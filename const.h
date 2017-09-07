@@ -9,4 +9,8 @@ const int LED_STATE_OFF = 0;
 const int LED_STATE_FLASHING = 1;
 const int LED_STATE_ON = 2;
 
+const byte CLOCK_MODE_CHRONO = 0;
+const byte CLOCK_MODE_TIMER = 1;
+const byte CLOCK_MODE_TIME = 2;
+
 #endif

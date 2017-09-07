@@ -11,8 +11,8 @@ int game_runMain(int gameTime){
   
   int buttonsPressed = 0;
 
-  clock_reset();
-  clock_start();
+  clock_setTimer(gameTime);
+  clock_start(CLOCK_MODE_TIMER);
   
   while((millis() - startTime) < gameTime){
 
@@ -32,11 +32,7 @@ int game_runMain(int gameTime){
 
   clock_stop();
 
-  if (buttonsPressed == 0){
-    return -1;
-  }
-  
-  return (millis() - startTime) / buttonsPressed;
+  return buttonsPressed;
 }
 
 void game_countDown(){
@@ -50,7 +46,9 @@ void game_countDown(){
 
 void game_start(){
   game_countDown();
-  game_runMain(30000);
+  screen_display(String(game_runMain(30000)) + " buttons pressed.");
+
+  
 }
 
 #endif
