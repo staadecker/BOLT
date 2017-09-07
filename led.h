@@ -1,5 +1,5 @@
-#ifndef led.h
-#define led.h
+#ifndef LED
+#define LED
 
 const int STATE_OFF = 0;
 const int STATE_FLASHING = 1;

@@ -1,12 +1,12 @@
-#ifndef game.h
-#define game.h
+#ifndef GAME
+#define GAME
 #include "button.h"
 #include "screen.h"
 #include "led.h"
 
 unsigned long startTime;
 
-startGame(int gameTime){
+int startGame(int gameTime){
   startTime = millis();
   
   int buttonsPressed = 0;
@@ -36,7 +36,7 @@ startGame(int gameTime){
   }
 
   if (buttonsPressed == 0){
-    return "No buttons pressed";
+    return -1;
   }
   
   return (millis() - startTime) / buttonsPressed;

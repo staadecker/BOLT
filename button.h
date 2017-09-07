@@ -1,39 +1,36 @@
-#ifndef button.h
-#define button.h
+#ifndef BUTTON
+#define BUTTON
 
-const int PIN_INTERRUPT = 2;
-const int PIN_DATA_IN = 3;
-const int PIN_CLOCK = 4;
+#include "const.h"
 
-volatile uint8_t Button;
+//Stores the value of the button pressed or depressed
+volatile uint8_t Button = 0;
 
-volatile uint8_t buttonPressed = 0;
-
-void buttonCallback(){
-  Button = 0;
+//Called when the P_BUTTON_INTERRUPT is falling
+void buttonISR(){
   
-  volatile uint8_t  val  = 0;
-  volatile uint8_t  clk  = 0;
+  uint8_t  val  = 0;
+  uint8_t  clk  = 0;
 
-  clk = digitalRead(PIN_CLOCK);
+  clk = digitalRead(P_BUTTON_CLOCK);
   while(clk == LOW)
   {
-    clk = digitalRead(PIN_CLOCK);
+    clk = digitalRead(P_BUTTON_CLOCK);
   }
 
-  for(volatile int i =0; i<8;i++)
+  for(int i = 0; i<8; i++)
   {   
-    val = digitalRead(PIN_DATA_IN);
-    clk = digitalRead(PIN_CLOCK);
+    val = digitalRead(P_BUTTON_DATA);
+    clk = digitalRead(P_BUTTON_CLOCK);
     
     while(clk == HIGH)
     {
-      clk = digitalRead(PIN_CLOCK);
+      clk = digitalRead(P_BUTTON_CLOCK);
     }
 
     if(val == HIGH)
     {
-      Button = Button +1;
+      Button = Button + 1;
     }
     
     if(i != 7)
@@ -45,25 +42,20 @@ void buttonCallback(){
       break;
     }
 
-    clk = digitalRead(PIN_CLOCK);
+    clk = digitalRead(P_BUTTON_CLOCK);
     
     while(clk == LOW)
     {
-      clk = digitalRead(PIN_CLOCK);
+      clk = digitalRead(P_BUTTON_CLOCK);
     }
   }
-
-  if (Button > 128){
-    buttonPressed = Button - 128;
-    Serial.println(buttonPressed);
-  }
-  
 }
 
+//Ends when the button with buttonNumber is pressed
 void waitForButtonPress(int buttonNumber){
-  while (buttonPressed != buttonNumber){
+  while (Button != buttonNumber + 128){
   }
-  buttonPressed = 0;
+  Button = 0;
 }
 
 #endif

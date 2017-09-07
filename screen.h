@@ -1,5 +1,5 @@
-#ifndef screen.h
-#define screen.h
+#ifndef SCREEN
+#define SCREEN
 #include <Thread.h>
 
 Thread timeThread;

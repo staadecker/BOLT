@@ -1,19 +1,22 @@
-#ifndef main.h
-#define main.h
+#ifndef BOLTARDUINO
+#define BOLTARDUINO
 
 #include "button.h"
 #include "led.h"
 #include "screen.h"
 #include "game.h"
+#include "const.h"
 
 
 void setup() {
   Serial.begin(115200);
-  
-  attachInterrupt(digitalPinToInterrupt(PIN_INTERRUPT), buttonCallback, FALLING);
 
+  //Attach interrupt for 64 button shield 
+  attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), buttonISR, FALLING);
+
+  //Generate new random seed
   randomSeed(analogRead(0));
-
+  
   setupClockThread();
 }
 
