@@ -3,6 +3,7 @@
 
 #include <Thread.h>
 #include "screen.h"
+#include "controller.h"
 
 Thread clock_thread;
 unsigned long clock_startTime;
@@ -16,17 +17,20 @@ void clock_reset(){
   clock_startTime = millis();
 }
 
-//Called to run the clock thread
-void clock_run(){
-  if(clock_thread.shouldRun()){
-    clock_thread.run();
-  }
+void clock_show(){
+  clock_thread.enabled = true;
+}
+
+void clock_hide(){
+  clock_thread.enabled = false;
 }
 
 void clock_setup(){
   clock_thread = Thread();
   clock_thread.setInterval(10);
   clock_thread.onRun(clock_callback);
+  clock_thread.enabled = false;
+  controller_add(clock_thread);
 }
 
 #endif

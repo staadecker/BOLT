@@ -2,6 +2,7 @@
 #define BUTTON
 
 #include "const.h"
+#include "controller.h"
 
 //Stores the value of the button pressed or depressed
 volatile uint8_t button = 0;
@@ -54,6 +55,7 @@ void button_ISR(){
 //Ends when the button with buttonNumber is pressed
 void button_wait(int buttonNumber){
   while (button != buttonNumber + 128){
+    controller_run();
   }
   button = 0;
 }

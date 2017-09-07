@@ -13,9 +13,9 @@ int startGame(int gameTime){
   int buttonsPressed = 0;
 
   clock_reset();
+  clock_show();
   
   while(true){
-    clock_run();
 
     //Generate random button
     int buttonNumber = random(1, 65);
