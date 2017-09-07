@@ -17,11 +17,11 @@ void clock_reset(){
   clock_startTime = millis();
 }
 
-void clock_show(){
+void clock_start(){
   clock_thread.enabled = true;
 }
 
-void clock_hide(){
+void clock_stop(){
   clock_thread.enabled = false;
 }
 

@@ -1,11 +1,8 @@
 #ifndef LED
 #define LED
 
-const int STATE_OFF = 0;
-const int STATE_FLASHING = 1;
-const int STATE_ON = 2;
-
 void setLedState(int ledNumber, int state){
+  Serial.println("LED number " + String(ledNumber) + " set to state " + String(state));
   //TODO
 }
 #endif
