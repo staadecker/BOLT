@@ -6,31 +6,32 @@
 #include "screen.h"
 #include "game.h"
 #include "const.h"
+#include "clock.h"
 
 
 void setup() {
   Serial.begin(115200);
 
   //Attach interrupt for 64 button shield 
-  attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), buttonISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), button_ISR, FALLING);
 
   //Generate new random seed
   randomSeed(analogRead(0));
   
-  setupClockThread();
+  clock_setup();
 }
 
 void loop() {
-  printToLCD("READY");
+  screen_display("READY");
   setLedState(1, STATE_FLASHING);
 
-  waitForButtonPress(1);
+  button_wait(1);
 
-  printToLCD("3");
+  screen_display("3");
   delay(1000);
-  printToLCD("2");
+  screen_display("2");
   delay(1000);
-  printToLCD("1");
+  screen_display("1");
   delay(1000);
 
   Serial.println(startGame(30000));

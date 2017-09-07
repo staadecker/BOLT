@@ -4,10 +4,10 @@
 #include "const.h"
 
 //Stores the value of the button pressed or depressed
-volatile uint8_t Button = 0;
+volatile uint8_t button = 0;
 
 //Called when the P_BUTTON_INTERRUPT is falling
-void buttonISR(){
+void button_ISR(){
   
   uint8_t  val  = 0;
   uint8_t  clk  = 0;
@@ -30,12 +30,12 @@ void buttonISR(){
 
     if(val == HIGH)
     {
-      Button = Button + 1;
+      button = button + 1;
     }
     
     if(i != 7)
     {
-      Button = Button << 1;
+      button = button << 1;
     }
     else
     {
@@ -52,10 +52,10 @@ void buttonISR(){
 }
 
 //Ends when the button with buttonNumber is pressed
-void waitForButtonPress(int buttonNumber){
-  while (Button != buttonNumber + 128){
+void button_wait(int buttonNumber){
+  while (button != buttonNumber + 128){
   }
-  Button = 0;
+  button = 0;
 }
 
 #endif

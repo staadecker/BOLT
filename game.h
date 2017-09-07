@@ -3,23 +3,19 @@
 #include "button.h"
 #include "screen.h"
 #include "led.h"
+#include "clock.h"
 
-unsigned long startTime;
+unsigned long game_startTime;
 
 int startGame(int gameTime){
-  startTime = millis();
+  game_startTime = millis();
   
   int buttonsPressed = 0;
 
-  startClock();
+  clock_reset();
   
   while(true){
-
-    //If time elapsed exit
-    if ((millis() - startTime) > gameTime){
-      timeThread.enabled = false;
-      break;
-    }
+    clock_run();
 
     //Generate random button
     int buttonNumber = random(1, 65);
@@ -28,7 +24,7 @@ int startGame(int gameTime){
     setLedState(buttonNumber, STATE_ON);
 
     //Wait for press then turn of led
-    waitForButtonPress(buttonNumber);
+    button_wait(buttonNumber);
     setLedState(buttonNumber, STATE_OFF);
 
     //Increment counter
@@ -39,7 +35,7 @@ int startGame(int gameTime){
     return -1;
   }
   
-  return (millis() - startTime) / buttonsPressed;
+  return (millis() - game_startTime) / buttonsPressed;
 }
 
 
