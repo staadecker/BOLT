@@ -20,11 +20,11 @@ int game_runMain(int gameTime){
     int buttonNumber = random(1, 65);
 
     //Turn on led
-    setLedState(buttonNumber, LED_STATE_ON);
+    led_set(buttonNumber, LED_STATE_ON);
 
     //Wait for press then turn of led
     button_wait(buttonNumber);
-    setLedState(buttonNumber, LED_STATE_OFF);
+    led_set(buttonNumber, LED_STATE_OFF);
 
     //Increment counter
     buttonsPressed ++;

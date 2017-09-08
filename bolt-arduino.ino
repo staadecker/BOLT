@@ -17,14 +17,12 @@ void setup() {
 
   //Generate new random seed
   randomSeed(analogRead(0));
-  
-  clock_setup();
 }
 
 void loop() {
   screen_display("READY");
   
-  setLedState(1, LED_STATE_FLASHING);
+  led_set(1, LED_STATE_FLASHING);
   button_wait(1);
 
   game_start();

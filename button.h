@@ -1,3 +1,4 @@
+/* Manages interaction with the buttons */
 #ifndef BUTTON
 #define BUTTON
 

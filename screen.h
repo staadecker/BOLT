@@ -1,3 +1,4 @@
+/* Interact with the screen. */
 #ifndef SCREEN
 #define SCREEN
 
