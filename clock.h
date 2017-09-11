@@ -25,7 +25,7 @@ const byte CLOCK_MODE_TIME = 2;
 Thread clock_thread;
 
 unsigned long clock_startTime;
-unsigned int clock_timer = 30000;
+unsigned int clock_timer = 0;
 
 
 void clock_callbackChrono(){
