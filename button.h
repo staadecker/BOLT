@@ -5,6 +5,7 @@
 #include "const.h"
 #include "controller.h"
 
+
 //Stores the value of the button pressed or depressed
 volatile uint8_t button = 0;
 
@@ -67,6 +68,5 @@ void button_wait(int buttonNumber){
     controller_run();
   }
 }
-
 
 #endif

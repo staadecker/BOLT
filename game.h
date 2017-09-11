@@ -6,6 +6,7 @@
 #include "clock.h"
 #include "const.h"
 
+
 int game_runMain(int gameTime){
   unsigned long startTime = millis();
   
@@ -46,9 +47,7 @@ void game_countDown(){
 
 void game_start(){
   game_countDown();
-  screen_display(String(game_runMain(30000)) + " buttons pressed.");
-
-  
+  screen_display(String(game_runMain(30000)) + " buttons pressed.");  
 }
 
 #endif

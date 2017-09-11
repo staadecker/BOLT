@@ -8,6 +8,4 @@ void screen_display(String message){
   //TODO
 }
 
-
-
 #endif
