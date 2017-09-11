@@ -53,12 +53,20 @@ void button_ISR(){
   }
 }
 
+void button_isPressed(int buttonNumber){
+  if(button != buttonNumber + 128){
+    button = 0;
+    return true;
+  }
+  return false;
+}
+
 //Ends when the button with buttonNumber is pressed
 void button_wait(int buttonNumber){
-  while (button != buttonNumber + 128){
+  while (not button_isPressed){
     controller_run();
   }
-  button = 0;
 }
+
 
 #endif
