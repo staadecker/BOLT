@@ -7,6 +7,7 @@
 #include "game.h"
 #include "const.h"
 #include "clock.h"
+#include "controller.h"
 
 
 void setup() {
