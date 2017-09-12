@@ -18,6 +18,9 @@ void setup() {
 
   //Generate new random seed
   randomSeed(analogRead(0));
+
+  led_setup();
+  clock_setup();
 }
 
 void loop() {

@@ -7,8 +7,6 @@
  * 
  * All units in millis
  */
-#include <TimeLib.h>
-#include <Time.h>
 
 #ifndef CLOCK
 #define CLOCK
@@ -28,6 +26,10 @@ Thread clock_thread;
 unsigned long clock_startTime;
 unsigned int clock_timer = 0;
 
+String clock_formatTime(){
+  //TODO
+  return String(0);
+}
 
 void clock_callbackChrono(){
   screen_display(String((millis() - clock_startTime)/10));
@@ -39,7 +41,7 @@ void clock_callbackTimer(){
 }
 
 void clock_callbackTime(){
-  screen_display(String(hourFormat12()));
+  screen_display(clock_formatTime());
 }
 
 //Start the clock in a specific mode
