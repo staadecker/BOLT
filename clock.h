@@ -1,12 +1,12 @@
 /*
- * Thread that displays a timer, stop watch or the time on the led screen
- * 
- * Use clock_start to start the clock.
- * Use clock_stop to stop the clock.
- * Use clock_setTimer to set the timer.
- * 
- * All units in millis
- */
+   Thread that displays a timer, stop watch or the time on the led screen
+
+   Use clock_start to start the clock.
+   Use clock_stop to stop the clock.
+   Use clock_setTimer to set the timer.
+
+   All units in millis
+*/
 
 #ifndef CLOCK
 #define CLOCK
@@ -26,27 +26,27 @@ Thread clock_thread;
 unsigned long clock_startTime;
 unsigned int clock_timer = 0;
 
-String clock_formatTime(){
+String clock_formatTime() {
   //TODO
   return String(0);
 }
 
-void clock_callbackChrono(){
-  screen_display(String((millis() - clock_startTime)/10));
+void clock_callbackChrono() {
+  screen_display(String((millis() - clock_startTime) / 10));
 }
 
-void clock_callbackTimer(){
+void clock_callbackTimer() {
   //TODO do not display negative times.
-  screen_display(String((millis() - clock_startTime + clock_timer)/10));
+  screen_display(String((millis() - clock_startTime + clock_timer) / 10));
 }
 
-void clock_callbackTime(){
+void clock_callbackTime() {
   screen_display(clock_formatTime());
 }
 
 //Start the clock in a specific mode
-void clock_start(byte mode){
-  switch (mode){
+void clock_start(byte mode) {
+  switch (mode) {
     case CLOCK_MODE_CHRONO:
       clock_thread.onRun(clock_callbackChrono);
       break;
@@ -63,18 +63,18 @@ void clock_start(byte mode){
 }
 
 //Stop the clock
-void clock_stop(){
+void clock_stop() {
   clock_thread.enabled = false;
 }
 
 //Set the time in millis seconds for the timer
-void clock_setTimer(int timerValue){
+void clock_setTimer(int timerValue) {
   clock_timer = timerValue;
 }
 
 
 //Setup the clock thread, enabled = false, add to controller
-void clock_setup(){
+void clock_setup() {
   clock_thread = Thread();
   clock_thread.setInterval(10);
   clock_thread.enabled = false;

@@ -7,15 +7,15 @@
 #include "const.h"
 
 
-int game_runMain(int gameTime){
+int game_runMain(int gameTime) {
   unsigned long startTime = millis();
-  
+
   int buttonsPressed = 0;
 
   clock_setTimer(gameTime);
   clock_start(CLOCK_MODE_TIMER);
-  
-  while((millis() - startTime) < gameTime){
+
+  while ((millis() - startTime) < gameTime) {
 
     //Generate random button
     int buttonNumber = random(1, 65);
@@ -36,7 +36,7 @@ int game_runMain(int gameTime){
   return buttonsPressed;
 }
 
-void game_countDown(){
+void game_countDown() {
   screen_display("3");
   delay(1000);
   screen_display("2");
@@ -45,9 +45,9 @@ void game_countDown(){
   delay(1000);
 }
 
-void game_start(){
+void game_start() {
   game_countDown();
-  screen_display(String(game_runMain(30000)) + " buttons pressed.");  
+  screen_display(String(game_runMain(30000)) + " buttons pressed.");
 }
 
 #endif

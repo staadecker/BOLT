@@ -1,5 +1,5 @@
 /*  Contains the constants used accross multiple files, especially the pins.
- */
+*/
 #ifndef CONST
 #define CONST
 

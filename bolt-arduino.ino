@@ -13,7 +13,7 @@
 void setup() {
   Serial.begin(115200);
 
-  //Attach interrupt for 64 button shield 
+  //Attach interrupt for 64 button shield
   attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), button_ISR, FALLING);
 
   //Generate new random seed
@@ -25,7 +25,7 @@ void setup() {
 
 void loop() {
   screen_display("READY");
-  
+
   led_set(1, LED_STATE_FLASHING);
   button_wait(1);
 

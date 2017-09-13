@@ -10,35 +10,35 @@
 volatile uint8_t button_pressed = 65;
 
 //Called when the P_BUTTON_INTERRUPT is falling
-void button_ISR(){
+void button_ISR() {
 
   uint8_t button = 0;
-  
+
   uint8_t  val  = 0;
   uint8_t  clk  = 0;
 
   clk = digitalRead(P_BUTTON_CLOCK);
-  while(clk == LOW)
+  while (clk == LOW)
   {
     clk = digitalRead(P_BUTTON_CLOCK);
   }
 
-  for(int i = 0; i<8; i++)
-  {   
+  for (int i = 0; i < 8; i++)
+  {
     val = digitalRead(P_BUTTON_DATA);
     clk = digitalRead(P_BUTTON_CLOCK);
-    
-    while(clk == HIGH)
+
+    while (clk == HIGH)
     {
       clk = digitalRead(P_BUTTON_CLOCK);
     }
 
-    if(val == HIGH)
+    if (val == HIGH)
     {
       button = button + 1;
     }
-    
-    if(i != 7)
+
+    if (i != 7)
     {
       button = button << 1;
     }
@@ -48,21 +48,21 @@ void button_ISR(){
     }
 
     clk = digitalRead(P_BUTTON_CLOCK);
-    
-    while(clk == LOW)
+
+    while (clk == LOW)
     {
       clk = digitalRead(P_BUTTON_CLOCK);
     }
   }
 
-  if (button > 64){
+  if (button > 64) {
     button_pressed = button - 129;
   }
-  
+
 }
 
-void button_isPressed(int buttonNumber){
-  if(button_pressed == buttonNumber){
+void button_isPressed(int buttonNumber) {
+  if (button_pressed == buttonNumber) {
     button_pressed = 65;
     return true;
   }
@@ -70,8 +70,8 @@ void button_isPressed(int buttonNumber){
 }
 
 //Ends when the button with buttonNumber is pressed
-void button_wait(int buttonNumber){
-  while (not button_isPressed){
+void button_wait(int buttonNumber) {
+  while (not button_isPressed) {
     controller_run();
   }
 }

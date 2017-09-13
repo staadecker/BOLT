@@ -3,7 +3,7 @@
 #define SCREEN
 
 
-void screen_display(String message){
+void screen_display(String message) {
   Serial.println("Printing to screen : " + message);
   //TODO
 }
