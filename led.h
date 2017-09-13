@@ -52,10 +52,10 @@ void led_set(int ledNumber, int state){
     //TODO Make flashing function
   }
   else if (state == LED_STATE_ON) {
-    led_states[ledNumber-1] = true;
+    led_states[ledNumber] = true;
   }
   else {
-    led_states[ledNumber-1] = false;
+    led_states[ledNumber] = false;
   }
 
   led_update();

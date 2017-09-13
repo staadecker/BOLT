@@ -7,10 +7,12 @@
 
 
 //Stores the value of the button pressed or depressed
-volatile uint8_t button = 0;
+volatile uint8_t button_pressed = 65;
 
 //Called when the P_BUTTON_INTERRUPT is falling
 void button_ISR(){
+
+  uint8_t button = 0;
   
   uint8_t  val  = 0;
   uint8_t  clk  = 0;
@@ -52,11 +54,16 @@ void button_ISR(){
       clk = digitalRead(P_BUTTON_CLOCK);
     }
   }
+
+  if (button > 64){
+    button_pressed = button - 129;
+  }
+  
 }
 
 void button_isPressed(int buttonNumber){
-  if(button != buttonNumber + 128){
-    button = 0;
+  if(button_pressed == buttonNumber){
+    button_pressed = 65;
     return true;
   }
   return false;
