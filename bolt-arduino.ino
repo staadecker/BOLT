@@ -5,8 +5,8 @@
 #include "led.h"
 #include "screen.h"
 #include "game.h"
-#include "const.h"
 #include "clock.h"
+#include "const.h"
 #include "controller.h"
 #include "flasher.h"
 

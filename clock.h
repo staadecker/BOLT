@@ -15,50 +15,49 @@
 #include "screen.h"
 #include "controller.h"
 #include "const.h"
+#include "game.h"
+
+//Forward declarations
+uint32_t game_getElapsedTime();
+uint32_t game_getRemainingTime();
 
 
 const uint8_t CLOCK_MODE_CHRONO = 0;
 const uint8_t CLOCK_MODE_TIMER = 1;
 const uint8_t CLOCK_MODE_TIME = 2;
 
+uint8_t clock_mode;
+
 Thread clock_thread;
 
-unsigned long clock_startTime;
-unsigned int clock_timer = 0;
-
-String clock_formatTime() {
+String clock_getTime() {
   //TODO
   return String(0);
 }
 
-void clock_callbackChrono() {
-  screen_display(String((millis() - clock_startTime) / 10));
+String clock_formatMillis(uint32_t milliSeconds) {
+  return String(milliSeconds);
 }
 
-void clock_callbackTimer() {
-  //TODO do not display negative times.
-  screen_display(String((millis() - clock_startTime + clock_timer) / 10));
-}
-
-void clock_callbackTime() {
-  screen_display(clock_formatTime());
+void clock_callback() {
+  String toDisplay;
+  switch (clock_mode) {
+    case CLOCK_MODE_CHRONO:
+      toDisplay = clock_formatMillis(game_getElapsedTime());
+      break;
+    case CLOCK_MODE_TIMER:
+      toDisplay = clock_formatMillis(game_getRemainingTime());
+      break;
+    case CLOCK_MODE_TIME:
+      toDisplay = clock_getTime();
+      break;
+  }
+  screen_display(toDisplay);
 }
 
 //Start the clock in a specific mode
 void clock_start(uint8_t mode) {
-  switch (mode) {
-    case CLOCK_MODE_CHRONO:
-      clock_thread.onRun(clock_callbackChrono);
-      break;
-    case CLOCK_MODE_TIMER:
-      clock_thread.onRun(clock_callbackTimer);
-      break;
-    case CLOCK_MODE_TIME:
-      clock_thread.onRun(clock_callbackTime);
-      break;
-  }
-
-  clock_startTime = millis();
+  clock_mode = mode;
   clock_thread.enabled = true;
 }
 
@@ -67,17 +66,13 @@ void clock_stop() {
   clock_thread.enabled = false;
 }
 
-//Set the time in millis seconds for the timer
-void clock_setTimer(int timerValue) {
-  clock_timer = timerValue;
-}
-
 
 //Setup the clock thread, enabled = false, add to controller
 void clock_setup() {
   clock_thread = Thread();
   clock_thread.setInterval(10);
   clock_thread.enabled = false;
+  clock_thread.onRun(clock_callback);
   controller_add(clock_thread);
 }
 
