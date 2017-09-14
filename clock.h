@@ -17,9 +17,9 @@
 #include "const.h"
 
 
-const byte CLOCK_MODE_CHRONO = 0;
-const byte CLOCK_MODE_TIMER = 1;
-const byte CLOCK_MODE_TIME = 2;
+const uint8_t CLOCK_MODE_CHRONO = 0;
+const uint8_t CLOCK_MODE_TIMER = 1;
+const uint8_t CLOCK_MODE_TIME = 2;
 
 Thread clock_thread;
 
@@ -45,7 +45,7 @@ void clock_callbackTime() {
 }
 
 //Start the clock in a specific mode
-void clock_start(byte mode) {
+void clock_start(uint8_t mode) {
   switch (mode) {
     case CLOCK_MODE_CHRONO:
       clock_thread.onRun(clock_callbackChrono);
