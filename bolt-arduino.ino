@@ -8,6 +8,7 @@
 #include "const.h"
 #include "clock.h"
 #include "controller.h"
+#include "flasher.h"
 
 
 void setup() {
@@ -21,6 +22,7 @@ void setup() {
 
   led_setup();
   clock_setup();
+  flasher_setup(1000);
 }
 
 void loop() {
