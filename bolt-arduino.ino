@@ -1,6 +1,3 @@
-#ifndef BOLTARDUINO
-#define BOLTARDUINO
-
 #include "button.h"
 #include "led.h"
 #include "screen.h"
@@ -33,5 +30,3 @@ void loop() {
 
   game_start();
 }
-
-#endif

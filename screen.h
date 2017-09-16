@@ -1,11 +1,9 @@
 /* Interact with the screen. */
-#ifndef SCREEN
-#define SCREEN
+#ifndef SCREEN_H
+#define SCREEN_H
 
+#include <Arduino.h>
 
-void screen_display(String message) {
-  Serial.println("Printing to screen : " + message);
-  //TODO
-}
+void screen_display(String message);
 
 #endif
