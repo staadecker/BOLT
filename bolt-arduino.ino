@@ -6,6 +6,7 @@
 #include "const.h"
 #include "controller.h"
 #include "flasher.h"
+#include "logger.h"
 
 
 void setup() {
@@ -20,6 +21,7 @@ void setup() {
   led_setup();
   clock_setup();
   flasher_setup(1000);
+  logger(LOGGER_TYPE_INFO, "main", "Setup done");
 }
 
 void loop() {

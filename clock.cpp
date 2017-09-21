@@ -4,6 +4,7 @@
 #include "controller.h"
 #include "const.h"
 #include "game.h"
+#include "logger.h"
 #include <Thread.h>
 
 uint8_t clock_mode;
@@ -20,6 +21,7 @@ String clock_formatMillis(uint32_t milliSeconds) {
 }
 
 void clock_callback() {
+  logger(LOGGER_TYPE_DEBUG, "clock", "clock thread called");
   String toDisplay;
   switch (clock_mode) {
     case CLOCK_MODE_CHRONO:

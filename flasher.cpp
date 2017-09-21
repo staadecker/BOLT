@@ -2,11 +2,13 @@
 
 #include <Thread.h>
 #include "controller.h"
+#include "logger.h"
 #include "led.h"
 
 Thread flasher_thread;
 
 void flasher_callback() {
+  logger(LOGGER_TYPE_DEBUG, "flasher", "flasher thread called");
   if (led_flashingCounter > 0) {
     led_update();
   }

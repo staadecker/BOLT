@@ -1,6 +1,7 @@
 #include "led.h"
 
 #include "const.h"
+#include "logger.h"
 #include <Arduino.h>
 
 //Stores the led states
@@ -26,8 +27,8 @@ void led_setup() {
 }
 
 void led_update() {
+  logger(LOGGER_TYPE_DEBUG, "led", "Shift out");
   analogWrite(P_LED_LATCH, LED_TWO_VOLTS);
-
   for (uint8_t i = 63; i >= 0; i--)  {
     switch (led_states[i]) {
       case LED_STATE_ON :
@@ -46,9 +47,10 @@ void led_update() {
         led_flashingOn = ! led_flashingOn;
         break;
       default:
-        Serial.println("Error : Wrong Led Status Code in variable led_states");
+        logger(LOGGER_TYPE_ERROR, "led", "wrong Led Status Code in variable led_states");
         break;
     }
+    
   }
 
   analogWrite(P_LED_CLOCK, LED_TWO_VOLTS);
@@ -58,7 +60,7 @@ void led_update() {
 }
 
 void led_set(int ledNumber, int newState) {
-
+  logger(LOGGER_TYPE_INFO, "led", "Set led : " + String(ledNumber) + " to state " + String(newState));
   uint8_t previousState = led_states[ledNumber];
   
   //If led is set to flashing and it wasn't before add one
