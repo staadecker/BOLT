@@ -18,5 +18,5 @@ void flasher_setup(int flashTime) {
   flasher_thread = Thread();
   flasher_thread.setInterval(flashTime);
   flasher_thread.onRun(flasher_callback);
-  controller_add(flasher_thread);
+  controller_add(&flasher_thread);
 }

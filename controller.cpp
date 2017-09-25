@@ -8,8 +8,8 @@
 ThreadController controller = ThreadController();
 
 //Add a thread to the controller
-void controller_add(Thread thread) {
-  controller.add(&thread);
+void controller_add(Thread* thread) {
+  controller.add(thread);
 }
 
 //Run the controller to run the threads that are enabled

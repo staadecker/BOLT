@@ -55,5 +55,5 @@ void clock_setup() {
   clock_thread.setInterval(10);
   clock_thread.enabled = false;
   clock_thread.onRun(clock_callback);
-  controller_add(clock_thread);
+  controller_add(&clock_thread);
 }
