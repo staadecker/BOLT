@@ -10,7 +10,7 @@
 
 #include <Thread.h>
 
-void controller_add(Thread* thread);
+boolean controller_add(Thread* thread);
 void controller_run();
 
 #endif

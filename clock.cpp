@@ -52,8 +52,9 @@ void clock_stop() {
 //Setup the clock thread, enabled = false, add to controller
 void clock_setup() {
   clock_thread = Thread();
+  clock_thread.ThreadName = "Clock";
   clock_thread.setInterval(10);
   clock_thread.enabled = false;
   clock_thread.onRun(clock_callback);
-  controller_add(&clock_thread);
+  logger(LOGGER_TYPE_DEBUG, "clock", "Success : " + String(controller_add(&clock_thread)));
 }

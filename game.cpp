@@ -42,7 +42,7 @@ int game_runMain(unsigned long gameTime) {
   while ((millis() - game_startTime) < gameTime) {
 
     //Generate random button
-    int buttonNumber = random(1, 65);
+    int buttonNumber = 0; //random(0, 64);
 
     //Turn on led
     led_set(buttonNumber, LED_STATE_ON);

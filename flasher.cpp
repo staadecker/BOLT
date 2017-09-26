@@ -17,6 +17,8 @@ void flasher_callback() {
 void flasher_setup(int flashTime) {
   flasher_thread = Thread();
   flasher_thread.setInterval(flashTime);
+  flasher_thread.ThreadName = "Flasher";
   flasher_thread.onRun(flasher_callback);
-  controller_add(&flasher_thread);
+  flasher_thread.enabled = true;
+  logger(LOGGER_TYPE_DEBUG, "flasher", "Success : " + String(controller_add(&flasher_thread)));
 }

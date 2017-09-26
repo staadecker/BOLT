@@ -19,8 +19,8 @@ void setup() {
   randomSeed(analogRead(0));
 
   led_setup();
-  clock_setup();
   flasher_setup(1000);
+  clock_setup();
   logger(LOGGER_TYPE_INFO, "main", "Setup done");
 }
 
