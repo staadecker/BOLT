@@ -21,7 +21,7 @@ void led_setup() {
   analogWrite(P_LED_VCC, LED_TWO_VOLTS);
 
   //Populate led_states
-  for (uint8_t i = 0; i < sizeof(led_states); i++) {
+  for (int i = 0; i < sizeof(led_states); i++) {
     led_states[i] = LED_STATE_OFF;
   }
 }
@@ -29,7 +29,7 @@ void led_setup() {
 void led_update() {
   logger(LOGGER_TYPE_DEBUG, "led", "Shift out");
   analogWrite(P_LED_LATCH, LED_TWO_VOLTS);
-  for (uint8_t i = 63; i >= 0; i--)  {
+  for (uint8_t i = 63; i < 64; i--)  {
     switch (led_states[i]) {
       case LED_STATE_ON :
         analogWrite(P_LED_DATA, LED_TWO_VOLTS);
