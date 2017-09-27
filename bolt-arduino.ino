@@ -22,13 +22,18 @@ void setup() {
   flasher_setup();
   clock_setup();
   logger(LOGGER_TYPE_INFO, "main", "Setup done");
-}
 
-void loop() {
+  //Starting procedure
   screen_display("READY");
 
   led_setState(0, LED_STATE_FLASHING);
   button_wait(0);
 
   game_start();
+  logger(LOGGER_TYPE_INFO, "main", "Program done");
+
+}
+
+void loop() {
+
 }
