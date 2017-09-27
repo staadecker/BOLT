@@ -2,6 +2,7 @@
 
 #include "const.h"
 #include "controller.h"
+#include "logger.h"
 
 
 //Stores the value of the button pressed or depressed
@@ -48,6 +49,7 @@ bool button_isPressed(uint8_t buttonNumber) {
 
 //Ends when the button with buttonNumber is pressed
 void button_wait(uint8_t buttonNumber) {
+  logger(LOGGER_TYPE_INFO, "button", "Waiting for press on button : " + String(buttonNumber));
   while (not button_isPressed(buttonNumber)) {
     controller_run();
   }
