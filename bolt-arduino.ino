@@ -11,7 +11,7 @@ const uint8_t LED_VCC_PWM = 105;
 const uint8_t LED_STATE_OFF = 0;
 const uint8_t LED_STATE_ON = 1;
 
-const uint8_t NUMBER_OF_BITS = 8;
+const uint8_t NUMBER_OF_BITS = 16;
 
 //PROCEDURE
 
@@ -30,6 +30,8 @@ void setup() {
   states[1] = LED_STATE_ON;
   states[4] = LED_STATE_ON;
   states[5] = LED_STATE_ON;
+  states[8] = LED_STATE_ON;
+  states[10] = LED_STATE_ON;
   shiftOut();
 }
 
