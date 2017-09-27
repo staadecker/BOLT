@@ -1,4 +1,4 @@
-const int P_LED_VCC = 3;
+const int P_LED_VCC = 5;
 const int P_LED_DATA = 9;
 const int P_LED_CLOCK = 10;
 const int P_LED_LATCH = 11;
@@ -28,9 +28,9 @@ void setup() {
 
   //states[0] = LED_STATE_ON;
 
-  analogWrite(P_LED_LATCH, LOW);
+  digitalWrite(P_LED_LATCH, LOW);
   shiftOut();
-  analogWrite(P_LED_LATCH, LED_TWO_VOLTS);
+  digitalWrite(P_LED_LATCH, HIGH);
 
 }
 
@@ -40,14 +40,14 @@ void loop() {}
 void shiftOut() {
   for (uint8_t i = 0; i < 8; i++)  {
     if (!!(val & (1 << i))){
-      analogWrite(P_LED_DATA, LED_TWO_VOLTS);
+      digitalWrite(P_LED_DATA, HIGH);
     } else {
-      analogWrite(P_LED_DATA, LOW);
+      digitalWrite(P_LED_DATA, LOW);
     }
     
 
-    analogWrite(P_LED_CLOCK, LED_TWO_VOLTS);
-    analogWrite(P_LED_CLOCK, LOW);
+    digitalWrite(P_LED_CLOCK, HIGH);
+    digitalWrite(P_LED_CLOCK, LOW);
   }
 
   /*analogWrite(P_LED_CLOCK, LOW);
