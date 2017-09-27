@@ -28,12 +28,10 @@ void setup() {
 
   led_setState(0, LED_STATE_FLASHING);
   button_wait(0);
+  led_setState(0, LED_STATE_OFF);
 
   game_start();
   logger(LOGGER_TYPE_INFO, "main", "Program done");
-
 }
 
-void loop() {
-
-}
+void loop() {}
