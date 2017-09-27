@@ -19,7 +19,7 @@ void setup() {
   randomSeed(analogRead(0));
 
   led_setup();
-  flasher_setup(1000);
+  flasher_setup();
   clock_setup();
   logger(LOGGER_TYPE_INFO, "main", "Setup done");
 }
@@ -27,7 +27,7 @@ void setup() {
 void loop() {
   screen_display("READY");
 
-  led_set(1, LED_STATE_FLASHING);
+  led_setState(1, LED_STATE_FLASHING);
   button_wait(1);
 
   game_start();

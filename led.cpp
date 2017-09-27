@@ -1,14 +1,11 @@
 #include "led.h"
-
+#include "flasher.h"
 #include "const.h"
 #include "logger.h"
 #include <Arduino.h>
 
-//Stores the led states
-unsigned char led_states[64];
-
-//Variables for flashing
-bool led_flashingOn = true;
+//Array keeping track of states
+uint8_t states[NUMBER_OF_BITS];
 
 unsigned char led_flashingCounter = 0;
 
@@ -17,62 +14,51 @@ void led_setup() {
   pinMode(P_LED_DATA, OUTPUT);
   pinMode(P_LED_CLOCK, OUTPUT);
   pinMode(P_LED_LATCH, OUTPUT);
-
-  analogWrite(P_LED_VCC, LED_TWO_VOLTS);
-
-  //Populate led_states
-  for (int i = 0; i < sizeof(led_states); i++) {
-    led_states[i] = LED_STATE_OFF;
-  }
 }
 
-void led_update() {
-  logger(LOGGER_TYPE_DEBUG, "led", "Shift out");
-  analogWrite(P_LED_LATCH, LED_TWO_VOLTS);
-  for (uint8_t i = 63; i < 64; i--)  {
-    switch (led_states[i]) {
-      case LED_STATE_ON :
-        analogWrite(P_LED_DATA, LED_TWO_VOLTS);
+void led_shiftOut() {
+  //Latch Low. VCC high
+  digitalWrite(P_LED_VCC, HIGH);
+  digitalWrite(P_LED_LATCH, LOW);
+
+
+  //Shift out
+  for (uint8_t i = NUMBER_OF_BITS; i <= NUMBER_OF_BITS; i--)  {
+    switch (states[i]) {
+      case LED_STATE_OFF:
+        digitalWrite(P_LED_DATA, LOW);
         break;
-      case LED_STATE_OFF :
-        analogWrite(P_LED_DATA, 0);
+      case LED_STATE_ON:
+        digitalWrite(P_LED_DATA, HIGH);
         break;
-      case LED_STATE_FLASHING :
-        if (led_flashingOn) {
-          analogWrite(P_LED_DATA, LED_TWO_VOLTS);
-        }
-        else {
-          analogWrite(P_LED_DATA, 0);
-        }
-        led_flashingOn = ! led_flashingOn;
-        break;
-      default:
-        logger(LOGGER_TYPE_ERROR, "led", "wrong Led Status Code in variable led_states");
+      case LED_STATE_FLASHING:
+        flashed = true;
+        digitalWrite(P_LED_DATA, flashingCurrentState);
         break;
     }
-    
+
+    //Clock
+    digitalWrite(P_LED_CLOCK, HIGH);
+    digitalWrite(P_LED_CLOCK, LOW);
   }
 
-  analogWrite(P_LED_CLOCK, LED_TWO_VOLTS);
-  analogWrite(P_LED_CLOCK, 0);
+  //If data is left on high drop to low, so that the final output voltage is not altered
+  digitalWrite(P_LED_DATA, LOW);
 
-  analogWrite(P_LED_LATCH, 0);
+  //Latch high. VCC adjust to two volts
+  digitalWrite(P_LED_LATCH, HIGH);
+  analogWrite(P_LED_VCC, LED_VCC_PWM);
+
+
 }
 
-void led_set(int ledNumber, int newState) {
-  logger(LOGGER_TYPE_INFO, "led", "Set led : " + String(ledNumber) + " to state " + String(newState));
-  uint8_t previousState = led_states[ledNumber];
-  
-  //If led is set to flashing and it wasn't before add one
-  if (newState == LED_STATE_FLASHING and previousState != LED_STATE_FLASHING) {
-    led_flashingCounter += 1;
-  }
-  //If led is set to stop flashing minus one
-  if (previousState == LED_STATE_FLASHING and newState != LED_STATE_FLASHING) {
-    led_flashingCounter -= 1;
+
+void led_setState(uint8_t led, uint8_t state) {
+  //If we have a flashing led turn on. The thread will automatically turn off if no leds are flashing.
+  if (state == LED_STATE_FLASHING) {
+    flasher_thread.enabled = true;
   }
 
-  led_states[ledNumber] = newState;
-
-  led_update();
+  states[led] = state;
 }
+

@@ -9,7 +9,7 @@ ThreadController controller = ThreadController();
 
 //Add a thread to the controller
 boolean controller_add(Thread* thread) {
-  logger(LOGGER_TYPE_DEBUG, "controller", "Added thread");
+  logger(LOGGER_TYPE_DEBUG, "controller", "Added thread : " + String(thread->ThreadName));
   return controller.add(thread);
 }
 

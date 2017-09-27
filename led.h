@@ -1,23 +1,20 @@
-/*   This class manages the LEDs.
-
-     Use led_set to set the led to one of the following states.
-
-*/
 #ifndef LED_H
 #define LED_H
 
-//Analog write constant for approx. 2V
-const int LED_TWO_VOLTS = 195;
+#include <Arduino.h>
 
-//Led states
-const int LED_STATE_OFF = 0;
-const int LED_STATE_ON = 1;
-const int LED_STATE_FLASHING = 2;
+const uint8_t NUMBER_OF_BITS = 16;
 
-extern unsigned char led_flashingCounter;
+//Value to adjust for optimal output voltage
+const uint8_t LED_VCC_PWM = 105;
+
+//0 is always default value
+const uint8_t LED_STATE_OFF = 0;
+const uint8_t LED_STATE_ON = 1;
+const uint8_t LED_STATE_FLASHING = 2;
 
 void led_setup();
-void led_update();
-void led_set(int ledNumber, int newState);
+void led_shiftOut();
+void led_setState(uint8_t led, uint8_t state);
 
 #endif
