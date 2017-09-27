@@ -24,7 +24,8 @@ uint8_t states[NUMBER_OF_BITS];
 
 Thread flasherThread;
 
-bool currentlyFlashing = true;
+bool flashingCurrentState = true;
+bool flashed = false;
 
 void setup() {
   Serial.begin(115200);
@@ -35,17 +36,22 @@ void setup() {
   pinMode(P_LED_CLOCK, OUTPUT);
   pinMode(P_LED_LATCH, OUTPUT);
 
-  states[1] = LED_STATE_FLASHING;
-  states[4] = LED_STATE_ON;
-  states[5] = LED_STATE_ON;
-  states[8] = LED_STATE_ON;
-  states[10] = LED_STATE_ON;
-  shiftOut();
-
   //Thread setup
   flasherThread = Thread();
   flasherThread.setInterval(1000);
   flasherThread.onRun(threadCallback);
+  flasherThread.enabled = false;
+
+  setState(1, LED_STATE_FLASHING);
+  setState(0, LED_STATE_ON);
+  setState(3, LED_STATE_ON);
+  setState(5, LED_STATE_ON);
+  setState(7, LED_STATE_ON);
+  setState(9, LED_STATE_ON);
+  setState(11, LED_STATE_ON);
+  shiftOut();
+
+
 }
 
 void loop() {
@@ -70,12 +76,8 @@ void shiftOut() {
         digitalWrite(P_LED_DATA, HIGH);
         break;
       case LED_STATE_FLASHING:
-        if (currentlyFlashing) {
-          digitalWrite(P_LED_DATA, HIGH);
-        } else {
-          digitalWrite(P_LED_DATA, LOW);
-        }
-        currentlyFlashing = !currentlyFlashing;
+        flashed = true;
+        digitalWrite(P_LED_DATA, flashingCurrentState);
         break;
     }
 
@@ -90,10 +92,36 @@ void shiftOut() {
   //Latch high. VCC adjust to two volts
   digitalWrite(P_LED_LATCH, HIGH);
   analogWrite(P_LED_VCC, LED_VCC_PWM);
+
+
 }
 
 void threadCallback() {
-  
+  Serial.println("Flasher thread running");
+
+  //Variable should turn true if something flahed
+  flashed = false;
+
   shiftOut();
+
+  if (!flashed) {
+    //Nothing is flashing anymore
+    flasherThread.enabled = false;
+  } else {
+    //If it did flash switch flashing state
+    flashingCurrentState = !flashingCurrentState;
+  }
+
+
+}
+
+void setState(uint8_t led, uint8_t state) {
+
+  //If we have a flashing led turn on. The thread will automatically turn off if no leds are flashing.
+  if (state == LED_STATE_FLASHING) {
+    flasherThread.enabled = true;
+  }
+
+  states[led] = state;
 }
 
