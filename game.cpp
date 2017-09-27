@@ -64,5 +64,5 @@ int game_runMain(unsigned long gameTime) {
 
 void game_start() {
   game_countDown();
-  screen_display(String(game_runMain(30000)) + " buttons pressed.");
+  screen_display(String(game_runMain(30000)) + " buttons pressed");
 }
