@@ -1,18 +1,22 @@
-const int P_LED_VCC = 5;
-const int P_LED_DATA = 8;
-const int P_LED_CLOCK = 12;
-const int P_LED_LATCH = 13;
+//CONSTANTS
+const uint8_t P_LED_VCC = 5;
+const uint8_t P_LED_DATA = 8;
+const uint8_t P_LED_CLOCK = 12;
+const uint8_t P_LED_LATCH = 13;
 
 //Value to adjust for optimal output voltage
 const uint8_t LED_VCC_PWM = 105;
 
-//const uint8_t LED_STATE_OFF = 0;
-//const uint8_t LED_STATE_ON = 1;
+//0 is always default value
+const uint8_t LED_STATE_OFF = 0;
+const uint8_t LED_STATE_ON = 1;
 
+const uint8_t NUMBER_OF_BITS = 8;
 
-byte val = B01000000;
+//PROCEDURE
 
-//byte states[8];
+//Array keeping track of states
+uint8_t states[NUMBER_OF_BITS];
 
 void setup() {
   Serial.begin(115200);
@@ -23,28 +27,29 @@ void setup() {
   pinMode(P_LED_CLOCK, OUTPUT);
   pinMode(P_LED_LATCH, OUTPUT);
 
-  shiftOut();
-  delay(5000);
-
-  val = B11111111;
+  states[1] = LED_STATE_ON;
+  states[4] = LED_STATE_ON;
+  states[5] = LED_STATE_ON;
   shiftOut();
 }
 
 void loop() {}
 
-
 void shiftOut() {
-  //Latch Low vcc high
+  //Latch Low. VCC high
   digitalWrite(P_LED_VCC, HIGH);
   digitalWrite(P_LED_LATCH, LOW);
-  
+
 
   //Shift out
-  for (uint8_t i = 0; i < 8; i++)  {
-    if (!!(val & (1 << i))) {
-      digitalWrite(P_LED_DATA, HIGH);
-    } else {
-      digitalWrite(P_LED_DATA, LOW);
+  for (uint8_t i = NUMBER_OF_BITS; i <= NUMBER_OF_BITS; i--)  {
+    switch (states[i]) {
+      case LED_STATE_OFF:
+        digitalWrite(P_LED_DATA, LOW);
+        break;
+      case LED_STATE_ON:
+        digitalWrite(P_LED_DATA, HIGH);
+        break;
     }
 
 
@@ -52,38 +57,11 @@ void shiftOut() {
     digitalWrite(P_LED_CLOCK, LOW);
   }
 
-  //If data is left on high drop to low, so that the final voltage is not altered
+  //If data is left on high drop to low, so that the final output voltage is not altered
   digitalWrite(P_LED_DATA, LOW);
 
-  //Latch high, vcc adjust
+  //Latch high. VCC adjust to two volts
   digitalWrite(P_LED_LATCH, HIGH);
   analogWrite(P_LED_VCC, LED_VCC_PWM);
-
-
-  /*analogWrite(P_LED_CLOCK, LOW);
-
-    //Loop for every byte
-    for (uint8_t i = 0; i < 8; i++)  {
-    Serial.println("Index : " + String(i) + ". State : OFF " + String(!!(val & (1 << i))));
-    digitalWrite(P_LED_DATA, !!(val & (1 << i)));
-    //Write byte
-
-    switch (states[i]) {
-      case LED_STATE_OFF:
-        Serial.println("Index : " + String(i) + ". State : OFF " + String(states[i]));
-        analogWrite(P_LED_DATA, LOW);
-        break;
-      case LED_STATE_ON:
-        Serial.println("Index : " + String(i) + ". State : ON " + String(states[i]));
-        analogWrite(P_LED_DATA, LED_TWO_VOLTS);
-        break;
-    }
-
-
-    //Clock
-    analogWrite(P_LED_CLOCK, HIGH);
-    analogWrite(P_LED_CLOCK, LOW);
-    }
-  */
 }
 
