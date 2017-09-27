@@ -32,5 +32,5 @@ void flasher_setup() {
   flasher_thread.onRun(flasher_callback);
   flasher_thread.enabled = false;
   flasher_thread.ThreadName = "flasher";
-  logger(LOGGER_TYPE_DEBUG, "flasher", "Success : " + String(controller_add(&flasher_thread)));
+  controller_add(&flasher_thread);
 }
