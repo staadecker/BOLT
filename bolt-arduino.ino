@@ -1,9 +1,9 @@
-//const int P_LED_VCC = 3;
+const int P_LED_VCC = 3;
 const int P_LED_DATA = 9;
 const int P_LED_CLOCK = 10;
 const int P_LED_LATCH = 11;
 
-//const int LED_TWO_VOLTS = 100;
+const uint8_t LED_TWO_VOLTS = 255;
 
 //const uint8_t LED_STATE_OFF = 0;
 //const uint8_t LED_STATE_ON = 1;
@@ -17,18 +17,20 @@ void setup() {
   Serial.begin(115200);
 
   // put your setup code here, to run once:
-  //pinMode(P_LED_VCC, OUTPUT);
+  pinMode(P_LED_VCC, OUTPUT);
   pinMode(P_LED_DATA, OUTPUT);
   pinMode(P_LED_CLOCK, OUTPUT);
   pinMode(P_LED_LATCH, OUTPUT);
 
-  //analogWrite(P_LED_VCC, HIGH);
+  analogWrite(P_LED_VCC, LED_TWO_VOLTS);
+
+  delay(1000);
 
   //states[0] = LED_STATE_ON;
 
   analogWrite(P_LED_LATCH, LOW);
   shiftOut();
-  analogWrite(P_LED_LATCH, HIGH);
+  analogWrite(P_LED_LATCH, LED_TWO_VOLTS);
 
 }
 
@@ -37,10 +39,15 @@ void loop() {}
 
 void shiftOut() {
   for (uint8_t i = 0; i < 8; i++)  {
-    digitalWrite(P_LED_DATA, !!(val & (1 << i)));
+    if (!!(val & (1 << i))){
+      analogWrite(P_LED_DATA, LED_TWO_VOLTS);
+    } else {
+      analogWrite(P_LED_DATA, LOW);
+    }
+    
 
-    digitalWrite(P_LED_CLOCK, HIGH);
-    digitalWrite(P_LED_CLOCK, LOW);
+    analogWrite(P_LED_CLOCK, LED_TWO_VOLTS);
+    analogWrite(P_LED_CLOCK, LOW);
   }
 
   /*analogWrite(P_LED_CLOCK, LOW);
