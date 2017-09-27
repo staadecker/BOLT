@@ -22,7 +22,9 @@ void setup() {
   flasher_setup();
   clock_setup();
   logger(LOGGER_TYPE_INFO, "main", "Setup done");
+}
 
+void loop() {
   //Starting procedure
   screen_display("READY");
 
@@ -31,7 +33,6 @@ void setup() {
   led_setState(0, LED_STATE_OFF);
 
   game_start();
-  logger(LOGGER_TYPE_INFO, "main", "Program done");
+  logger(LOGGER_TYPE_DEBUG, "main", "Program done");
+  delay(10000);
 }
-
-void loop() {}
