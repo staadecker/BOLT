@@ -1,15 +1,16 @@
 const int P_LED_VCC = 5;
-const int P_LED_DATA = 9;
-const int P_LED_CLOCK = 10;
-const int P_LED_LATCH = 11;
+const int P_LED_DATA = 8;
+const int P_LED_CLOCK = 12;
+const int P_LED_LATCH = 13;
 
-const uint8_t LED_TWO_VOLTS = 255;
+//Value to adjust for optimal output voltage
+const uint8_t LED_VCC_PWM = 105;
 
 //const uint8_t LED_STATE_OFF = 0;
 //const uint8_t LED_STATE_ON = 1;
 
 
-byte val = B01010110;
+byte val = B01000000;
 
 //byte states[8];
 
@@ -22,33 +23,42 @@ void setup() {
   pinMode(P_LED_CLOCK, OUTPUT);
   pinMode(P_LED_LATCH, OUTPUT);
 
-  analogWrite(P_LED_VCC, LED_TWO_VOLTS);
-
-  delay(1000);
-
-  //states[0] = LED_STATE_ON;
-
-  digitalWrite(P_LED_LATCH, LOW);
   shiftOut();
-  digitalWrite(P_LED_LATCH, HIGH);
+  delay(5000);
 
+  val = B11111111;
+  shiftOut();
 }
 
 void loop() {}
 
 
 void shiftOut() {
+  //Latch Low vcc high
+  digitalWrite(P_LED_VCC, HIGH);
+  digitalWrite(P_LED_LATCH, LOW);
+  
+
+  //Shift out
   for (uint8_t i = 0; i < 8; i++)  {
-    if (!!(val & (1 << i))){
+    if (!!(val & (1 << i))) {
       digitalWrite(P_LED_DATA, HIGH);
     } else {
       digitalWrite(P_LED_DATA, LOW);
     }
-    
+
 
     digitalWrite(P_LED_CLOCK, HIGH);
     digitalWrite(P_LED_CLOCK, LOW);
   }
+
+  //If data is left on high drop to low, so that the final voltage is not altered
+  digitalWrite(P_LED_DATA, LOW);
+
+  //Latch high, vcc adjust
+  digitalWrite(P_LED_LATCH, HIGH);
+  analogWrite(P_LED_VCC, LED_VCC_PWM);
+
 
   /*analogWrite(P_LED_CLOCK, LOW);
 
@@ -75,8 +85,5 @@ void shiftOut() {
     analogWrite(P_LED_CLOCK, LOW);
     }
   */
-
-
-  Serial.println("Done");
 }
 
