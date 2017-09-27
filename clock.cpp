@@ -21,7 +21,7 @@ String clock_formatMillis(uint32_t milliSeconds) {
 }
 
 void clock_callback() {
-  logger(LOGGER_TYPE_DEBUG, "clock", "clock thread called");
+  logger(LOGGER_TYPE_DEBUG, "clock", "clock thread called. Mode : " + String(clock_mode));
   String toDisplay;
   switch (clock_mode) {
     case CLOCK_MODE_CHRONO:
@@ -52,8 +52,8 @@ void clock_stop() {
 //Setup the clock thread, enabled = false, add to controller
 void clock_setup() {
   clock_thread = Thread();
-  clock_thread.ThreadName = "Clock";
-  clock_thread.setInterval(10);
+  clock_thread.ThreadName = "clock";
+  clock_thread.setInterval(100);
   clock_thread.enabled = false;
   clock_thread.onRun(clock_callback);
   controller_add(&clock_thread);

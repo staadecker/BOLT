@@ -5,7 +5,7 @@
 #include <Arduino.h>
 
 //Array keeping track of states
-uint8_t states[NUMBER_OF_BITS];
+uint8_t states[NUMBER_OF_LEDS];
 
 unsigned char led_flashingCounter = 0;
 
@@ -23,7 +23,7 @@ void led_shiftOut() {
 
 
   //Shift out
-  for (uint8_t i = NUMBER_OF_BITS; i <= NUMBER_OF_BITS; i--)  {
+  for (uint8_t i = NUMBER_OF_LEDS; i <= NUMBER_OF_LEDS; i--)  {
     switch (states[i]) {
       case LED_STATE_OFF:
         digitalWrite(P_LED_DATA, LOW);

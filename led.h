@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 
-const uint8_t NUMBER_OF_BITS = 16;
-
 //Value to adjust for optimal output voltage
 const uint8_t LED_VCC_PWM = 105;
 

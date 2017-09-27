@@ -5,12 +5,14 @@
 #include "led.h"
 #include "clock.h"
 #include "const.h"
+#include "logger.h"
 
 unsigned long game_startTime;
 unsigned long game_totalTime;
 
 unsigned long game_getRemainingTime(){
   unsigned long remainingTime = game_totalTime - (millis() - game_startTime);
+  logger(LOGGER_TYPE_DEBUG, "game",String(game_startTime) + "     " + String(game_totalTime) + "    " + String(remainingTime));
   if (remainingTime > 0){
     return remainingTime;
   }
@@ -42,7 +44,7 @@ int game_runMain(unsigned long gameTime) {
   while ((millis() - game_startTime) < gameTime) {
 
     //Generate random button
-    int buttonNumber = random(0, 63);
+    int buttonNumber = random(0, NUMBER_OF_LEDS - 1);
 
     //Turn on led
     led_setState(buttonNumber, LED_STATE_ON);
