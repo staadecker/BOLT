@@ -27,8 +27,8 @@ void setup() {
 void loop() {
   screen_display("READY");
 
-  led_setState(1, LED_STATE_FLASHING);
-  button_wait(1);
+  led_setState(0, LED_STATE_FLASHING);
+  button_wait(0);
 
   game_start();
 }
