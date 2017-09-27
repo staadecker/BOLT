@@ -1,3 +1,6 @@
+#include <Thread.h>
+#include <ThreadController.h>
+
 //CONSTANTS
 const uint8_t P_LED_VCC = 5;
 const uint8_t P_LED_DATA = 8;
@@ -10,6 +13,7 @@ const uint8_t LED_VCC_PWM = 105;
 //0 is always default value
 const uint8_t LED_STATE_OFF = 0;
 const uint8_t LED_STATE_ON = 1;
+const uint8_t LED_STATE_FLASHING = 2;
 
 const uint8_t NUMBER_OF_BITS = 16;
 
@@ -17,6 +21,10 @@ const uint8_t NUMBER_OF_BITS = 16;
 
 //Array keeping track of states
 uint8_t states[NUMBER_OF_BITS];
+
+Thread flasherThread;
+
+bool currentlyFlashing = true;
 
 void setup() {
   Serial.begin(115200);
@@ -27,15 +35,24 @@ void setup() {
   pinMode(P_LED_CLOCK, OUTPUT);
   pinMode(P_LED_LATCH, OUTPUT);
 
-  states[1] = LED_STATE_ON;
+  states[1] = LED_STATE_FLASHING;
   states[4] = LED_STATE_ON;
   states[5] = LED_STATE_ON;
   states[8] = LED_STATE_ON;
   states[10] = LED_STATE_ON;
   shiftOut();
+
+  //Thread setup
+  flasherThread = Thread();
+  flasherThread.setInterval(1000);
+  flasherThread.onRun(threadCallback);
 }
 
-void loop() {}
+void loop() {
+  if (flasherThread.shouldRun()) {
+    flasherThread.run();
+  }
+}
 
 void shiftOut() {
   //Latch Low. VCC high
@@ -52,6 +69,14 @@ void shiftOut() {
       case LED_STATE_ON:
         digitalWrite(P_LED_DATA, HIGH);
         break;
+      case LED_STATE_FLASHING:
+        if (currentlyFlashing) {
+          digitalWrite(P_LED_DATA, HIGH);
+        } else {
+          digitalWrite(P_LED_DATA, LOW);
+        }
+        currentlyFlashing = !currentlyFlashing;
+        break;
     }
 
 
@@ -65,5 +90,10 @@ void shiftOut() {
   //Latch high. VCC adjust to two volts
   digitalWrite(P_LED_LATCH, HIGH);
   analogWrite(P_LED_VCC, LED_VCC_PWM);
+}
+
+void threadCallback() {
+  
+  shiftOut();
 }
 
