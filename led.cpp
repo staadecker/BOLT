@@ -54,6 +54,8 @@ void led_shiftOut() {
 
 
 void led_setState(uint8_t led, uint8_t state) {
+  logger(LOGGER_TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
+  
   //If we have a flashing led turn on. The thread will automatically turn off if no leds are flashing.
   if (state == LED_STATE_FLASHING) {
     flasher_thread.enabled = true;
