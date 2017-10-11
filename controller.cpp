@@ -12,6 +12,7 @@ namespace controller {
   void addThread(Thread* thread) {
 
     bool result = controller.add(thread);
+    
     if (result) {
       logger::logger(logger::TYPE_DEBUG, "controller", "Added thread : " + String(thread->ThreadName));
     } else {
@@ -21,7 +22,6 @@ namespace controller {
 
   //Run the controller to run the threads that are enabled
   void runController() {
-    //logger(LOGGER_TYPE_DEBUG, "controller", "Controller run : " + String(controller.size(false)));
     controller.run();
   }
 }

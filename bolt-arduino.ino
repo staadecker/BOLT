@@ -27,7 +27,6 @@ void setup() {
 
 
 void loop() {
-  //Starting procedure
   screen::displayToScreen("READY");
 
   //Wait for center button to be pressed
@@ -37,5 +36,4 @@ void loop() {
 
   //Start game
   game::start();
-  exit(0);
 }

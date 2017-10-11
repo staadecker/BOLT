@@ -9,60 +9,58 @@ namespace button {
 
   namespace {
     //Stores the value of the button pressed or depressed
-    const unsigned char BUTTON_NONE = 100;
-    volatile uint8_t button_pressed = BUTTON_NONE;
+    const uint8_t BUTTON_NONE = 65;
+    volatile uint8_t buttonPressed = BUTTON_NONE;
   }
 
-  //Called when the P_BUTTON_INTERRUPT is falling
+  //Method to call when the the interrupt pin is falling
   void isr() {
-    uint8_t button = 0;
+
+    buttonPressed = 0;
 
     for (int i = 0; i < 8; i++) {
 
       //Wait for clock to go high
       while (digitalRead(constants::P_BUTTON_CLOCK) == LOW);
 
-      //Read and add value to button
-      if (digitalRead(constants::P_BUTTON_DATA) == HIGH)
-      {
-        button = button + 1;
-      }
+      //If value is high add one
+      buttonPressed = buttonPressed + digitalRead(constants::P_BUTTON_DATA);
 
       //If not last time in loop, shift bits
       if (i != 7) {
-        button = button << 1;
+        buttonPressed = buttonPressed << 1;
       }
 
       //Wait for clock to go low
       while (digitalRead(constants::P_BUTTON_CLOCK) == HIGH);
     }
 
-    if (button > 64) {
-      button_pressed = button - 129;
+    if (buttonPressed > 64) {
+      buttonPressed = buttonPressed - 129;
     }
-
   }
 
-  bool isButtonPressed(uint8_t buttonNumber) {
-    if (button_pressed == buttonNumber) {
-      button_pressed = BUTTON_NONE ;
+  //Checks whether the button got pressed
+  bool isButtonPressed(uint8_t buttonToCheck) {
+    //If not button shield wait two seconds and return true
+    if (not constants::IS_BUTTON_SHIELD_CONNECT) {
+      helper::wait(2000);
+      return true;
+    }
+
+    //If button pressed is the button to check return true
+    if (buttonPressed == buttonToCheck) {
+      buttonPressed = BUTTON_NONE;
       return true;
     }
     return false;
   }
 
   //Ends when the button with buttonNumber is pressed
-  void wait(uint8_t buttonNumber) {
+  void wait(uint8_t buttonToWaitFor) {
+    logger::logger(logger::TYPE_INFO, "button", "Waiting for press on button : " + String(buttonToWaitFor));
 
-    logger::logger(logger::TYPE_INFO, "button", "Waiting for press on button : " + String(buttonNumber));
-
-    //If no board wait 2 seconds instead
-    if (constants::IS_BUTTON_SHIELD_CONNECTED) {
-      while (not isButtonPressed(buttonNumber) ) {
-        controller::runController();
-      }
-    } else {
-      helper::waitTime(2000);
+    while (not isButtonPressed(buttonToWaitFor) ) {
+      controller::runController();
     }
   }
-}
