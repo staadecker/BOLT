@@ -5,32 +5,35 @@
 #include "logger.h"
 #include "led.h"
 
-bool flashingCurrentState = true;
-bool flashed = false;
+namespace flasher {
+  Thread flasher_thread = Thread();
 
-Thread flasher_thread = Thread();
 
-void flasher_callback() {
-  logger(LOGGER_TYPE_DEBUG, "flasher", "flasher thread called");
+  bool flashingCurrentState = true;
+  bool flashed = false;
 
-  //Variable should turn true if something flahed
-  flashed = false;
+  void callback() {
+    logger::logger(logger::TYPE_DEBUG, "flasher", "flasher thread called");
 
-  led_shiftOut();
+    //Variable should turn true if something flahed
+    flashed = false;
 
-  if (!flashed) {
-    //Nothing is flashing anymore
-    flasher_thread.enabled = false;
-  } else {
-    //If it did flash switch flashing state
-    flashingCurrentState = !flashingCurrentState;
+    led::shiftOutLed();
+
+    if (!flashed) {
+      //Nothing is flashing anymore
+      flasher_thread.enabled = false;
+    } else {
+      //If it did flash switch flashing state
+      flashingCurrentState = !flashingCurrentState;
+    }
   }
-}
 
-void flasher_setup() {
-  flasher_thread.setInterval(FLASHER_INTERVAL);
-  flasher_thread.onRun(flasher_callback);
-  flasher_thread.enabled = false;
-  flasher_thread.ThreadName = "flasher";
-  controller_add(&flasher_thread);
+  void setupFlasher() {
+    flasher_thread.setInterval(FLASHER_INTERVAL);
+    flasher_thread.onRun(callback);
+    flasher_thread.enabled = false;
+    flasher_thread.ThreadName = "flasher";
+    controller::addThread(&flasher_thread);
+  }
 }

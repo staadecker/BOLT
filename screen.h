@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 
-void screen_display(String message);
-
+namespace screen {
+  void displayToScreen(String message);
+}
 #endif

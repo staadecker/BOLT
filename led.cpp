@@ -4,63 +4,66 @@
 #include "logger.h"
 #include <Arduino.h>
 
-//Array keeping track of states
-uint8_t states[NUMBER_OF_LEDS];
+namespace led {
+  namespace {
+    //Array keeping track of states
+    uint8_t states[constants::NUMBER_OF_LEDS];
 
-unsigned char led_flashingCounter = 0;
+    unsigned char flashingCounter = 0;
 
-void led_setup() {
-  pinMode(P_LED_VCC, OUTPUT);
-  pinMode(P_LED_DATA, OUTPUT);
-  pinMode(P_LED_CLOCK, OUTPUT);
-  pinMode(P_LED_LATCH, OUTPUT);
-}
-
-void led_shiftOut() {
-  //Latch Low. VCC high
-  digitalWrite(P_LED_VCC, HIGH);
-  digitalWrite(P_LED_LATCH, LOW);
+    
+  }
+  void shiftOutLed() {
+      //Latch Low. VCC high
+      digitalWrite(constants::P_LED_VCC, HIGH);
+      digitalWrite(constants::P_LED_LATCH, LOW);
 
 
-  //Shift out
-  for (uint8_t i = NUMBER_OF_LEDS; i <= NUMBER_OF_LEDS; i--)  {
-    switch (states[i]) {
-      case LED_STATE_OFF:
-        digitalWrite(P_LED_DATA, LOW);
-        break;
-      case LED_STATE_ON:
-        digitalWrite(P_LED_DATA, HIGH);
-        break;
-      case LED_STATE_FLASHING:
-        flashed = true;
-        digitalWrite(P_LED_DATA, flashingCurrentState);
-        break;
+      //Shift out
+      for (uint8_t i = constants::NUMBER_OF_LEDS; i <= constants::NUMBER_OF_LEDS; i--)  {
+        switch (states[i]) {
+          case STATE_OFF:
+            digitalWrite(constants::P_LED_DATA, LOW);
+            break;
+          case STATE_ON:
+            digitalWrite(constants::P_LED_DATA, HIGH);
+            break;
+          case STATE_FLASHING:
+            flasher::flashed = true;
+            digitalWrite(constants::P_LED_DATA, flasher::flashingCurrentState);
+            break;
+        }
+
+        //Clock
+        digitalWrite(constants::P_LED_CLOCK, HIGH);
+        digitalWrite(constants::P_LED_CLOCK, LOW);
+      }
+
+      //If data is left on high drop to low, so that the final output voltage is not altered
+      digitalWrite(constants::P_LED_DATA, LOW);
+
+      //Latch high. VCC adjust to two volts
+      digitalWrite(constants::P_LED_LATCH, HIGH);
+      analogWrite(constants::P_LED_VCC, VCC_PWM);
+
+
+    }
+  
+  void setupLed() {
+    pinMode(constants::P_LED_VCC, OUTPUT);
+    pinMode(constants::P_LED_DATA, OUTPUT);
+    pinMode(constants::P_LED_CLOCK, OUTPUT);
+    pinMode(constants::P_LED_LATCH, OUTPUT);
+  }
+
+  void setState(uint8_t led, uint8_t state) {
+    logger::logger(logger::TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
+
+    //If we have a flashing led turn on. The thread will automatically turn off if no leds are flashing.
+    if (state == STATE_FLASHING) {
+      flasher::flasher_thread.enabled = true;
     }
 
-    //Clock
-    digitalWrite(P_LED_CLOCK, HIGH);
-    digitalWrite(P_LED_CLOCK, LOW);
+    states[led] = state;
   }
-
-  //If data is left on high drop to low, so that the final output voltage is not altered
-  digitalWrite(P_LED_DATA, LOW);
-
-  //Latch high. VCC adjust to two volts
-  digitalWrite(P_LED_LATCH, HIGH);
-  analogWrite(P_LED_VCC, LED_VCC_PWM);
-
-
 }
-
-
-void led_setState(uint8_t led, uint8_t state) {
-  logger(LOGGER_TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
-  
-  //If we have a flashing led turn on. The thread will automatically turn off if no leds are flashing.
-  if (state == LED_STATE_FLASHING) {
-    flasher_thread.enabled = true;
-  }
-
-  states[led] = state;
-}
-

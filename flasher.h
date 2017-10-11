@@ -3,14 +3,16 @@
 
 #include <Thread.h>
 
-const int FLASHER_INTERVAL = 1000;
+namespace flasher {
+  const int FLASHER_INTERVAL = 1000;
 
-extern Thread flasher_thread;
+  extern Thread flasher_thread;
 
-extern bool flashingCurrentState;
-extern bool flashed;
+  extern bool flashingCurrentState;
+  extern bool flashed;
 
-void flasher_setup();
-void flasher_callback();
+  void setupFlasher();
+  void callback();
+}
 
 #endif

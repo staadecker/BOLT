@@ -3,9 +3,10 @@
 #include "logger.h"
 #include "const.h"
 
-void screen_display(String message) {
-  logger(LOGGER_TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
-  if (IS_SCREEN_CONNECTED) {
-    logger(LOGGER_TYPE_WARNING, "screen", "Method incomplete");
+namespace screen{
+void displayToScreen(String message) {
+  logger::logger(logger::TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
+  if (constants::IS_SCREEN_CONNECTED) {
+    logger::logger(logger::TYPE_WARNING, "screen", "Method incomplete");
   }
-}
+}}

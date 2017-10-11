@@ -10,7 +10,9 @@
 
 #include <Thread.h>
 
-void controller_add(Thread* thread);
-void controller_run();
+namespace controller {
+  void addThread(Thread* thread);
+  void runController();
+}
 
 #endif

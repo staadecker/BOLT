@@ -4,10 +4,12 @@
 
 #include <Arduino.h>
 
-const unsigned char BUTTON_NONE = 100;
+namespace button {
 
-bool button_isPressed(uint8_t buttonNumber);
-void button_wait(uint8_t buttonNumber);
-void button_ISR();
+  void isr();
+  bool isButtonPressed(uint8_t buttonNumber);
+  void wait(uint8_t buttonNumber);
+
+}
 
 #endif
