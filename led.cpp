@@ -52,12 +52,12 @@ namespace led {
   }
 
   void setState(uint8_t led, uint8_t state) {
-    logger::logger(logger::TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
+    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
 
     states[led] = state;
   }
 
-  void setupLed() {
+  void setup() {
     pinMode(constants::P_LED_VCC, OUTPUT);
     pinMode(constants::P_LED_DATA, OUTPUT);
     pinMode(constants::P_LED_CLOCK, OUTPUT);

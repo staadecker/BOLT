@@ -25,7 +25,7 @@ namespace timer {
     }
 
     void callback() {
-      logger::logger(logger::TYPE_DEBUG, "clock", "clock thread called. Mode : " + String(mode));
+      logger::log(logger::TYPE_DEBUG, "clock", "clock thread called. Mode : " + String(mode));
       String toDisplay;
       switch (mode) {
         case MODE_CHRONO:
@@ -38,7 +38,7 @@ namespace timer {
           toDisplay = getTime();
           break;
       }
-      screen::displayToScreen(toDisplay);
+      screen::display(toDisplay);
     }
   }
 
@@ -49,19 +49,19 @@ namespace timer {
   }
 
   //Stop the clock
-  void stopTimer() {
+  void stop() {
     thread.enabled = false;
   }
 
 
   //Setup the clock thread, enabled = false, add to controller
-  void setupTimer() {
+  void setup() {
     thread = Thread();
     thread.ThreadName = "clock";
     thread.setInterval(INTERVAL);
     thread.enabled = false;
     thread.onRun(callback);
-    controller::addThread(&thread);
+    controller::add(&thread);
   }
 
 }

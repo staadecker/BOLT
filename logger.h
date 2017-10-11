@@ -11,7 +11,7 @@ namespace logger {
 
   const byte MODE = TYPE_INFO;
 
-  void logger(byte type, String fileName, String message);
+  void log(byte type, String fileName, String message);
 }
 
 #endif

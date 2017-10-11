@@ -15,11 +15,11 @@ namespace game {
     unsigned int buttonsPressed = 0;
 
     void countDown() {
-      screen::displayToScreen("3");
+      screen::display("3");
       helper::waitTime(1000);
-      screen::displayToScreen("2");
+      screen::display("2");
       helper::waitTime(1000);
-      screen::displayToScreen("1");
+      screen::display("1");
       helper::waitTime(1000);
     }
 
@@ -62,8 +62,8 @@ namespace game {
 
     timer::start(timer::MODE_TIMER);
     runMain();
-    timer::stopTimer();
+    timer::stop();
 
-    screen::displayToScreen(String(buttonsPressed) + " buttons pressed");
+    screen::display(String(buttonsPressed) + " buttons pressed");
   }
 }

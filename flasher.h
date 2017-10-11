@@ -4,7 +4,7 @@
 #include <Thread.h>
 
 namespace flasher {
-  void setupFlasher();
+  void setup();
 }
 
 #endif

@@ -1,7 +1,7 @@
 #include "logger.h"
 
 namespace logger{
-void logger(byte type, String fileName, String message) {
+void log(byte type, String fileName, String message) {
   if (type <= MODE) {
     String typeName;
 
@@ -20,7 +20,7 @@ void logger(byte type, String fileName, String message) {
         break;
 
       default:
-        logger(TYPE_ERROR, "test", "Unkown log type");
+        log(TYPE_ERROR, "test", "Unkown log type");
     }
 
     Serial.println(typeName + " : " + fileName + " : " + message + ".");

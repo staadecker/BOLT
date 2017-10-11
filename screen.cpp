@@ -4,9 +4,9 @@
 #include "const.h"
 
 namespace screen{
-void displayToScreen(String message) {
-  logger::logger(logger::TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
+void display(String message) {
+  logger::log(logger::TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
   if (constants::IS_SCREEN_CONNECTED) {
-    logger::logger(logger::TYPE_WARNING, "screen", "Method incomplete");
+    logger::log(logger::TYPE_WARNING, "screen", "Method incomplete");
   }
 }}

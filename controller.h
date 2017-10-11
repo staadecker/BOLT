@@ -11,8 +11,8 @@
 #include <Thread.h>
 
 namespace controller {
-  void addThread(Thread* thread);
-  void runController();
+  void add(Thread* thread);
+  void run();
 }
 
 #endif

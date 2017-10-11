@@ -12,15 +12,15 @@ namespace flasher {
     Thread flasher_thread = Thread();
     
     void callback() {
-      logger::logger(logger::TYPE_DEBUG, "flasher", "flasher thread called");
+      logger::log(logger::TYPE_DEBUG, "flasher", "flasher thread called");
       led::flash();
     }
   }
 
-  void setupFlasher() {
+  void setup() {
     flasher_thread.setInterval(FLASHER_INTERVAL);
     flasher_thread.onRun(callback);
     flasher_thread.ThreadName = "flasher";
-    controller::addThread(&flasher_thread);
+    controller::add(&flasher_thread);
   }
 }

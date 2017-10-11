@@ -7,7 +7,7 @@ namespace helper {
   void waitTime(unsigned long milliseconds) {
     unsigned long startTime = millis();
     while (millis() - startTime < milliseconds) {
-      controller::runController();
+      controller::run();
     }
   }
 }

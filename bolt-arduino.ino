@@ -17,16 +17,16 @@ void setup() {
   randomSeed(analogRead(0));
 
   //Setup
-  button::setupButton();
-  led::setupLed();
-  flasher::setupFlasher();
-  timer::setupTimer();
-  logger::logger(logger::TYPE_INFO, "main", "Setup done");
+  button::setup();
+  led::setup();
+  flasher::setup();
+  timer::setup();
+  logger::log(logger::TYPE_INFO, "main", "Setup done");
 }
 
 
 void loop() {
-  screen::displayToScreen("READY");
+  screen::display("READY");
 
   //Wait for center button to be pressed
   led::setState(0, led::STATE_FLASHING);

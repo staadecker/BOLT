@@ -37,36 +37,35 @@ namespace button {
         buttonPressed = buttonPressed - 129;
       }
     }
-  }
 
 
+    //Checks whether the button got pressed
+    bool isPressed(uint8_t buttonToCheck) {
+      //If not button shield wait two seconds and return true
+      if (not constants::IS_BUTTON_SHIELD_CONNECTED) {
+        helper::waitTime(2000);
+        return true;
+      }
 
-  //Checks whether the button got pressed
-  bool isButtonPressed(uint8_t buttonToCheck) {
-    //If not button shield wait two seconds and return true
-    if (not constants::IS_BUTTON_SHIELD_CONNECTED) {
-      helper::waitTime(2000);
-      return true;
+      //If button pressed is the button to check return true
+      if (buttonPressed == buttonToCheck) {
+        buttonPressed = BUTTON_NONE;
+        return true;
+      }
+      return false;
     }
-
-    //If button pressed is the button to check return true
-    if (buttonPressed == buttonToCheck) {
-      buttonPressed = BUTTON_NONE;
-      return true;
-    }
-    return false;
   }
 
   //Ends when buttonToWaitFor is pressed
   void wait(uint8_t buttonToWaitFor) {
-    logger::logger(logger::TYPE_INFO, "button", "Waiting for press on button : " + String(buttonToWaitFor));
+    logger::log(logger::TYPE_INFO, "button", "Waiting for press on button : " + String(buttonToWaitFor));
 
-    while (not isButtonPressed(buttonToWaitFor) ) {
-      controller::runController();
+    while (not isPressed(buttonToWaitFor) ) {
+      controller::run();
     }
   }
 
-  void setupButton() {
+  void setup() {
     attachInterrupt(digitalPinToInterrupt(constants::P_BUTTON_INTERRUPT), isr, FALLING); //Attach interrupt for 64 button shield
   }
 }

@@ -17,8 +17,8 @@ namespace timer {
   const unsigned char MODE_TIME = 2;
 
   void start(unsigned char mode);
-  void stopTimer();
-  void setupTimer();
+  void stop();
+  void setup();
 }
 
 #endif
