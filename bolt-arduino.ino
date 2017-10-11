@@ -7,18 +7,17 @@
 #include "controller.h"
 #include "flasher.h"
 #include "logger.h"
+#include "helper.h"
 
 
 void setup() {
   Serial.begin(115200);
 
-  //Attach interrupt for 64 button shield
-  attachInterrupt(digitalPinToInterrupt(constants::P_BUTTON_INTERRUPT), button::isr, FALLING);
-
   //Generate new random seed
   randomSeed(analogRead(0));
 
   //Setup
+  button::setupButton();
   led::setupLed();
   flasher::setupFlasher();
   timer::setupTimer();
@@ -36,4 +35,5 @@ void loop() {
 
   //Start game
   game::start();
+  helper::waitTime(5000);
 }

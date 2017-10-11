@@ -13,7 +13,7 @@ namespace led {
   const uint8_t STATE_FLASHING = 2;
 
   void setupLed();
-  void shiftOutLed();
+  void flash();
   void setState(uint8_t led, uint8_t state);
 }
 

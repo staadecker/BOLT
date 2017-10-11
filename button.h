@@ -5,9 +5,9 @@
 #include <Arduino.h>
 
 namespace button {
-  void isr();
   bool isButtonPressed(uint8_t buttonNumber);
   void wait(uint8_t buttonNumber);
+  void setupButton();
 }
 
 #endif

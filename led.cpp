@@ -8,12 +8,9 @@ namespace led {
   namespace {
     //Array keeping track of states
     uint8_t states[constants::NUMBER_OF_LEDS];
+    uint8_t currentFlasherState = HIGH;
 
-    unsigned char flashingCounter = 0;
-
-    
-  }
-  void shiftOutLed() {
+    void shiftOutLed() {
       //Latch Low. VCC high
       digitalWrite(constants::P_LED_VCC, HIGH);
       digitalWrite(constants::P_LED_LATCH, LOW);
@@ -29,8 +26,7 @@ namespace led {
             digitalWrite(constants::P_LED_DATA, HIGH);
             break;
           case STATE_FLASHING:
-            flasher::flashed = true;
-            digitalWrite(constants::P_LED_DATA, flasher::flashingCurrentState);
+            digitalWrite(constants::P_LED_DATA, currentFlasherState);
             break;
         }
 
@@ -48,22 +44,23 @@ namespace led {
 
 
     }
-  
-  void setupLed() {
-    pinMode(constants::P_LED_VCC, OUTPUT);
-    pinMode(constants::P_LED_DATA, OUTPUT);
-    pinMode(constants::P_LED_CLOCK, OUTPUT);
-    pinMode(constants::P_LED_LATCH, OUTPUT);
+  }
+
+  void flash() {
+    shiftOutLed();
+    currentFlasherState = !currentFlasherState;
   }
 
   void setState(uint8_t led, uint8_t state) {
     logger::logger(logger::TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
 
-    //If we have a flashing led turn on. The thread will automatically turn off if no leds are flashing.
-    if (state == STATE_FLASHING) {
-      flasher::flasher_thread.enabled = true;
-    }
-
     states[led] = state;
+  }
+
+  void setupLed() {
+    pinMode(constants::P_LED_VCC, OUTPUT);
+    pinMode(constants::P_LED_DATA, OUTPUT);
+    pinMode(constants::P_LED_CLOCK, OUTPUT);
+    pinMode(constants::P_LED_LATCH, OUTPUT);
   }
 }

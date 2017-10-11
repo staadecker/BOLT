@@ -12,7 +12,6 @@
 #define TIMER_H
 
 namespace timer {
-
   const unsigned char MODE_CHRONO = 0;
   const unsigned char MODE_TIMER = 1;
   const unsigned char MODE_TIME = 2;
