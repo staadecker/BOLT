@@ -1,7 +1,7 @@
 /*  Contains the constants used accross multiple files, especially the pins.
 */
-#ifndef CONST
-#define CONST
+#ifndef CONST_H
+#define CONST_H
 
 namespace constants {
   const int P_BUTTON_INTERRUPT = 2;
@@ -11,7 +11,7 @@ namespace constants {
   const int P_LED_VCC = 5;
   const int P_LED_DATA = 8;
   const int P_LED_CLOCK = 12;
-  const int P_LED_LATCH = 13;
+  const int P_LED_LATCH = 7;
 
   const bool IS_BUTTON_SHIELD_CONNECTED = false;
   const bool IS_SCREEN_CONNECTED = false;
