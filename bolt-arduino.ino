@@ -22,10 +22,7 @@ void setup() {
   flasher::setup();
   timer::setup();
   logger::log(logger::TYPE_INFO, "main", "Setup done");
-}
 
-
-void loop() {
   screen::display("READY");
 
   //Wait for center button to be pressed
@@ -36,4 +33,9 @@ void loop() {
   //Start game
   game::start();
   helper::waitTime(5000);
+}
+
+
+void loop() {
+
 }
