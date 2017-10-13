@@ -8,7 +8,7 @@ namespace led {
   namespace {
     //Array keeping track of states
     uint8_t states[constants::NUMBER_OF_LEDS];
-    uint8_t currentFlasherState = HIGH;
+    uint8_t currentFlasherState = LOW;
 
     void shiftOutLed() {
       //Latch Low. VCC high
@@ -47,14 +47,16 @@ namespace led {
   }
 
   void flash() {
-    shiftOutLed();
     currentFlasherState = !currentFlasherState;
+    shiftOutLed();
   }
 
   void setState(uint8_t led, uint8_t state) {
     logger::log(logger::TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
 
     states[led] = state;
+
+    shiftOutLed();
   }
 
   void setup() {
