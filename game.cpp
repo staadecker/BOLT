@@ -7,11 +7,12 @@
 #include "const.h"
 #include "logger.h"
 #include "helper.h"
+#include "controller.h"
 
 namespace game {
   namespace {
     unsigned long startTime;
-    unsigned long totalTime;
+    const unsigned long GAME_TIME = 3000;
     unsigned int buttonsPressed = 0;
 
     void countDown() {
@@ -24,14 +25,18 @@ namespace game {
     }
 
     void runMain() {
-      while (millis() - startTime < totalTime) {
+      while (millis() - startTime < GAME_TIME) {
 
         //Generate random button
         int buttonNumber = random(0, constants::NUMBER_OF_LEDS - 1);
 
         //Turn on led and wait for button press
         led::turnOn(buttonNumber);
-        button::wait(buttonNumber);
+        
+        while(not button::isPressed(buttonNumber)){
+          controller::run();
+        }
+        
         led::turnOff(buttonNumber);
 
         //Increment counter
@@ -41,26 +46,21 @@ namespace game {
   }
 
   unsigned long getRemainingTime() {
-    unsigned long remainingTime = totalTime - (millis() - startTime);
+    unsigned long remainingTime = GAME_TIME - (millis() - startTime);
 
     if (remainingTime > 0) {
       return remainingTime;
     }
-
+    
     return 0;
-  }
-
-  unsigned long getElapsedTime() {
-    return millis() - startTime;
   }
 
   void start() {
     countDown();
-
-    totalTime = 30000;
+    
     startTime = millis();
 
-    timer::start(timer::MODE_TIMER);
+    timer::start();
     runMain();
     timer::stop();
 

@@ -3,7 +3,6 @@
 
 namespace game {
   unsigned long getRemainingTime();
-  unsigned long getElapsedTime();
   void start();
 }
 #endif

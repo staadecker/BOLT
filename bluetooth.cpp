@@ -3,8 +3,6 @@
 #include "controller.h"
 #include <Thread.h>
 
-
-
 namespace bluetooth {
 
   bool isConnected(){

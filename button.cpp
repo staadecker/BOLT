@@ -34,7 +34,7 @@ namespace button {
       }
 
       if (buttonPressed > 64) {
-        buttonPressed = buttonPressed - 129;
+        buttonPressed -= 129;
       }
     }
   }
@@ -53,15 +53,6 @@ namespace button {
       return true;
     }
     return false;
-  }
-
-  //Ends when buttonToWaitFor is pressed
-  void wait(uint8_t buttonToWaitFor) {
-    logger::log(logger::TYPE_INFO, "button", "Waiting for press on button : " + String(buttonToWaitFor));
-
-    while (not isPressed(buttonToWaitFor) ) {
-      controller::run();
-    }
   }
 
   void setup() {

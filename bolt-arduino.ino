@@ -34,6 +34,7 @@ void loop() {
 
   if (bluetooth::isConnected()) { //If connected to bluetooth go in online mode
     flasher::stopFlashing(0);
+    screen::display("CONNECTED");
     bluetooth::listen();
     makeStartSetting();
   }
