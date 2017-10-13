@@ -30,9 +30,9 @@ namespace game {
         int buttonNumber = random(0, constants::NUMBER_OF_LEDS - 1);
 
         //Turn on led and wait for button press
-        led::setState(buttonNumber, led::STATE_ON);
+        led::turnOn(buttonNumber);
         button::wait(buttonNumber);
-        led::setState(buttonNumber, led::STATE_OFF);
+        led::turnOff(buttonNumber);
 
         //Increment counter
         buttonsPressed ++;

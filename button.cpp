@@ -37,9 +37,6 @@ namespace button {
         buttonPressed = buttonPressed - 129;
       }
     }
-
-
-
   }
 
   //Checks whether the button got pressed

@@ -18,6 +18,7 @@ void setup() {
   randomSeed(analogRead(0));
 
   //Setup
+  bluetooth:setup();
   button::setup();
   led::setup();
   flasher::setup();
@@ -28,17 +29,17 @@ void setup() {
 
 void loop() {
   screen::display("READY");
-  led::setState(0, led::STATE_FLASHING);
+  flasher::flash(0);
 
   while (true) {
     controller::run(); //Run controller
 
-    led::setState(0, led::STATE_OFF);
-
     if (bluetooth::isConnected()) {
-      //Start online mode
+      flasher::stopFlashing(0);
+      //TODO : Start online mode
     } else if (button::isPressed(0)) {
-      game::start(); //Start offline game
+      flasher::stopFlashing(0);
+      game::start(); //Start offline game      
     }
   }
   helper::waitTime(5000);

@@ -7,8 +7,7 @@
 namespace led {
   namespace {
     //Array keeping track of states
-    uint8_t states[constants::NUMBER_OF_LEDS];
-    uint8_t currentFlasherState = LOW;
+    bool states[constants::NUMBER_OF_LEDS];
 
     void shiftOutLed() {
       //Latch Low. VCC high
@@ -18,17 +17,7 @@ namespace led {
 
       //Shift out
       for (uint8_t i = constants::NUMBER_OF_LEDS; i <= constants::NUMBER_OF_LEDS; i--)  {
-        switch (states[i]) {
-          case STATE_OFF:
-            digitalWrite(constants::P_LED_DATA, LOW);
-            break;
-          case STATE_ON:
-            digitalWrite(constants::P_LED_DATA, HIGH);
-            break;
-          case STATE_FLASHING:
-            digitalWrite(constants::P_LED_DATA, currentFlasherState);
-            break;
-        }
+        digitalWrite(constants::P_LED_DATA, states[i]);
 
         //Clock
         digitalWrite(constants::P_LED_CLOCK, HIGH);
@@ -41,20 +30,21 @@ namespace led {
       //Latch high. VCC adjust to two volts
       digitalWrite(constants::P_LED_LATCH, HIGH);
       analogWrite(constants::P_LED_VCC, VCC_PWM);
-
-
     }
   }
 
-  void flash() {
-    currentFlasherState = !currentFlasherState;
+  void turnOn(uint8_t ledNumber) {
+    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(ledNumber) + "ON");
+
+    states[ledNumber] = HIGH;
+
     shiftOutLed();
   }
 
-  void setState(uint8_t led, uint8_t state) {
-    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(led) + " to state " + String(state));
+  void turnOff(uint8_t ledNumber) {
+    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(ledNumber) + "OFF");
 
-    states[led] = state;
+    states[ledNumber] = LOW;
 
     shiftOutLed();
   }
