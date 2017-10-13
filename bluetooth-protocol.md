@@ -1,17 +1,23 @@
 # Bluetooth protocol
 
-## Format
+## Packet Format
 
-Packet = Command byte + arguments seperated by commas + carriage return (ASCII 15)
+Command byte + arguments seperated by commas + carriage return (ASCII 15)
 
-Ex : C10,50/r
+Example : `L30/r` turns on led number 30
 
 ## Commands
+### Arduino to Phone
 
-| Command byte | Command description | Direction | Arguments |
-|-----|-----|-----|-----|
-| A | Acknowledge receiving a packet | Arduino to phone | None |
-| B | Called when a button is pressed | Arduino to phone | Number of the button pressed (between 0-63)|
-| D | Called to disconnect with arduino | Phone to arduino | None |
-| L | Called to change state of led | Phone to arduino | 1) Number of LED to change <br> 2) State of led (off = 0; on = 1; flashing = 2)|
-| S | Display to screen | Phone to arduino | Message to display to screen |
+| Command byte | Name | Description | Arguments |
+|--------------|------|-------------|-----------|
+| A | Acknowledge | Acknowledge receiving a packet | None |
+| B | Button pressed | Called when a button is pressed | Number of the button pressed (between 0-63)|
+
+### Phone to Arduino
+
+| Command byte | Name | Description | Arguments |
+|--------------|------|-------------|-----------|
+| D | Disconnect | Called to disconnect with arduino | None |
+| L | Led ON | Called to turn on led| Number of LED to turn on (between 0-63)|
+| O | Led OFF | Called to turn off led | Number of LED to turn off (between 0-63)|
