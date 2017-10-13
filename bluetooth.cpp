@@ -15,6 +15,10 @@ namespace bluetooth {
     //Setup bluetooth
 
   }
+
+  void listen(){
+    
+  }
 }
 
 

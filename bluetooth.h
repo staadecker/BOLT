@@ -4,6 +4,7 @@
 namespace bluetooth {
   void setup();
   bool isConnected();
+  void listen();
 }
 
 #endif
