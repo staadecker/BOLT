@@ -8,6 +8,7 @@
 #include "flasher.h"
 #include "logger.h"
 #include "helper.h"
+#include "bluetooth.h"
 
 
 void setup() {
@@ -22,20 +23,23 @@ void setup() {
   flasher::setup();
   timer::setup();
   logger::log(logger::TYPE_INFO, "main", "Setup done");
-
-  screen::display("READY");
-
-  //Wait for center button to be pressed
-  led::setState(0, led::STATE_FLASHING);
-  button::wait(0);
-  led::setState(0, led::STATE_OFF);
-
-  //Start game
-  game::start();
-  helper::waitTime(5000);
 }
 
 
 void loop() {
+  screen::display("READY");
+  led::setState(0, led::STATE_FLASHING);
 
+  while (true) {
+    controller::run(); //Run controller
+
+    led::setState(0, led::STATE_OFF);
+
+    if (bluetooth::isConnected()) {
+      //Start online mode
+    } else if (button::isPressed(0)) {
+      game::start(); //Start offline game
+    }
+  }
+  helper::waitTime(5000);
 }

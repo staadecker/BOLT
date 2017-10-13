@@ -39,21 +39,23 @@ namespace button {
     }
 
 
-    //Checks whether the button got pressed
-    bool isPressed(uint8_t buttonToCheck) {
-      //If not button shield wait two seconds and return true
-      if (not constants::IS_BUTTON_SHIELD_CONNECTED) {
-        helper::waitTime(2000);
-        return true;
-      }
 
-      //If button pressed is the button to check return true
-      if (buttonPressed == buttonToCheck) {
-        buttonPressed = BUTTON_NONE;
-        return true;
-      }
-      return false;
+  }
+
+  //Checks whether the button got pressed
+  bool isPressed(uint8_t buttonToCheck) {
+    //If not button shield wait two seconds and return true
+    if (not constants::IS_BUTTON_SHIELD_CONNECTED) {
+      helper::waitTime(2000);
+      return true;
     }
+
+    //If button pressed is the button to check return true
+    if (buttonPressed == buttonToCheck) {
+      buttonPressed = BUTTON_NONE;
+      return true;
+    }
+    return false;
   }
 
   //Ends when buttonToWaitFor is pressed
