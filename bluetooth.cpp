@@ -5,40 +5,39 @@
 #include "led.h"
 #include "logger.h"
 
-#include <Thread.h>
 #include <SoftwareSerial.h>
 
 namespace bluetooth {
   namespace {
     SoftwareSerial mySerial(constants::P_SOFTWARE_SERIAL_RX, constants::P_SOFTWARE_SERIAL_TX);
 
-    Thread listeningThread = Thread();
+    const char START_OF_PACKET = 0x02;  //Start of text
+    const char END_OF_PACKET = 0x03;  //End of text
+    const char ACKNOWLEDGE = 0x06; //Acknowledge
 
-    const int LISTENING_INTERVAL = 2000;
-
-    const char END_OF_PACKET = 0x0D;  // Carriage return
+    const String REQUEST_PACKET_CONTENT = "R";
 
     const char C_DISCONNECT = 0x44; //"D"
     const char C_TURN_ON_LED = 0x4C; //"L"
     const char C_TURN_OFF_LED = 0x4F; //"O"
-    const char C_START = 0x53; //"S"
-
-    const String ACKNOWLEDGE_COMMAND = "A";
 
     const String BLUETOOTH_PIN = "756945";
 
-    bool shouldListen = false;
+    const int CONNECTION_INTERVAL = 1000;
 
-    String currentPacket = "";
+    bool connection = false;
 
-    void parsePacket(String packet) {
+    void acknowledgePacket() {
+      mySerial.print(ACKNOWLEDGE);
+    }
 
-      char command = packet[0];
-      String argument = packet.substring(1);
+    void processPacketContent(String packetContent) {
+      char command = packetContent[0];
+      String argument = packetContent.substring(1);
 
       switch (command) {
         case C_DISCONNECT:
-          shouldListen = false;
+          connection = false;
           break;
         case C_TURN_ON_LED:
           led::turnOn(argument.toInt());
@@ -46,56 +45,71 @@ namespace bluetooth {
         case C_TURN_OFF_LED:
           led::turnOff(argument.toInt());
           break;
-        case C_START:
-          shouldListen = true;
-          break;
         default:
-          logger::log(logger::TYPE_ERROR, "bluetooth", "unkown command : " + packet);
-      }
-
-      transmit(ACKNOWLEDGE_COMMAND);
-    }
-
-    void readReceivedBytes() {
-      char receivedByte;
-
-      while (mySerial.available() > 0) {
-
-        receivedByte = mySerial.read();
-
-        if (receivedByte == END_OF_PACKET) {
-          parsePacket(currentPacket);
-          currentPacket = "";
-        }
-        else {
-          currentPacket += receivedByte;
-        }
+          logger::log(logger::TYPE_ERROR, "bluetooth", "can't parse packet : " + packetContent);
       }
     }
+
+    String getPacketContent() {
+      String packet = "";
+
+      while (true) {
+        if (Serial.available()) {
+
+          char newByte = Serial.read();
+
+          if (newByte = END_OF_PACKET) {
+            break;
+          } else {
+            packet += newByte;
+          }
+        }
+      }
+
+      return packet;
+    }
+
+    void readReceived() {
+      while (Serial.available()) {
+        char newByte = Serial.read();
+
+        switch (newByte) {
+          case ACKNOWLEDGE:
+            connection = true;
+            break;
+          case START_OF_PACKET:
+            processPacketContent(getPacketContent());
+            acknowledgePacket();
+            break;
+          default:
+            logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX byte : " + newByte);
+        }
+      }
+    }
+  }
+
+  void sendPacket(String packetContent) {
+    mySerial.print(START_OF_PACKET + packetContent + END_OF_PACKET);
+  }
+
+  void listen() {
+    while (connection) {
+      readReceived();
+    }
+  }
+
+  bool isConnected() {
+    return connection;
+  }
+
+  void testConnection() {
+    sendPacket(REQUEST_PACKET_CONTENT);
+    readReceived();
   }
 
   void setup() {
     mySerial.begin(9600);
-    transmit("AT+PIN:" + BLUETOOTH_PIN);
-
-    listeningThread.setInterval(LISTENING_INTERVAL);
-    listeningThread.onRun(readReceivedBytes);
-    listeningThread.ThreadName = "bluetooth";
-    controller::add(&listeningThread);
-  }
-
-  void listen() {
-    while (shouldListen) {
-      readReceivedBytes();
-    }
-  }
-
-  void transmit(String packet) {
-    mySerial.print(packet);
-  }
-
-  bool isConnected() {
-    return shouldListen;
+    mySerial.print("AT+PIN:" + BLUETOOTH_PIN); //Set PIN to be same as phone
   }
 }
 

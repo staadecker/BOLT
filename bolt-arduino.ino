@@ -25,30 +25,31 @@ void setup() {
   timer::setup();
   logger::log(logger::TYPE_INFO, "main", "Setup done");
 
-  makeStartSetting();
+  startReadyMode();
 }
 
 
 void loop() {
-  controller::run(); //Run controller
+  bluetooth::testConnection();
 
   if (bluetooth::isConnected()) { //If connected to bluetooth go in online mode
     flasher::stopFlashing(0);
     screen::display("CONNECTED");
 
     bluetooth::listen();
-    
-    makeStartSetting();
+
+    startReadyMode();
   }
   else if (button::isPressed(0)) { //If middle button pressed go in offline mode
     flasher::stopFlashing(0);
+    
     game::start();
-    makeStartSetting();
+    
+    startReadyMode();
   }
 }
 
-void makeStartSetting() {
+void startReadyMode() {
   screen::display("READY");
   flasher::flash(0);
 }
-

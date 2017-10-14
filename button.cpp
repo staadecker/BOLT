@@ -36,7 +36,7 @@ namespace button {
 
       if (buttonPressed > 64) {
         buttonPressed -= 129;
-        bluetooth::transmit("B" + String(buttonPressed));
+        bluetooth::sendPacket("B" + String(buttonPressed));
       }
     }
   }
