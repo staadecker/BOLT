@@ -13,6 +13,9 @@ namespace constants {
   const int P_LED_CLOCK = 12;
   const int P_LED_LATCH = 7;
 
+  const int P_SOFTWARE_SERIAL_TX = 9;
+  const int P_SOFTWARE_SERIAL_RX = 10;
+
   const bool IS_BUTTON_SHIELD_CONNECTED = false;
   const bool IS_SCREEN_CONNECTED = false;
 

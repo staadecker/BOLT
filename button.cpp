@@ -4,6 +4,7 @@
 #include "controller.h"
 #include "logger.h"
 #include "helper.h"
+#include "bluetooth.h"
 
 namespace button {
   namespace {
@@ -35,6 +36,7 @@ namespace button {
 
       if (buttonPressed > 64) {
         buttonPressed -= 129;
+        bluetooth::transmit("B" + String(buttonPressed));
       }
     }
   }
