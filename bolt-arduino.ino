@@ -36,10 +36,8 @@ void loop() {
     flasher::stopFlashing(0);
     screen::display("CONNECTED");
 
-    while (bluetooth::isConnected()) {
-      bluetooth::listen();
-    }
-
+    bluetooth::listen();
+    
     makeStartSetting();
   }
   else if (button::isPressed(0)) { //If middle button pressed go in offline mode

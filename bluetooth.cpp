@@ -27,22 +27,27 @@ namespace bluetooth {
 
     const String BLUETOOTH_PIN = "756945";
 
-    bool connection = false;
+    bool shouldListen = false;
+
+    String currentPacket = "";
 
     void parsePacket(String packet) {
 
-      switch (packet[0]) {
+      char command = packet[0];
+      String argument = packet.substring(1);
+
+      switch (command) {
         case C_DISCONNECT:
-          connection = false;
+          shouldListen = false;
           break;
         case C_TURN_ON_LED:
-          led::turnOn(packet.substring(1).toInt());
+          led::turnOn(argument.toInt());
           break;
         case C_TURN_OFF_LED:
-          led::turnOff(packet.substring(1).toInt());
+          led::turnOff(argument.toInt());
           break;
         case C_START:
-          connection = true;
+          shouldListen = true;
           break;
         default:
           logger::log(logger::TYPE_ERROR, "bluetooth", "unkown command : " + packet);
@@ -50,35 +55,38 @@ namespace bluetooth {
 
       transmit(ACKNOWLEDGE_COMMAND);
     }
+
+    void readReceivedBytes() {
+      char receivedByte;
+
+      while (mySerial.available() > 0) {
+
+        receivedByte = mySerial.read();
+
+        if (receivedByte == END_OF_PACKET) {
+          parsePacket(currentPacket);
+          currentPacket = "";
+        }
+        else {
+          currentPacket += receivedByte;
+        }
+      }
+    }
   }
 
   void setup() {
     mySerial.begin(9600);
     transmit("AT+PIN:" + BLUETOOTH_PIN);
-    
+
     listeningThread.setInterval(LISTENING_INTERVAL);
-    listeningThread.onRun(listen);
+    listeningThread.onRun(readReceivedBytes);
     listeningThread.ThreadName = "bluetooth";
     controller::add(&listeningThread);
   }
 
   void listen() {
-    char receivedByte;
-    String packet = "";
-
-    while (mySerial.available()) {
-
-      receivedByte = mySerial.read();
-
-      Serial.print(receivedByte);
-
-      if (receivedByte == END_OF_PACKET) {
-        parsePacket(packet);
-        packet = "";
-      }
-      else {
-        packet += receivedByte;
-      }
+    while (shouldListen) {
+      readReceivedBytes();
     }
   }
 
@@ -87,7 +95,7 @@ namespace bluetooth {
   }
 
   bool isConnected() {
-    return connection;
+    return shouldListen;
   }
 }
 
