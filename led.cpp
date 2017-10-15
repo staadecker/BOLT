@@ -6,6 +6,8 @@
 
 namespace led {
   namespace {
+    const uint8_t VCC_PWM = 105; //Value to adjust for optimal output voltage
+    
     //Array keeping track of states
     bool states[constants::NUMBER_OF_LEDS];
 
