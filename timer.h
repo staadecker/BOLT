@@ -12,7 +12,6 @@
 #define TIMER_H
 
 namespace timer {
-
   void start();
   void stop();
   void setup();

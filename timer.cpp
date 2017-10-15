@@ -10,7 +10,7 @@
 namespace timer {
   namespace {
 
-    Thread thread;
+    Thread thread = Thread();
 
     const int INTERVAL = 100;
 
@@ -37,7 +37,6 @@ namespace timer {
 
   //Setup the clock thread, enabled = false, add to controller
   void setup() {
-    thread = Thread();
     thread.ThreadName = "clock";
     thread.setInterval(INTERVAL);
     thread.enabled = false;
