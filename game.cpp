@@ -35,14 +35,15 @@ namespace game {
         //Turn on led and wait for button press
         led::turnOn(buttonNumber);
         
-        while(not button::isPressed(buttonNumber)){
+        while(not button::isPressed(buttonNumber) and millis() < endTime){
           controller::run();
+        }
+
+        if (millis() < endTime){
+          buttonsPressed ++; //Increment counter
         }
         
         led::turnOff(buttonNumber);
-
-        //Increment counter
-        buttonsPressed ++;
       }
     }
   }
