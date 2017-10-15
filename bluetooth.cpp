@@ -70,6 +70,8 @@ namespace bluetooth {
     }
 
     void readReceived() {
+      String unknown = "";
+
       while (Serial.available()) {
         char newByte = Serial.read();
 
@@ -82,8 +84,12 @@ namespace bluetooth {
             acknowledgePacket();
             break;
           default:
-            logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX byte : " + newByte);
+            unknown += newByte;
         }
+      }
+
+      if (not unknown.equals("")) {
+        logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX bytes : " + unknown);
       }
     }
   }
