@@ -49,10 +49,13 @@ namespace button {
 
     //If button pressed is the button to check return true
     if (buttonPressed == buttonToCheck) {
-      buttonPressed = BUTTON_NONE;
       return true;
     }
     return false;
+  }
+
+  void clearLast() {
+    buttonPressed = BUTTON_NONE;
   }
 
   void setup() {

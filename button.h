@@ -6,6 +6,7 @@
 
 namespace button {
   bool isPressed(uint8_t buttonToCheck);
+  void clearLast();
   void setup();
 }
 

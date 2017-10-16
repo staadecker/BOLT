@@ -26,12 +26,11 @@ namespace game {
 
     void runMain() {
       while (millis() < endTime) {
+        
+        int buttonNumber = random(0, constants::NUMBER_OF_LEDS - 1);  //Generate random button
 
-        //Generate random button
-        int buttonNumber = random(0, constants::NUMBER_OF_LEDS - 1);
-
-        //Turn on led and wait for button press
-        led::turnOn(buttonNumber);
+        button::clearLast();
+        led::turnOn(buttonNumber);  //Turn on led and wait for button press
         
         while(not button::isPressed(buttonNumber) and millis() < endTime){
           timer::checkUpdateDisplay();

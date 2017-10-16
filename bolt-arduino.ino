@@ -37,7 +37,8 @@ void loop() {
 
     startReadyMode();
   }
-  else if (button::isPressed(0)) { //If middle button pressed go in offline mode
+  
+  if (button::isPressed(0)) { //If middle button pressed go in offline mode
     flasher::stopFlashing(0);
 
     game::start();
@@ -47,6 +48,7 @@ void loop() {
 }
 
 void startReadyMode() {
+  button::clearLast();
   screen::display("READY");
   flasher::startFlashing(0);
 }
