@@ -26,7 +26,7 @@ void setup() {
 
 
 void loop() {
-  
+  flasher::checkFlash(); // Will flash if should flash
   bluetooth::readReceived();
   
   if (bluetooth::shouldGoOnline()) { //If connected to bluetooth go in online mode
@@ -44,8 +44,6 @@ void loop() {
 
     startReadyMode();
   }
-
-  flasher::checkFlash(); // Will flash if should flash
 }
 
 void startReadyMode() {
