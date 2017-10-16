@@ -14,6 +14,7 @@
 namespace timer {
   void start();
   void stop();
+  void run();
   void setup();
 }
 

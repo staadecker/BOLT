@@ -1,7 +1,6 @@
 #include "flasher.h"
 
 #include <Thread.h>
-#include "controller.h"
 #include "logger.h"
 #include "led.h"
 #include "const.h"
@@ -42,10 +41,13 @@ namespace flasher {
     led::turnOff(ledNumber);
   }
 
+  void run(){
+    flasher_thread.run();
+  }
+
   void setup() {
     flasher_thread.setInterval(FLASHER_INTERVAL);
     flasher_thread.onRun(callback);
     flasher_thread.ThreadName = "flasher";
-    controller::add(&flasher_thread);
   }
 }

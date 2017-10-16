@@ -1,9 +1,7 @@
 #include "button.h"
 
 #include "const.h"
-#include "controller.h"
 #include "logger.h"
-#include "helper.h"
 #include "bluetooth.h"
 
 namespace button {
@@ -45,7 +43,7 @@ namespace button {
   bool isPressed(uint8_t buttonToCheck) {
     //If not button shield wait two seconds and return true
     if (not constants::IS_BUTTON_SHIELD_CONNECTED) {
-      helper::waitTime(2000);
+      delay(2000);
       return true;
     }
 

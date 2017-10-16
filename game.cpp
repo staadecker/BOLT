@@ -6,8 +6,6 @@
 #include "timer.h"
 #include "const.h"
 #include "logger.h"
-#include "helper.h"
-#include "controller.h"
 
 namespace game {
   namespace {
@@ -19,11 +17,11 @@ namespace game {
 
     void countDown() {
       screen::display("3");
-      helper::waitTime(1000);
+      delay(1000);
       screen::display("2");
-      helper::waitTime(1000);
+      delay(1000);
       screen::display("1");
-      helper::waitTime(1000);
+      delay(1000);
     }
 
     void runMain() {
@@ -36,7 +34,7 @@ namespace game {
         led::turnOn(buttonNumber);
         
         while(not button::isPressed(buttonNumber) and millis() < endTime){
-          controller::run();
+          timer::run();
         }
 
         if (millis() < endTime){

@@ -4,10 +4,8 @@
 #include "game.h"
 #include "timer.h"
 #include "const.h"
-#include "controller.h"
 #include "flasher.h"
 #include "logger.h"
-#include "helper.h"
 #include "bluetooth.h"
 
 
@@ -30,6 +28,7 @@ void setup() {
 
 
 void loop() {
+  
   bluetooth::readReceived();
   
   if (bluetooth::shouldGoOnline()) { //If connected to bluetooth go in online mode
@@ -48,7 +47,7 @@ void loop() {
     startReadyMode();
   }
 
-  controller::run(); // Will flash led
+  flasher::run(); // Will flash led
 }
 
 void startReadyMode() {

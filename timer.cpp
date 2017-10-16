@@ -1,7 +1,6 @@
 #include "timer.h"
 
 #include "screen.h"
-#include "controller.h"
 #include "const.h"
 #include "game.h"
 #include "logger.h"
@@ -34,6 +33,9 @@ namespace timer {
     thread.enabled = false;
   }
 
+  void run(){
+    thread.run();
+  }
 
   //Setup the clock thread, enabled = false, add to controller
   void setup() {
@@ -41,7 +43,6 @@ namespace timer {
     thread.setInterval(INTERVAL);
     thread.enabled = false;
     thread.onRun(callback);
-    controller::add(&thread);
   }
 
 }

@@ -1,6 +1,5 @@
 #include "bluetooth.h"
 
-#include "controller.h"
 #include "const.h"
 #include "led.h"
 #include "logger.h"
@@ -30,7 +29,7 @@ namespace bluetooth {
 
     bool goOnline = false;
 
-    unsigned long timeAtLastByte;
+    
 
     void acknowledgePacket() {
       mySerial.print(ACKNOWLEDGE);
@@ -61,6 +60,8 @@ namespace bluetooth {
     String getPacketContent() {
       String packet = "";
 
+      unsigned long timeAtLastByte = millis();
+
       while (millis() < timeAtLastByte + PACKET_TIMEOUT) {
         if (Serial.available()) {
 
@@ -75,7 +76,7 @@ namespace bluetooth {
         }
       }
       logger::log(logger::TYPE_WARNING, "bluetooth", "Timout while reading packet content");
-      return String(C_END); // If ended because off timeout disconnect
+      return String(C_END); // If while loop ended because off timeout, end game
     }
   }
 
@@ -84,7 +85,6 @@ namespace bluetooth {
 
     while (Serial.available()) {
       char newByte = Serial.read();
-      timeAtLastByte = millis();
 
       switch (newByte) {
         case ACKNOWLEDGE:
