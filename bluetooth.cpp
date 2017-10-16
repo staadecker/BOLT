@@ -6,6 +6,7 @@
 #include "logger.h"
 
 #include <SoftwareSerial.h>
+#include <Thread.h>
 
 namespace bluetooth {
   namespace {
@@ -17,15 +18,19 @@ namespace bluetooth {
 
     const String REQUEST_PACKET_CONTENT = "R";
 
-    const char C_DISCONNECT = 0x44; //"D"
+    const char C_END = 0x45; //"D"
+    const char C_START = 0x53; //"S"
     const char C_TURN_ON_LED = 0x4C; //"L"
     const char C_TURN_OFF_LED = 0x4F; //"O"
 
+    const unsigned long PACKET_TIMEOUT = 1000;
+    const int TEST_CONNECTION_INTERVAL = 2000;
+
     const String BLUETOOTH_PIN = "756945";
 
-    const int CONNECTION_INTERVAL = 1000;
+    bool goOnline = false;
 
-    bool connection = false;
+    unsigned long timeAtLastByte;
 
     void acknowledgePacket() {
       mySerial.print(ACKNOWLEDGE);
@@ -36,8 +41,11 @@ namespace bluetooth {
       String argument = packetContent.substring(1);
 
       switch (command) {
-        case C_DISCONNECT:
-          connection = false;
+        case C_END:
+          goOnline = false;
+          break;
+        case C_START:
+          goOnline = true;
           break;
         case C_TURN_ON_LED:
           led::turnOn(argument.toInt());
@@ -53,44 +61,53 @@ namespace bluetooth {
     String getPacketContent() {
       String packet = "";
 
-      while (true) {
+      while (millis() < timeAtLastByte + PACKET_TIMEOUT) {
         if (Serial.available()) {
 
           char newByte = Serial.read();
+          timeAtLastByte = millis();
 
-          if (newByte = END_OF_PACKET) {
-            break;
+          if (newByte == END_OF_PACKET) {
+            return packet;
           } else {
             packet += newByte;
           }
         }
       }
+      logger::log(logger::TYPE_WARNING, "bluetooth", "Timout while reading packet content");
+      return String(C_END); // If ended because off timeout disconnect
+    }
+  }
 
-      return packet;
+  void readReceived() {
+    String unknown = "";
+
+    while (Serial.available()) {
+      char newByte = Serial.read();
+      timeAtLastByte = millis();
+
+      switch (newByte) {
+        case ACKNOWLEDGE:
+          //TODO
+          break;
+        case START_OF_PACKET:
+          processPacketContent(getPacketContent());
+          acknowledgePacket();
+          break;
+        default:
+          unknown += newByte;
+      }
     }
 
-    void readReceived() {
-      String unknown = "";
+    if (not unknown.equals("")) {
+      logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX bytes : " + unknown);
+    }
+  }
 
-      while (Serial.available()) {
-        char newByte = Serial.read();
 
-        switch (newByte) {
-          case ACKNOWLEDGE:
-            connection = true;
-            break;
-          case START_OF_PACKET:
-            processPacketContent(getPacketContent());
-            acknowledgePacket();
-            break;
-          default:
-            unknown += newByte;
-        }
-      }
-
-      if (not unknown.equals("")) {
-        logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX bytes : " + unknown);
-      }
+  void listen() {
+    while (goOnline) {
+      readReceived();
     }
   }
 
@@ -98,19 +115,8 @@ namespace bluetooth {
     mySerial.print(START_OF_PACKET + packetContent + END_OF_PACKET);
   }
 
-  void listen() {
-    while (connection) {
-      readReceived();
-    }
-  }
-
-  bool isConnected() {
-    return connection;
-  }
-
-  void testConnection() {
-    sendPacket(REQUEST_PACKET_CONTENT);
-    readReceived();
+  bool shouldGoOnline() {
+    return goOnline;
   }
 
   void setup() {
@@ -118,6 +124,3 @@ namespace bluetooth {
     mySerial.print("AT+PIN:" + BLUETOOTH_PIN); //Set PIN to be same as phone
   }
 }
-
-
-

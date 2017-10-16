@@ -4,12 +4,13 @@
 #include <Arduino.h>
 
 namespace bluetooth {
-
-  void sendPacket(String packet);
+  
   void listen();
 
-  bool isConnected();
-  void testConnection();
+  bool shouldGoOnline();
+
+  void readReceived();
+  void sendPacket(String packetContent);
   void setup();
 }
 

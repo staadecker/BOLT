@@ -30,11 +30,11 @@ void setup() {
 
 
 void loop() {
-  bluetooth::testConnection();
-
-  if (bluetooth::isConnected()) { //If connected to bluetooth go in online mode
+  bluetooth::readReceived();
+  
+  if (bluetooth::shouldGoOnline()) { //If connected to bluetooth go in online mode
     flasher::stopFlashing(0);
-    screen::display("CONNECTED");
+    screen::display("ONLINE");
 
     bluetooth::listen();
 
@@ -42,11 +42,13 @@ void loop() {
   }
   else if (button::isPressed(0)) { //If middle button pressed go in offline mode
     flasher::stopFlashing(0);
-    
+
     game::start();
-    
+
     startReadyMode();
   }
+
+  controller::run(); // Will flash led
 }
 
 void startReadyMode() {
