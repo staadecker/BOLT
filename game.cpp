@@ -34,7 +34,7 @@ namespace game {
         led::turnOn(buttonNumber);
         
         while(not button::isPressed(buttonNumber) and millis() < endTime){
-          timer::run();
+          timer::checkUpdateDisplay();
         }
 
         if (millis() < endTime){
@@ -61,9 +61,7 @@ namespace game {
     
     endTime = GAME_TIME + millis();
 
-    timer::start();
     runMain();
-    timer::stop();
 
     screen::display(String(buttonsPressed) + " buttons pressed");
   }

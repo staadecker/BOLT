@@ -5,7 +5,6 @@
 #include "logger.h"
 
 #include <SoftwareSerial.h>
-#include <Thread.h>
 
 namespace bluetooth {
   namespace {

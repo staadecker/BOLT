@@ -1,38 +1,38 @@
 #include "flasher.h"
 
-#include <Thread.h>
 #include "logger.h"
 #include "led.h"
 #include "const.h"
 
 namespace flasher {
   namespace {
-    const int FLASHER_INTERVAL = 1000;
+    const unsigned int FLASHER_INTERVAL = 1000;
 
     bool flashing[constants::NUMBER_OF_LEDS];
 
     bool currentFlashingState = LOW;
+    
+    unsigned long nextRun = millis();
 
-    Thread flasher_thread = Thread();
-
-    void callback() {
+    void flash() {
       logger::log(logger::TYPE_DEBUG, "flasher", "flasher thread called");
 
       currentFlashingState = !currentFlashingState;
 
       for (uint8_t led = 0 ; led < constants::NUMBER_OF_LEDS ; led++) {
         if (flashing[led]) {
-          if(currentFlashingState){
+          if (currentFlashingState) {
             led::turnOn(led);
-          } else{
+          } else {
             led::turnOff(led);
           }
         }
       }
+      nextRun = millis() + FLASHER_INTERVAL;
     }
   }
 
-  void flash(uint8_t ledNumber) {
+  void startFlashing(uint8_t ledNumber) {
     flashing[ledNumber] = true;
   }
 
@@ -41,13 +41,9 @@ namespace flasher {
     led::turnOff(ledNumber);
   }
 
-  void run(){
-    flasher_thread.run();
-  }
-
-  void setup() {
-    flasher_thread.setInterval(FLASHER_INTERVAL);
-    flasher_thread.onRun(callback);
-    flasher_thread.ThreadName = "flasher";
+  void checkFlash() {
+    if (millis() > nextRun) {
+      flash();
+    }
   }
 }

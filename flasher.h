@@ -1,13 +1,12 @@
 #ifndef FLASHER_H
 #define FLASHER_H
 
-#include <Thread.h>
+#include <Arduino.h>
 
 namespace flasher {
-  void flash(uint8_t ledNumber);
+  void startFlashing(uint8_t ledNumber);
   void stopFlashing(uint8_t ledNumber);
-  void run();
-  void setup();
+  void checkFlash();
 }
 
 #endif

@@ -12,10 +12,7 @@
 #define TIMER_H
 
 namespace timer {
-  void start();
-  void stop();
-  void run();
-  void setup();
+  void checkUpdateDisplay();
 }
 
 #endif

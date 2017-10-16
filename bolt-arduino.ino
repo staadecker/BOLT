@@ -19,8 +19,6 @@ void setup() {
   bluetooth::setup();
   button::setup();
   led::setup();
-  flasher::setup();
-  timer::setup();
   logger::log(logger::TYPE_INFO, "main", "Setup done");
 
   startReadyMode();
@@ -47,10 +45,10 @@ void loop() {
     startReadyMode();
   }
 
-  flasher::run(); // Will flash led
+  flasher::checkFlash(); // Will flash if should flash
 }
 
 void startReadyMode() {
   screen::display("READY");
-  flasher::flash(0);
+  flasher::startFlashing(0);
 }
