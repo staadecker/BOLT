@@ -31,6 +31,6 @@ Receive : Acknowledge (ASCII 6)
 | Command byte | Hexadecimal | Decimal | Name | Description | Argument |
 |--------------|-------------|---------|------|-------------|-----------|
 | S | 0x53 | 83 | Start | Called to start online game | None |
-| D | 0x44 | 68 | End | Called to end online game | None |
+| E | 0x45 | 69 | End | Called to end online game | None |
 | L | 0x4C | 76 | Led ON | Called to turn on led | Number of LED to turn on (between 0-63)|
 | O | 0x4F | 79 | Led OFF | Called to turn off led | Number of LED to turn off (between 0-63)|
