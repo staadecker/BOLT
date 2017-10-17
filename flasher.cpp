@@ -28,6 +28,7 @@ namespace flasher {
           }
         }
       }
+      led::shiftOut();
       nextRun = millis() + FLASHER_INTERVAL;
     }
   }
@@ -39,6 +40,7 @@ namespace flasher {
   void stopFlashing(uint8_t ledNumber) {
     flashing[ledNumber] = false;
     led::turnOff(ledNumber);
+    led::shiftOut();
   }
 
   void checkFlash() {

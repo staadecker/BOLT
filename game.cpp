@@ -31,6 +31,7 @@ namespace game {
 
         button::clearLast();
         led::turnOn(buttonNumber);  //Turn on led and wait for button press
+        led::shiftOut();
         
         while(not button::isPressed(buttonNumber) and millis() < endTime){
           timer::checkUpdateDisplay();

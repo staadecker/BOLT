@@ -20,11 +20,12 @@ namespace bluetooth {
     const char C_START = 0x53; //"S"
     const char C_TURN_ON_LED = 0x4C; //"L"
     const char C_TURN_OFF_LED = 0x4F; //"O"
+    const char C_SHIFT_OUT = 0x57; //"W"
 
     const unsigned long PACKET_TIMEOUT = 1000;
     const unsigned int ACKNOWLEDGE_TIMEOUT = 2000;
     const long NO_TIMEOUT = -1;
-    
+
     const int TEST_CONNECTION_INTERVAL = 2000;
 
     const String BLUETOOTH_PIN = "756945";
@@ -51,14 +52,14 @@ namespace bluetooth {
           case C_END:
             connection = false;
             break;
-          case C_START:
-            connection = true;
-            break;
           case C_TURN_ON_LED:
             led::turnOn(argument.toInt());
             break;
           case C_TURN_OFF_LED:
             led::turnOff(argument.toInt());
+            break;
+          case C_SHIFT_OUT:
+            led::shiftOut();
             break;
           default:
             logger::log(logger::TYPE_ERROR, "bluetooth", "can't parse packet : " + packetContent);

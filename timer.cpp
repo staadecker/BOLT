@@ -9,7 +9,7 @@ namespace timer {
   namespace {
     const int INTERVAL = 100;
     
-    long lastUpdate;
+    unsigned long lastUpdate = 0;
 
     void updateDisplay() {
       screen::display(String(game::getRemainingTime()));

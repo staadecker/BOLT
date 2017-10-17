@@ -10,6 +10,7 @@ namespace led {
   void setup();
   void turnOn(uint8_t ledNumber);
   void turnOff(uint8_t ledNumber);
+  void shiftOut();
 }
 
 #endif
