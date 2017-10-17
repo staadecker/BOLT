@@ -32,9 +32,12 @@ namespace button {
         while (digitalRead(constants::P_BUTTON_CLOCK) == HIGH);
       }
 
+      buttonPressed -= 1;
+      
       if (buttonPressed > 64) {
-        buttonPressed -= 129;
+        buttonPressed -= 128;
         bluetooth::sendPacket(bluetooth::C_BUTTON_PRESS + String(buttonPressed));
+        logger::log(logger::TYPE_INFO, "button", "Button pressed : " + String(buttonPressed));
       }
     }
   }

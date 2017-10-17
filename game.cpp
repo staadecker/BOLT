@@ -9,11 +9,11 @@
 
 namespace game {
   namespace {
-    const unsigned long GAME_TIME = 3000;
+    const unsigned long GAME_TIME = 30000;
     
     unsigned long endTime;
     
-    unsigned int buttonsPressed = 0;
+    unsigned int buttonsPressed;
 
     void countDown() {
       screen::display("3");
@@ -27,7 +27,7 @@ namespace game {
     void runMain() {
       while (millis() < endTime) {
         
-        int buttonNumber = random(0, constants::NUMBER_OF_LEDS - 1);  //Generate random button
+        int buttonNumber = random(0, constants::NUMBER_OF_LEDS);  //Generate random button
 
         button::clearLast();
         led::turnOn(buttonNumber);  //Turn on led and wait for button press
@@ -59,6 +59,7 @@ namespace game {
   void start() {
     countDown();
     
+    buttonsPressed = 0;
     endTime = GAME_TIME + millis();
 
     runMain();

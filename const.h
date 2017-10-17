@@ -16,7 +16,7 @@ namespace constants {
   const int P_SOFTWARE_SERIAL_TX = 9;
   const int P_SOFTWARE_SERIAL_RX = 10;
 
-  const bool IS_BUTTON_SHIELD_CONNECTED = false;
+  const bool IS_BUTTON_SHIELD_CONNECTED = true;
   const bool IS_SCREEN_CONNECTED = false;
 
   const uint8_t NUMBER_OF_LEDS = 16;

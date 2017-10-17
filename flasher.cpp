@@ -1,6 +1,5 @@
 #include "flasher.h"
 
-#include "logger.h"
 #include "led.h"
 #include "const.h"
 
@@ -15,8 +14,6 @@ namespace flasher {
     unsigned long nextRun = millis();
 
     void flash() {
-      logger::log(logger::TYPE_DEBUG, "flasher", "flasher thread called");
-
       currentFlashingState = !currentFlashingState;
 
       for (uint8_t led = 0 ; led < constants::NUMBER_OF_LEDS ; led++) {

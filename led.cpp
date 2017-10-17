@@ -37,13 +37,13 @@ namespace led {
   }
 
   void turnOn(uint8_t ledNumber) {
-    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(ledNumber) + "ON");
+    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(ledNumber) + " ON");
 
     states[ledNumber] = HIGH;
   }
 
   void turnOff(uint8_t ledNumber) {
-    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(ledNumber) + "OFF");
+    logger::log(logger::TYPE_INFO, "led", "Set led number " + String(ledNumber) + " OFF");
 
     states[ledNumber] = LOW;
   }
