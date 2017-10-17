@@ -14,19 +14,15 @@ namespace bluetooth {
     const char END_OF_PACKET = 0x03;  //End of text
     const char ACKNOWLEDGE = 0x06; //Acknowledge
 
-    const String REQUEST_PACKET_CONTENT = "R";
-
-    const char C_END = 0x45; //"D"
-    const char C_START = 0x53; //"S"
-    const char C_TURN_ON_LED = 0x4C; //"L"
-    const char C_TURN_OFF_LED = 0x4F; //"O"
-    const char C_SHIFT_OUT = 0x57; //"W"
+    const char C_BEGIN = 0x42; //"B"
+    const char C_END = 0x45; //"E"
+    const char C_TURN_OFF_LED = 0x49; //"I"
+    const char C_TURN_ON_LED = 0x4F; //"O"
+    const char C_SHIFT_OUT = 0x53; //"S"
 
     const unsigned long PACKET_TIMEOUT = 1000;
     const unsigned int ACKNOWLEDGE_TIMEOUT = 2000;
     const long NO_TIMEOUT = -1;
-
-    const int TEST_CONNECTION_INTERVAL = 2000;
 
     const String BLUETOOTH_PIN = "756945";
 
@@ -42,7 +38,7 @@ namespace bluetooth {
       char command = packetContent[0];
       String argument = packetContent.substring(1);
 
-      if (command = C_START) {
+      if (command = C_BEGIN) {
         connection = true;
         acknowledgePacket();
       }
