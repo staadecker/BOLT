@@ -8,22 +8,17 @@
 namespace timer {
   namespace {
     const int INTERVAL = 100;
-
-    unsigned long nextRun = millis();
-
-    String formatMillis(uint32_t milliSeconds) {
-      return String(milliSeconds);
-    }
+    
+    long lastUpdate;
 
     void updateDisplay() {
-      logger::log(logger::TYPE_DEBUG, "clock", "clock thread called");
-      screen::display(formatMillis(game::getRemainingTime()));
-      nextRun = millis() + INTERVAL;
+      screen::display(String(game::getRemainingTime()));
+      lastUpdate = millis();
     }
   }
 
   void checkUpdateDisplay(){
-    if (millis() > nextRun){
+    if (millis() > lastUpdate + INTERVAL){
       updateDisplay();
     }
   }
