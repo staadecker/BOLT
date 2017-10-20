@@ -7,37 +7,31 @@
 namespace button {
   namespace {
     //Stores the value of the button pressed or depressed
-    const uint8_t BUTTON_NONE = 65;
-    volatile uint8_t buttonPressed = BUTTON_NONE;
+    const int8_t BUTTON_NONE = -1;
+    volatile int8_t buttonPressed = BUTTON_NONE;
 
     //Method to call when the the interrupt pin is falling
     void isr() {
 
-      buttonPressed = 0;
+      uint8_t button = 0;
 
       for (int i = 0; i < 8; i++) {
 
-        //Wait for clock to go high
-        while (digitalRead(constants::P_BUTTON_CLOCK) == LOW);
+        while (digitalRead(constants::P_BUTTON_CLOCK) == LOW);  //Wait for clock to go high
 
-        //If value is high add one
-        buttonPressed = buttonPressed + digitalRead(constants::P_BUTTON_DATA);
+        buttonPressed = buttonPressed + digitalRead(constants::P_BUTTON_DATA);  //If value is high add one
 
         //If not last time in loop, shift bits
         if (i != 7) {
           buttonPressed = buttonPressed << 1;
         }
 
-        //Wait for clock to go low
-        while (digitalRead(constants::P_BUTTON_CLOCK) == HIGH);
+        while (digitalRead(constants::P_BUTTON_CLOCK) == HIGH);  //Wait for clock to go low
       }
 
-      buttonPressed -= 1;
-      
-      if (buttonPressed > 64) {
-        buttonPressed -= 128;
+      if (button > 64) {  // If button pressed
+        buttonPressed = button - 129 ; 
         bluetooth::sendPacket(bluetooth::C_BUTTON_PRESS + String(buttonPressed));
-        logger::log(logger::TYPE_INFO, "button", "Button pressed : " + String(buttonPressed));
       }
     }
   }
