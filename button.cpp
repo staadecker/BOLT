@@ -19,11 +19,11 @@ namespace button {
 
         while (digitalRead(constants::P_BUTTON_CLOCK) == LOW);  //Wait for clock to go high
 
-        buttonPressed = buttonPressed + digitalRead(constants::P_BUTTON_DATA);  //If value is high add one
+        button = button + digitalRead(constants::P_BUTTON_DATA);  //If value is high add one
 
         //If not last time in loop, shift bits
         if (i != 7) {
-          buttonPressed = buttonPressed << 1;
+          button = button << 1;
         }
 
         while (digitalRead(constants::P_BUTTON_CLOCK) == HIGH);  //Wait for clock to go low
