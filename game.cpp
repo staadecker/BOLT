@@ -11,9 +11,7 @@ namespace game {
   namespace {
     const unsigned long GAME_TIME = 30000;
     
-    unsigned long endTime;
-    
-    unsigned int buttonsPressed;
+    unsigned long startTime;
 
     void countDown() {
       screen::display("3");
@@ -24,8 +22,11 @@ namespace game {
       delay(1000);
     }
 
-    void runMain() {
-      while (millis() < endTime) {
+    unsigned long runMain() {
+
+      uint8_t buttonsPressed = 0;
+      
+      while (millis() < startTime + GAME_TIME) {
         
         int buttonNumber = random(0, constants::NUMBER_OF_LEDS);  //Generate random button
 
@@ -33,21 +34,25 @@ namespace game {
         led::turnOn(buttonNumber);  //Turn on led and wait for button press
         led::shiftOut();
         
-        while(not button::isPressed(buttonNumber) and millis() < endTime){
+        while(not button::isPressed(buttonNumber) and millis() < startTime + GAME_TIME){
           timer::checkUpdateDisplay();
         }
 
-        if (millis() < endTime){
+        led::turnOff(buttonNumber);
+        
+        if (millis() < startTime + GAME_TIME){
           buttonsPressed ++; //Increment counter
+        } else {
+          return (millis() - startTime)/buttonsPressed;
         }
         
-        led::turnOff(buttonNumber);
+        
       }
     }
   }
 
   unsigned long getRemainingTime() {
-    unsigned long remainingTime = endTime - millis();
+    unsigned long remainingTime = startTime + GAME_TIME - millis();
 
     if (remainingTime > 0) {
       return remainingTime;
@@ -59,11 +64,10 @@ namespace game {
   void start() {
     countDown();
     
-    buttonsPressed = 0;
-    endTime = GAME_TIME + millis();
+    startTime = millis();
 
-    runMain();
+    unsigned long averageReactionSpeed = runMain();
 
-    screen::display(String(buttonsPressed) + " buttons pressed");
+    screen::display(String(averageReactionSpeed) + " average speed in millis");
   }
 }

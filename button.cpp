@@ -28,9 +28,9 @@ namespace button {
 
         while (digitalRead(constants::P_BUTTON_CLOCK) == HIGH);  //Wait for clock to go low
       }
-
+      
       if (button > 64) {  // If button pressed
-        buttonPressed = button - 129 ; 
+        buttonPressed = button - 129 ;
         bluetooth::sendPacket(bluetooth::C_BUTTON_PRESS + String(buttonPressed));
       }
     }
