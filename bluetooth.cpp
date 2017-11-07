@@ -8,7 +8,7 @@
 
 namespace bluetooth {
   namespace {
-    SoftwareSerial mySerial(constants::P_SOFTWARE_SERIAL_RX, constants::P_SOFTWARE_SERIAL_TX);
+    SoftwareSerial BT(constants::P_SOFTWARE_SERIAL_RX, constants::P_SOFTWARE_SERIAL_TX);
 
     const char START_OF_PACKET = 0x02;  //Start of text
     const char END_OF_PACKET = 0x03;  //End of text
@@ -24,14 +24,14 @@ namespace bluetooth {
     const unsigned int ACKNOWLEDGE_TIMEOUT = 2000;
     const long NO_TIMEOUT = -1;
 
-    const String BLUETOOTH_PIN = "756945";
+    const char BLUETOOTH_PIN[4] = "1234";
 
     bool connection = false;
 
     volatile long acknowledgeTimeout = NO_TIMEOUT;
 
     void acknowledgePacket() {
-      mySerial.print(ACKNOWLEDGE);
+      BT.write(ACKNOWLEDGE);
     }
 
     void processPacketContent(String packetContent) {
@@ -102,6 +102,7 @@ namespace bluetooth {
           break;
         default:
           unknown += newByte;
+          delay(10);
       }
     }
 
@@ -121,7 +122,12 @@ namespace bluetooth {
   }
 
   void sendPacket(String packetContent) {
-    mySerial.print(START_OF_PACKET + packetContent + END_OF_PACKET);
+    BT.write(START_OF_PACKET);
+    for (int i = 0 ; i < packetContent.length(); i++) {
+      BT.write(packetContent.charAt(i));
+    }
+    BT.write(END_OF_PACKET);
+    
     if (acknowledgeTimeout == NO_TIMEOUT) {
       acknowledgeTimeout = millis() + ACKNOWLEDGE_TIMEOUT;
     }
@@ -132,7 +138,11 @@ namespace bluetooth {
   }
 
   void setup() {
-    mySerial.begin(9600);
-    mySerial.print("AT+PIN:" + BLUETOOTH_PIN); //Set PIN to be same as phone
+    BT.begin(9600);
+    //Set PIN to be same as phone
+    BT.write("AT+PIN:");
+    BT.write(BLUETOOTH_PIN);
+    BT.write(13);
+    BT.write(10);
   }
 }

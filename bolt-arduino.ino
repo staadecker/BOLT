@@ -10,7 +10,7 @@
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   //Generate new random seed
   randomSeed(analogRead(0));
