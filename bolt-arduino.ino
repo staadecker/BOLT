@@ -3,7 +3,7 @@
 #include "screen.h"
 #include "game.h"
 #include "timer.h"
-#include "const.h"
+#include "constants.h"
 #include "flasher.h"
 #include "logger.h"
 #include "bluetooth.h"

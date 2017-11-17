@@ -1,7 +1,6 @@
 #include "timer.h"
 
 #include "screen.h"
-#include "const.h"
 #include "game.h"
 #include "logger.h"
 

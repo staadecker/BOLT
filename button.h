@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 namespace button {
+  void buttonPressedCallback(int8_t buttonNumber);
   bool isPressed(uint8_t buttonToCheck);
   void clearLast();
   void setup();

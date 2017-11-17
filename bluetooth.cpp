@@ -1,8 +1,9 @@
 #include "bluetooth.h"
 
-#include "const.h"
+#include "constants.h"
 #include "led.h"
 #include "logger.h"
+#include "button.h"
 
 #include <SoftwareSerial.h>
 
@@ -32,6 +33,7 @@ namespace bluetooth {
 
     void acknowledgePacket() {
       BT.write(ACKNOWLEDGE);
+      logger::log(logger::TYPE_INFO, "bluetooth", "Acknowledged packet");
     }
 
     void processPacketContent(String packetContent) {
@@ -70,12 +72,13 @@ namespace bluetooth {
       unsigned long timeAtLastByte = millis();
 
       while (millis() < timeAtLastByte + PACKET_TIMEOUT) {
-        if (Serial.available()) {
+        if (BT.available()) {
 
-          char newByte = Serial.read();
+          char newByte = BT.read();
           timeAtLastByte = millis();
 
           if (newByte == END_OF_PACKET) {
+            logger::log(logger::TYPE_INFO, "bluetooth", "Received packet : " + packet);
             return packet;
           } else {
             packet += newByte;
@@ -87,14 +90,31 @@ namespace bluetooth {
     }
   }
 
+  void checkSerial() {
+    while (Serial.available()){
+      if (Serial.read() == 67){
+        delay(10);
+        String buttonNumber = "";
+        while (Serial.available()){
+          buttonNumber += (char) Serial.read();
+          delay(10);
+        }
+        Serial.println("Got packet : " + buttonNumber);
+        button::buttonPressedCallback(buttonNumber.toInt());
+      }
+    }
+  }
+
   void readReceived() {
     String unknown = "";
 
-    while (Serial.available()) {
-      char newByte = Serial.read();
+    while (BT.available()) {
+      char newByte = BT.read();
+
 
       switch (newByte) {
         case ACKNOWLEDGE:
+          logger::log(logger::TYPE_INFO, "bluetooth", "Received acknowledge");
           acknowledgeTimeout = NO_TIMEOUT;
           break;
         case START_OF_PACKET:
@@ -109,6 +129,10 @@ namespace bluetooth {
     if (not unknown.equals("")) {
       logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX bytes : " + unknown);
     }
+
+    if(constants::IS_DEBUGGING){
+      checkSerial();
+    }
   }
 
   void listen() {
@@ -122,12 +146,13 @@ namespace bluetooth {
   }
 
   void sendPacket(String packetContent) {
+    logger::log(logger::TYPE_INFO, "bluetooth", "Sent packet : " + packetContent);
     BT.write(START_OF_PACKET);
     for (int i = 0 ; i < packetContent.length(); i++) {
       BT.write(packetContent.charAt(i));
     }
     BT.write(END_OF_PACKET);
-    
+
     if (acknowledgeTimeout == NO_TIMEOUT) {
       acknowledgeTimeout = millis() + ACKNOWLEDGE_TIMEOUT;
     }

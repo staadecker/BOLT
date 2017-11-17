@@ -1,6 +1,6 @@
 #include "button.h"
 
-#include "const.h"
+#include "constants.h"
 #include "logger.h"
 #include "bluetooth.h"
 
@@ -30,16 +30,20 @@ namespace button {
       }
       
       if (button > 64) {  // If button pressed
-        buttonPressed = button - 129 ;
-        bluetooth::sendPacket(bluetooth::C_BUTTON_PRESS + String(buttonPressed));
+        buttonPressedCallback(button - 129);
       }
     }
+  }
+
+  void buttonPressedCallback(int8_t buttonNumber){
+    buttonPressed = buttonNumber;
+    bluetooth::sendPacket(bluetooth::C_BUTTON_PRESS + String(buttonPressed));
   }
 
   //Checks whether the button got pressed
   bool isPressed(uint8_t buttonToCheck) {
     //If not button shield wait two seconds and return true
-    if (not constants::IS_BUTTON_SHIELD_CONNECTED) {
+    if (not constants::IS_BUTTON_SHIELD_CONNECTED  and not constants::IS_DEBUGGING) {
       delay(2000);
       return true;
     }
