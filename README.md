@@ -20,6 +20,12 @@ The Arduino controls 64 buttons using a 64-button shield. It controls the LEDs u
 
 The code that runs on the Arduino controls the LED's and registers the button presses. It also allows a device to connect via bluetooth. This device will be informed of button presses and will be able to send commands to turn the LEDs on or off.
 
+### Modes
+
+The code has two modes.
+1. An offline simple reaction time tester than can be run without any phone.
+2. A online mode where the arduino simply acts as a bridge between the buttons/LEDs and the phone.
+
 ### Bluetooth
 
-The bluetooth communcations use packets. The packets are sent to and from the Arduino. Packet's format is defined in the `bluetooth-protocol.md` file.
+To communicate via bluetooth the Arduino and phone send each other packets. The packet's format is defined in the `bluetooth-protocol.md` file.
