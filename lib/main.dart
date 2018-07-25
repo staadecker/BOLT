@@ -54,6 +54,13 @@ class _ConnectionStateState extends State<StatefulApp> {
     );
   }
 
+
+  @override
+  void dispose() {
+    bluetoothManager.disconnect();
+    super.dispose();
+  }
+
   void _onStateUpdate(String message) {
     setState(() {
       state = message;
