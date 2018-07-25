@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_blue/flutter_blue.dart';
 
 class BluetoothManager {
+  static const VERSION = 5;
   static const MAC_ADDRESS = "D4:36:39:BF:82:AB";
   static const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
   static const CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
@@ -16,9 +19,14 @@ class BluetoothManager {
 
     connecting = true;
 
+    updateStatus("Version: $VERSION");
+
+    await new Future.delayed(const Duration(seconds: 1));
+
     var flutterBlue = FlutterBlue.instance;
 
-    var bluetoothState = await flutterBlue.state; //Get the current state of the bluetooth
+    var bluetoothState =
+        await flutterBlue.state; //Get the current state of the bluetooth
 
     //If bluetooth adapter not on abort
     if (bluetoothState != BluetoothState.on) {
@@ -55,26 +63,27 @@ class BluetoothManager {
 
     //Connect to the device
     //Abort if can't connect
-    BluetoothDeviceState state = await flutterBlue
+    flutterBlue
         .connect(scanResult.device, timeout: Duration(seconds: 10))
-        .singleWhere((result) => result == BluetoothDeviceState.connected)
-        .catchError((error) {
-      updateStatus("Could not connect to board");
-      connecting = false;
-    }, test: (e) => e is StateError);
+        .listen((result) async {
+      print("Result ${result.toString()}");
+      if (result == BluetoothDeviceState.connected) {
+        print("Is connected");
+        print((await scanResult.device.state));
 
-    if (!connecting) return;
+        if (!connecting) return;
 
-    updateStatus("Connected. Discovering services...");
-    //print((await scanResult.device.state));
-    print(state);
+        updateStatus("Connected. Discovering services...");
+        print((await scanResult.device.state));
 
-    bluetoothCharacteristic = (await scanResult.device.discoverServices())
-        .singleWhere((service) => service.uuid == Guid(SERVICE_UUID))
-        .characteristics
-        .singleWhere((chara) => chara.uuid == Guid(CHARACTERISTIC_UUID));
+        bluetoothCharacteristic = (await scanResult.device.discoverServices())
+            .singleWhere((service) => service.uuid == Guid(SERVICE_UUID))
+            .characteristics
+            .singleWhere((chara) => chara.uuid == Guid(CHARACTERISTIC_UUID));
 
-    updateStatus("Done connecting.");
-    connected = true;
+        updateStatus("Done connecting.");
+        connected = true;
+      }
+    });
   }
 }
