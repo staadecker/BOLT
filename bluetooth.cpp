@@ -126,7 +126,11 @@ namespace bluetooth {
         }
       }
 
-      if (not unknown.equals("")) {
+      if (unknown.equals("OK+LOST")) {
+        connection = false;
+      } else if (unknown.equals("OK+CONN")) {
+        connection = true;
+      } else if (not unknown.equals("")) {
         logger::log(logger::TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
       }
     }
