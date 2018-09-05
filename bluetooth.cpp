@@ -27,7 +27,7 @@ namespace bluetooth {
 
     const String BLUETOOTH_PIN = "1234";
 
-    bool connection = false;
+    bool connection = true; //Assume already connected. On setup will change to false if no response to the AT command is received.
 
     volatile long acknowledgeTimeout = NO_TIMEOUT;
 
@@ -92,14 +92,14 @@ namespace bluetooth {
 
   void checkSerial() {
     while (Serial.available()) {
-      if (Serial.read() == 67) {
+      if (Serial.read() == 80) {
         delay(10);
         String buttonNumber = "";
         while (Serial.available()) {
           buttonNumber += (char) Serial.read();
           delay(10);
         }
-        Serial.println("Got packet : " + buttonNumber);
+        Serial.println("Debug button pressed : " + buttonNumber);
         button::buttonPressedCallback(buttonNumber.toInt());
       }
     }
@@ -130,6 +130,8 @@ namespace bluetooth {
         connection = false;
       } else if (unknown.equals("OK+CONN")) {
         connection = true;
+      } else if (unknown.equals("OK+Set:1")) {
+        connection = false; 
       } else if (not unknown.equals("")) {
         logger::log(logger::TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
       }
@@ -146,6 +148,7 @@ namespace bluetooth {
       if (acknowledgeTimeout != NO_TIMEOUT and millis() > acknowledgeTimeout) {
         connection = false;
         acknowledgeTimeout = NO_TIMEOUT;
+        logger::log(logger::TYPE_WARNING, "bluetooth", "No acknowledge received. Disconnecting");
       }
     }
   }
@@ -164,11 +167,13 @@ namespace bluetooth {
   }
 
   bool shouldGoOnline() {
+    readReceived();
     return connection;
   }
 
   void setup() {
     BT.begin(9600);
     BT.write("AT+NOTI1");
+    delay(1000); //Delay to allow chip to send response to AT command to see if device is connected
   }
 }

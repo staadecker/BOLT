@@ -21,15 +21,15 @@ void setup() {
   led::setup();
   logger::log(logger::TYPE_INFO, "main", "Setup done");
 
-  startReadyMode();
+  if (not bluetooth::shouldGoOnline()) {
+    startReadyMode(); //Unless already connected start ready mode
+  }
 }
 
 
 void loop() {
-  flasher::checkFlash(); // Will flash if should flash
-  bluetooth::readReceived();
-  
-  if (bluetooth::shouldGoOnline()) { //If connected to bluetooth go in online mode
+  //If connected to bluetooth go in online mode
+  if (bluetooth::shouldGoOnline()) {
     flasher::stopFlashing(0);
     screen::display("ONLINE");
 
@@ -37,14 +37,17 @@ void loop() {
 
     startReadyMode();
   }
-  
-  if (button::isPressed(0)) { //If middle button pressed go in offline mode
+
+  //If middle button pressed go in offline mode
+  if (button::isPressed(0)) {
     flasher::stopFlashing(0);
 
     game::start();
 
     startReadyMode();
   }
+
+  flasher::checkFlash(); // Will flash if should flash
 }
 
 void startReadyMode() {
