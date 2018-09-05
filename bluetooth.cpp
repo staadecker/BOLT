@@ -37,6 +37,10 @@ namespace bluetooth {
     }
 
     void processPacketContent(String packetContent) {
+      if (packetContent.equals("")) {
+        return;
+      }
+
       char command = packetContent[0];
       String argument = packetContent.substring(1);
 
@@ -69,13 +73,14 @@ namespace bluetooth {
     String getPacketContent() {
       String packet = "";
 
-      unsigned long timeAtLastByte = millis();
+      unsigned long timeOutTime = millis() + PACKET_TIMEOUT;
 
-      while (millis() < timeAtLastByte + PACKET_TIMEOUT) {
+      while (millis() < timeOutTime) {
         if (BT.available()) {
-
           char newByte = BT.read();
-          timeAtLastByte = millis();
+          delay(10);
+
+          timeOutTime = millis() + PACKET_TIMEOUT;
 
           if (newByte == END_OF_PACKET) {
             logger::log(logger::TYPE_INFO, "bluetooth", "Received packet : " + packet);
@@ -85,15 +90,17 @@ namespace bluetooth {
           }
         }
       }
-      logger::log(logger::TYPE_WARNING, "bluetooth", "Timout while reading packet content");
-      return String(C_END); // If while loop ended because off timeout, end game
+
+      logger::log(logger::TYPE_WARNING, "bluetooth", "Timout while reading packet content: " + packet);
+      return ""; // If while loop ended because off timeout, end game
     }
   }
 
   void checkSerial() {
     while (Serial.available()) {
-      if (Serial.read() == 80) {
-        delay(10);
+      int value = Serial.read();
+      delay(10);
+      if (value == 80) {
         String buttonNumber = "";
         while (Serial.available()) {
           buttonNumber += (char) Serial.read();
@@ -111,6 +118,7 @@ namespace bluetooth {
 
       while (BT.available()) {
         char newByte = char(BT.read());
+        delay(10);
 
         switch (newByte) {
           case ACKNOWLEDGE:
@@ -122,7 +130,7 @@ namespace bluetooth {
             break;
           default:
             unknown += newByte;
-            delay(10);
+
         }
       }
 
@@ -131,7 +139,7 @@ namespace bluetooth {
       } else if (unknown.equals("OK+CONN")) {
         connection = true;
       } else if (unknown.equals("OK+Set:1")) {
-        connection = false; 
+        connection = false;
       } else if (not unknown.equals("")) {
         logger::log(logger::TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
       }
