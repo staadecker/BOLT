@@ -25,7 +25,7 @@ namespace bluetooth {
     const unsigned int ACKNOWLEDGE_TIMEOUT = 2000;
     const long NO_TIMEOUT = -1;
 
-    const char BLUETOOTH_PIN[4] = "1234";
+    const String BLUETOOTH_PIN = "1234";
 
     bool connection = false;
 
@@ -91,11 +91,11 @@ namespace bluetooth {
   }
 
   void checkSerial() {
-    while (Serial.available()){
-      if (Serial.read() == 67){
+    while (Serial.available()) {
+      if (Serial.read() == 67) {
         delay(10);
         String buttonNumber = "";
-        while (Serial.available()){
+        while (Serial.available()) {
           buttonNumber += (char) Serial.read();
           delay(10);
         }
@@ -106,31 +106,32 @@ namespace bluetooth {
   }
 
   void readReceived() {
-    String unknown = "";
+    if (BT.available()) {
+      String unknown = "";
 
-    while (BT.available()) {
-      char newByte = BT.read();
+      while (BT.available()) {
+        char newByte = char(BT.read());
 
+        switch (newByte) {
+          case ACKNOWLEDGE:
+            logger::log(logger::TYPE_INFO, "bluetooth", "Received acknowledge");
+            acknowledgeTimeout = NO_TIMEOUT;
+            break;
+          case START_OF_PACKET:
+            processPacketContent(getPacketContent());
+            break;
+          default:
+            unknown += newByte;
+            delay(10);
+        }
+      }
 
-      switch (newByte) {
-        case ACKNOWLEDGE:
-          logger::log(logger::TYPE_INFO, "bluetooth", "Received acknowledge");
-          acknowledgeTimeout = NO_TIMEOUT;
-          break;
-        case START_OF_PACKET:
-          processPacketContent(getPacketContent());
-          break;
-        default:
-          unknown += newByte;
-          delay(10);
+      if (not unknown.equals("")) {
+        logger::log(logger::TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
       }
     }
 
-    if (not unknown.equals("")) {
-      logger::log(logger::TYPE_WARNING, "bluetooth", "Unknown RX bytes : " + unknown);
-    }
-
-    if(constants::IS_DEBUGGING){
+    if (constants::IS_DEBUGGING) {
       checkSerial();
     }
   }
@@ -164,10 +165,6 @@ namespace bluetooth {
 
   void setup() {
     BT.begin(9600);
-    //Set PIN to be same as phone
-    BT.write("AT+PIN:");
-    BT.write(BLUETOOTH_PIN);
-    BT.write(13);
-    BT.write(10);
+    BT.write("AT+NOTI1");
   }
 }
