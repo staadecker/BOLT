@@ -23,10 +23,10 @@ class MyApp extends StatelessWidget {
 
 class StatefulApp extends StatefulWidget {
   @override
-  _ConnectionStateState createState() => _ConnectionStateState();
+  _StatefulAppState createState() => _StatefulAppState();
 }
 
-class _ConnectionStateState extends State<StatefulApp> {
+class _StatefulAppState extends State<StatefulApp> {
   String state = "";
 
   BluetoothManager bluetoothManager = BluetoothManager();
@@ -37,6 +37,12 @@ class _ConnectionStateState extends State<StatefulApp> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          RaisedButton(
+            child: Text("Do action"),
+            onPressed: () {
+              bluetoothManager.doAction();
+            },
+          ),
           Padding(
               padding: EdgeInsets.all(10.0),
               child: RaisedButton(
