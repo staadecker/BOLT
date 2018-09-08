@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'game.dart';
+import 'gamescreen.dart';
 
 void main() => runApp(new MyApp());
 
@@ -11,9 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Bolt',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
+        primaryColor: Colors.red,
+        accentColor: Colors.redAccent
       ),
       home: Scaffold(
           appBar: AppBar(
@@ -37,13 +39,13 @@ class _StatefulAppState extends State<StatefulApp> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           RaisedButton(
-            child: Text("Connect"),
+            child: Text("Play"),
             onPressed: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => GamePage()));
             },
           ),
-          Text("Build: $BUILD_NUMBER")
+          Text("Build number: $BUILD_NUMBER")
         ],
       ),
     );

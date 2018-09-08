@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'bluetooth.dart';
 
@@ -19,7 +21,12 @@ class StatefulGamePage extends StatefulWidget {
 }
 
 class _StatefulGamePageState extends State<StatefulGamePage> {
-  BluetoothTransmitter bluetoothManager;
+  BluetoothTransmitter bluetoothTransmitter;
+  StreamSubscription buttonPressSubscription;
+  String time = "30.00";
+  Timer tickTimer;
+  Stopwatch stopwatch = Stopwatch();
+  final Duration gameDuration = Duration(seconds: 30);
 
   @override
   void initState() {
@@ -30,33 +37,55 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
   }
 
   _showConnectingDialog() async {
-    BluetoothConnection bluetoothConnection = await showDialog<BluetoothConnection>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ConnectingDialog();
-        });
+    BluetoothConnection bluetoothConnection =
+        await showDialog<BluetoothConnection>(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return ConnectingDialog();
+            });
 
+    //Canceled connection go back to home screen
     if (bluetoothConnection == null) Navigator.pop(context);
 
-    bluetoothManager = BluetoothTransmitter(bluetoothConnection);
+    bluetoothTransmitter = BluetoothTransmitter(bluetoothConnection);
+    buttonPressSubscription =
+        bluetoothTransmitter.buttonPresses.listen(firstButtonPressed);
+  }
+
+  void firstButtonPressed(int buttonNumber) {
+    buttonPressSubscription.cancel();
+    stopwatch.start();
+    tickTimer = new Timer.periodic(Duration(milliseconds: 30), tick);
   }
 
   @override
   void dispose() {
-    bluetoothManager?.disconnect();
+    bluetoothTransmitter?.disconnect();
     super.dispose();
+  }
+
+  void tick(Timer timer) {
+    if (stopwatch.elapsed > gameDuration) tickTimer.cancel();
+    else {
+      setState(() {
+        time = (gameDuration - stopwatch.elapsed).inMilliseconds
+            .toString();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text("Time"),
-          RaisedButton(
-              onPressed: () => bluetoothManager?.doAction(),
-              child: Text("Do action"))
+          Text(time, style: TextStyle(fontSize: 96.0)),
+          Text(
+            "Press any button to start!",
+            style: TextStyle(fontSize: 16.0),
+          )
         ],
       ),
     );
@@ -65,8 +94,7 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
 
 class ConnectingDialog extends StatefulWidget {
   @override
-  _ConnectingDialogState createState() =>
-      _ConnectingDialogState();
+  _ConnectingDialogState createState() => _ConnectingDialogState();
 }
 
 class _ConnectingDialogState extends State<ConnectingDialog> {
@@ -103,6 +131,12 @@ class _ConnectingDialogState extends State<ConnectingDialog> {
   }
 
   @override
+  void dispose() {
+    _bluetoothConnector.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
         title: Text("Connecting to board"),
@@ -127,8 +161,7 @@ class _ConnectingDialogState extends State<ConnectingDialog> {
                 )
               : null,
           FlatButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"))
+              onPressed: () => Navigator.pop(context), child: Text("Cancel"))
         ]);
   }
 }

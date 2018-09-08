@@ -109,15 +109,23 @@ class BluetoothConnector {
           .add(ConnectorUpdate("Could not connect", ConnectorStatus.failed));
     });
   }
+
+  void dispose() {
+    _statusUpdatesController.close();
+  }
 }
 
 class BluetoothTransmitter {
   BluetoothConnection _bluetoothConnection;
 
+  final StreamController<int> _buttonPressStreamController =
+      new StreamController();
+
+  Stream<int> get buttonPresses => _buttonPressStreamController.stream;
+
   BluetoothTransmitter(this._bluetoothConnection) {
     //Register device for connection changes
     _bluetoothConnection.device.onStateChanged().listen(deviceStateChanged);
-
     _bluetoothConnection.device
         .onValueChanged(_bluetoothConnection.bluetoothCharacteristic)
         .listen(valueChanged);
@@ -130,16 +138,24 @@ class BluetoothTransmitter {
   void valueChanged(List<int> values) {
     if (ListEquality().equals(values, _BluetoothMessage.acknowledge.value))
       print("Received acknowledge");
-    else if (values[0] == _BluetoothMessage.startCode) {
-      print("Received packet: " +
-          String.fromCharCodes(values, 1, values.length - 1));
+    else if (values[0] == _BluetoothMessage.startCode &&
+        values[values.length - 1] == _BluetoothMessage.endCode) {
+      switch (values[1]) {
+        case 80:
+          int buttonNumber = int.parse(String.fromCharCodes(values, 2, 3));
+          print("Received button pressed : $buttonNumber");
+          _buttonPressStreamController.add(buttonNumber);
+          break;
+        default:
+          print("Unknown packet content received");
+      }
       writePacket(_BluetoothMessage.acknowledge);
     } else
       print("Value changed : " + values.toString());
   }
 
   void writePacket(_BluetoothMessage packet) async {
-    print(packet.value);
+    print("Sending content: $packet");
     await _bluetoothConnection.device.writeCharacteristic(
         _bluetoothConnection.bluetoothCharacteristic, packet.value);
   }
@@ -147,6 +163,7 @@ class BluetoothTransmitter {
   void disconnect() {
     writePacket(_BluetoothMessage.end);
     _bluetoothConnection.disconnect();
+    _buttonPressStreamController.close();
   }
 
   void doAction() {
@@ -178,4 +195,9 @@ class _BluetoothMessage {
 
   static _BluetoothMessage turnLedOff(ledNumber) =>
       createPacket("I" + ledNumber.toString());
+
+  @override
+  String toString() {
+    return _value.toString();
+  }
 }
