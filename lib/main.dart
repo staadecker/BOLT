@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'bluetooth.dart';
+
+import 'game.dart';
 
 void main() => runApp(new MyApp());
+
+const String BUILD_NUMBER = "1";
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -27,10 +30,6 @@ class StatefulApp extends StatefulWidget {
 }
 
 class _StatefulAppState extends State<StatefulApp> {
-  String state = "";
-
-  BluetoothManager bluetoothManager = BluetoothManager();
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -38,38 +37,15 @@ class _StatefulAppState extends State<StatefulApp> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           RaisedButton(
-            child: Text("Do action"),
+            child: Text("Connect"),
             onPressed: () {
-              bluetoothManager.doAction();
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => GamePage()));
             },
           ),
-          Padding(
-              padding: EdgeInsets.all(10.0),
-              child: RaisedButton(
-                child: Text("Connect"),
-                onPressed: () {
-                  bluetoothManager.connect(_onStateUpdate);
-                },
-              )),
-          Text(
-            state,
-            textAlign: TextAlign.center,
-          )
+          Text("Build: $BUILD_NUMBER")
         ],
       ),
     );
-  }
-
-
-  @override
-  void dispose() {
-    bluetoothManager.disconnect();
-    super.dispose();
-  }
-
-  void _onStateUpdate(String message) {
-    setState(() {
-      state = message;
-    });
   }
 }

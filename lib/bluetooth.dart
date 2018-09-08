@@ -3,83 +3,127 @@ import 'dart:async';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:collection/collection.dart';
 
-class BluetoothManager {
-  static const VERSION = 2;
-
-  static const MAC_ADDRESS = "D4:36:39:BF:82:AB";
-  static const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
-  static const CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
-
+class BluetoothConnection {
   BluetoothCharacteristic bluetoothCharacteristic;
   StreamSubscription<BluetoothDeviceState> connection;
   BluetoothDevice device;
 
-  void connect(void updateStatus(String state)) async {
-    //TODO Remove. Only used for debugging
-    updateStatus("Version: $VERSION");
-    await new Future.delayed(const Duration(seconds: 1));
+  void disconnect() {
+    connection?.cancel();
+  }
+}
 
-    var flutterBlue = FlutterBlue.instance;
+enum ConnectorStatus { connecting, failed, connected }
+
+class ConnectorUpdate {
+  final String message;
+  final ConnectorStatus state;
+
+  ConnectorUpdate(this.message, this.state);
+}
+
+class BluetoothConnector {
+  static const _MAC_ADDRESS = "D4:36:39:BF:82:AB";
+  static const _SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
+  static const _CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+
+  BluetoothConnection bluetoothConnection = BluetoothConnection();
+
+  final StreamController<ConnectorUpdate> _statusUpdatesController =
+      StreamController();
+
+  //Stream of events when connecting to board
+  Stream<ConnectorUpdate> get statusStream => _statusUpdatesController.stream;
+
+  void connect() async {
+    FlutterBlue flutterBlue = FlutterBlue.instance;
 
     //Send message depending on adapter state
-    //Return if adapter not on
+    //Only continue if adapter is on
     switch (await flutterBlue.state) {
       case BluetoothState.on:
-        updateStatus("Scanning for board...");
+        _statusUpdatesController.add(ConnectorUpdate(
+            "Scanning for board...", ConnectorStatus.connecting));
         break;
       case BluetoothState.off:
-        updateStatus("Turn on bluetooth");
+        _statusUpdatesController
+            .add(ConnectorUpdate("Turn on bluetooth", ConnectorStatus.failed));
         return;
       case BluetoothState.unavailable:
-        updateStatus("Bluetooth LE is not available on this device");
+        _statusUpdatesController.add(ConnectorUpdate(
+            "Bluetooth LE is not available on this device",
+            ConnectorStatus.failed));
         return;
       default:
-        updateStatus("Bluetooth LE adapter is unkown");
-        return;
+        _statusUpdatesController.add(ConnectorUpdate(
+            "Bluetooth LE adapter is unkown", ConnectorStatus.failed));
     }
 
     //Scan for the board
     //Catch for error board not found
     bool noDeviceFound = false;
 
-    device = (await flutterBlue
+    bluetoothConnection.device = (await flutterBlue
             .scan(timeout: Duration(seconds: 10))
-            .firstWhere((result) => result.device.id.id == MAC_ADDRESS)
+            .firstWhere((result) => result.device.id.id == _MAC_ADDRESS)
             .catchError((error) {
-      updateStatus("Board not found.");
+      _statusUpdatesController
+          .add(ConnectorUpdate("Board not found.", ConnectorStatus.failed));
       noDeviceFound = true;
-    }, test: (e) => e is StateError))
+    }))
         .device;
 
     if (noDeviceFound) return;
 
-    device.onStateChanged().listen(deviceStateChanged);
-
-    updateStatus("Board found. Connecting...");
+    _statusUpdatesController.add(ConnectorUpdate(
+        "Board found. Connecting...", ConnectorStatus.connecting));
 
     //Connect to the device
-    connection = flutterBlue
-        .connect(device, timeout: Duration(seconds: 10))
+    //Should not close stream until we want to disconnect
+    bluetoothConnection.connection = flutterBlue
+        .connect(bluetoothConnection.device, timeout: Duration(seconds: 10))
         .listen((result) async {
       if (result == BluetoothDeviceState.connected) {
-        updateStatus("Connected. Discovering services...");
+        _statusUpdatesController.add(ConnectorUpdate(
+            "Connected. Discovering services...", ConnectorStatus.connecting));
 
         //When connected get characteristic
-        bluetoothCharacteristic = (await device.discoverServices())
-            .singleWhere((service) => service.uuid == Guid(SERVICE_UUID))
+        bluetoothConnection.bluetoothCharacteristic = (await bluetoothConnection
+                .device
+                .discoverServices())
+            .singleWhere((service) => service.uuid == Guid(_SERVICE_UUID))
             .characteristics
-            .singleWhere((chara) => chara.uuid == Guid(CHARACTERISTIC_UUID));
+            .singleWhere((chara) => chara.uuid == Guid(_CHARACTERISTIC_UUID));
 
         //Setup on notify for change
-        await device.setNotifyValue(bluetoothCharacteristic, true);
-        device.onValueChanged(bluetoothCharacteristic).listen(valueChanged);
+        await bluetoothConnection.device
+            .setNotifyValue(bluetoothConnection.bluetoothCharacteristic, true);
 
-        updateStatus("Done connecting.");
+        _statusUpdatesController.add(
+            ConnectorUpdate("Done connecting.", ConnectorStatus.connected));
       }
     });
+
+    bluetoothConnection.connection.onDone(() {
+      _statusUpdatesController
+          .add(ConnectorUpdate("Could not connect", ConnectorStatus.failed));
+    });
+  }
+}
+
+class BluetoothTransmitter {
+  BluetoothConnection _bluetoothConnection;
+
+  BluetoothTransmitter(this._bluetoothConnection) {
+    //Register device for connection changes
+    _bluetoothConnection.device.onStateChanged().listen(deviceStateChanged);
+
+    _bluetoothConnection.device
+        .onValueChanged(_bluetoothConnection.bluetoothCharacteristic)
+        .listen(valueChanged);
   }
 
-  void deviceStateChanged(BluetoothDeviceState state){
+  void deviceStateChanged(BluetoothDeviceState state) {
     print("State changed to: " + state.toString());
   }
 
@@ -96,12 +140,13 @@ class BluetoothManager {
 
   void writePacket(_BluetoothMessage packet) async {
     print(packet.value);
-    await device?.writeCharacteristic(bluetoothCharacteristic, packet.value);
+    await _bluetoothConnection.device.writeCharacteristic(
+        _bluetoothConnection.bluetoothCharacteristic, packet.value);
   }
 
   void disconnect() {
     writePacket(_BluetoothMessage.end);
-    connection?.cancel();
+    _bluetoothConnection.disconnect();
   }
 
   void doAction() {
