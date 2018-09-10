@@ -27,7 +27,7 @@ namespace bluetooth {
 
     const String BLUETOOTH_PIN = "1234";
 
-    bool connection = true; //Assume already connected. On setup will change to false if no response to the AT command is received.
+    bool isOnline = false;
 
     volatile long acknowledgeTimeout = NO_TIMEOUT;
 
@@ -44,15 +44,16 @@ namespace bluetooth {
       char command = packetContent[0];
       String argument = packetContent.substring(1);
 
-      if (command = C_BEGIN) {
-        connection = true;
+      if (command == C_BEGIN) {
+        isOnline = true;
         acknowledgePacket();
       }
 
-      else if (connection) {
+      //Only analyse packet if a connection is already made
+      else if (isOnline) {
         switch (command) {
           case C_END:
-            connection = false;
+            isOnline = false;
             break;
           case C_TURN_ON_LED:
             led::turnOn(argument.toInt());
@@ -66,6 +67,7 @@ namespace bluetooth {
           default:
             logger::log(logger::TYPE_ERROR, "bluetooth", "can't parse packet : " + packetContent);
         }
+
         acknowledgePacket();
       }
     }
@@ -135,11 +137,11 @@ namespace bluetooth {
       }
 
       if (unknown.equals("OK+LOST")) {
-        connection = false;
+        isOnline = false;
       } else if (unknown.equals("OK+CONN")) {
-        connection = true;
+        logger::log(logger::TYPE_INFO, "bluetooth", "A decive connected to the board");
       } else if (unknown.equals("OK+Set:1")) {
-        connection = false;
+        //Response from AT command. To ignore.
       } else if (not unknown.equals("")) {
         logger::log(logger::TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
       }
@@ -151,10 +153,10 @@ namespace bluetooth {
   }
 
   void listen() {
-    while (connection) {
+    while (isOnline) {
       readReceived();
       if (acknowledgeTimeout != NO_TIMEOUT and millis() > acknowledgeTimeout) {
-        connection = false;
+        isOnline = false;
         acknowledgeTimeout = NO_TIMEOUT;
         logger::log(logger::TYPE_WARNING, "bluetooth", "No acknowledge received. Disconnecting");
       }
@@ -176,7 +178,7 @@ namespace bluetooth {
 
   bool shouldGoOnline() {
     readReceived();
-    return connection;
+    return isOnline;
   }
 
   void setup() {
