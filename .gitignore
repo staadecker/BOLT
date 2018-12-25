@@ -1,10 +1,10 @@
 .DS_Store
-.dart_tool/
+bolt-mobile/dart_tool/
 
 .packages
-.pub/
+bolt-mobile/pub/
 
-build/
+bolt-mobile/build/
 
-.flutter-plugins
-.idea
+bolt-mobile/flutter-plugins
+bolt-mobile/.idea
