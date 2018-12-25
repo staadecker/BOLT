@@ -1,16 +1,4 @@
-# BOLT
-
-WARNING : This project is not finished or fully functionnal.
-
-## The project
-
-This repository contains the Arduino code for the BOLT project.
-
-BOLT is a machine that tests your reflex speed. The machine has buttons which contain embedded LEDs. When an LED turns on, the user must press the matching button. The machine then calculates the user's reflexes based on the time it took the user to press the button.
-
-The project has two components.
-1. The arduino that controls the buttons and LED's (this repository)
-2. An android phone which communicates with the Arduino and displays the results. See code [here](https://github.com/SUPERETDUPER/bolt-android).
+This folder contains the Arduino code for the BOLT project.
 
 ## The hardware setup
 
