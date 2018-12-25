@@ -8,4 +8,7 @@ The project has two components.
 - `bolt-aruino` : The arduino code that controls the buttons and LED's
 - `bolt-mobile` : The Flutter code that uses a phone to communicate with the Arduino and displays the results
 
+### Bluetooth
+
+To communicate the Arduino and phone send each other packets over bluetooth. The packets' format is defined in `bluetooth-protocol.md`.
 
