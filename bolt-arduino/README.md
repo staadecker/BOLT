@@ -1,3 +1,5 @@
+# Bolt-Arduino
+
 This folder contains the Arduino code for the BOLT project.
 
 ## The hardware setup
@@ -13,9 +15,5 @@ The code that runs on the Arduino controls the LED's and registers the button pr
 The code has two modes.
 1. An offline simple reaction time tester than can be run without any phone.
 2. A online mode where the arduino simply acts as a bridge between the buttons/LEDs and the phone.
-
-### Bluetooth
-
-To communicate via bluetooth the Arduino and phone send each other packets. The packet's format is defined in the `bluetooth-protocol.md` file.
 
 
