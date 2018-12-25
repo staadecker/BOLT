@@ -1,4 +1,4 @@
-# BOLT (Arduino)
+# BOLT
 
 WARNING : This project is not finished or fully functionnal.
 
@@ -29,4 +29,5 @@ The code has two modes.
 ### Bluetooth
 
 To communicate via bluetooth the Arduino and phone send each other packets. The packet's format is defined in the `bluetooth-protocol.md` file.
+
 
