@@ -5,14 +5,13 @@ void setup() {
   Serial.begin(9600);
 
   //Decide what you want to run.
-  
-  //main::runMain();
+  main::runMain();
   
   //tests::cycleLights();
   //tests::singleLights();
   //tests::printButtonPress();
   //tests::testButtonWithLED();
-  tests::allLightsTest();
+  //tests::allLightsTest();
 }
 
 //Loop not used since we just use a while loop in runMain();

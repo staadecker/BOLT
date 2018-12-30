@@ -15,6 +15,55 @@ void startReadyMode() {
   screen::display("READY");
   flasher::startFlashing(0);
 }
+
+void bootUpSequence() {
+  led::turnOn(0);
+  led::shiftOut();
+
+  delay(300);
+
+  led::turnOff(0);
+  for (int i = 1; i < 8; i++) {
+    led::turnOn(i);
+  }
+  led::shiftOut();
+
+  delay(180);
+
+  for (int i = 1; i < 8; i++) {
+    led::turnOff(i);
+  }
+  for (int i = 8; i < 16; i++) {
+    led::turnOn(i);
+  }
+  led::shiftOut();
+
+  delay(120);
+
+  for (int i = 8; i < 16; i++) {
+    led::turnOff(i);
+  }
+  for (int i = 16; i < 32; i++) {
+    led::turnOn(i);
+  }
+  led::shiftOut();
+
+  delay(50);
+
+  for (int i = 16; i < 32; i++) {
+    led::turnOff(i);
+  }
+  for (int i = 32; i < 64; i++) {
+    led::turnOn(i);
+  }
+  led::shiftOut();
+
+  for (int i = 0; i < 64; i++) {
+    led::turnOff(i);
+  }
+
+  led::shiftOut();
+}
 }
 
 void runMain() {
@@ -26,6 +75,8 @@ void runMain() {
   button::setup();
   led::setup();
   logger::log(logger::TYPE_INFO, "main", "Setup done");
+
+  bootUpSequence();
 
   if (not bluetooth::shouldGoOnline()) {
     startReadyMode(); //Unless already connected start ready mode
