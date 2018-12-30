@@ -43,6 +43,7 @@ namespace game {
         if (millis() < startTime + GAME_TIME){
           buttonsPressed ++; //Increment counter
         } else {
+          led::shiftOut();
           return (millis() - startTime)/buttonsPressed;
         }
         
@@ -69,5 +70,7 @@ namespace game {
     unsigned long averageReactionSpeed = runMain();
 
     screen::display(String(averageReactionSpeed) + " average speed in millis");
+    delay(2000);
+
   }
 }

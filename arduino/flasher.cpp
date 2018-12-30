@@ -5,7 +5,7 @@
 
 namespace flasher {
 namespace {
-const unsigned int FLASHER_INTERVAL = 1000;
+const unsigned int FLASHER_INTERVAL = 500;
 
 bool flashing[constants::NUMBER_OF_LEDS];
 

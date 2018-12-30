@@ -9,6 +9,7 @@ void singleLight(int shiftRegister, int value);
 
 void printButtonPress();
 void testButtonWithLED();
+void allLightsTest();
 }
 
 #endif

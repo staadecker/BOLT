@@ -30,6 +30,14 @@ void singleLight(int shiftRegister, int value) {
   led::shiftOut();
 }
 
+void allLightsTest(){
+  led::setup();
+  for(int i = 0 ; i< 64 ; i++){
+    led::turnOn(i);
+  }
+  led::shiftOut();
+}
+
 void printButtonPress() {
   button::setup();
   int buttonLastPressed = button::getButtonLastPressed();
