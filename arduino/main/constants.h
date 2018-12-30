@@ -20,7 +20,7 @@ namespace constants {
   const bool IS_SCREEN_CONNECTED = false;
   const bool IS_DEBUGGING = true;
 
-  const uint8_t NUMBER_OF_LEDS = 16;
+  const uint8_t NUMBER_OF_LEDS = 64;
 }
 
 #endif

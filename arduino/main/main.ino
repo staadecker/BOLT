@@ -39,13 +39,13 @@ void loop() {
   }
 
   //If middle button pressed go in offline mode
-  if (button::isPressed(0)) {
-    flasher::stopFlashing(0);
+  //if (button::isPressed(0)) {
+    //flasher::stopFlashing(0);
 
-    game::start();
+    //game::start();
 
-    startReadyMode();
-  }
+    //startReadyMode();
+  //}
 
   flasher::checkFlash(); // Will flash if should flash
 }

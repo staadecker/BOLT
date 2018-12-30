@@ -164,7 +164,7 @@ namespace bluetooth {
   }
 
   void sendPacket(String packetContent) {
-    logger::log(logger::TYPE_INFO, "bluetooth", "Sent packet : " + packetContent);
+    //logger::log(logger::TYPE_INFO, "bluetooth", "Sent packet : " + packetContent);
     BT.write(START_OF_PACKET);
     for (int i = 0 ; i < packetContent.length(); i++) {
       BT.write(packetContent.charAt(i));
