@@ -184,8 +184,10 @@ bool shouldGoOnline() {
 }
 
 void setup() {
-  BT.begin(9600);
-  BT.write("AT+NOTI1");
-  delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected
+  if (constants::IS_BLUETOOTH_CHIP_CONNECTED) {
+    BT.begin(9600);
+    BT.write("AT+NOTI1");
+    delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected
+  }
 }
 }

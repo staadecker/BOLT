@@ -43,7 +43,7 @@ void buttonPressedCallback(int8_t buttonNumber) {
 //Checks whether the button got pressed
 bool isPressed(uint8_t buttonToCheck) {
   //If not button shield wait two seconds and return true
-  if (not constants::IS_BUTTON_SHIELD_CONNECTED  and not constants::IS_DEBUGGING) {
+  if (not constants::IS_BUTTONS_CONNECTED  and not constants::IS_DEBUGGING) {
     delay(2000);
     return true;
   }

@@ -16,9 +16,10 @@ const int P_LED_LATCH = 7;
 const int P_SOFTWARE_SERIAL_TX = 10;
 const int P_SOFTWARE_SERIAL_RX = 9;
 
-const bool IS_BUTTON_SHIELD_CONNECTED = true;
+const bool IS_BUTTONS_CONNECTED = true;
 const bool IS_SCREEN_CONNECTED = false;
 const bool IS_DEBUGGING = true;
+const bool IS_BLUETOOTH_CHIP_CONNECTED = true;
 
 const uint8_t NUMBER_OF_LEDS = 64;
 }
