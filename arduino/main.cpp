@@ -16,58 +16,24 @@ void startReadyMode() {
   flasher::startFlashing(0);
 }
 
+// Makes chasing lights on the outer circle
 void bootUpSequence() {
-  led::turnOn(0);
-  led::shiftOut();
-
-  delay(300);
-
-  led::turnOff(0);
-  for (int i = 1; i < 8; i++) {
-    led::turnOn(i);
-  }
-  led::shiftOut();
-
-  delay(180);
-
-  for (int i = 1; i < 8; i++) {
-    led::turnOff(i);
-  }
-  for (int i = 8; i < 16; i++) {
-    led::turnOn(i);
-  }
-  led::shiftOut();
-
-  delay(120);
-
-  for (int i = 8; i < 16; i++) {
-    led::turnOff(i);
-  }
-  for (int i = 16; i < 32; i++) {
-    led::turnOn(i);
-  }
-  led::shiftOut();
-
-  delay(50);
-
-  for (int i = 16; i < 32; i++) {
-    led::turnOff(i);
-  }
   for (int i = 32; i < 64; i++) {
     led::turnOn(i);
+    led::shiftOut();
+    delay(70);
+    led::turnOff(i);
   }
-  led::shiftOut();
 
   for (int i = 0; i < 64; i++) {
     led::turnOff(i);
   }
-
   led::shiftOut();
 }
 }
 
 void runMain() {
-  //Generate new random seed
+  //Generate new random seed such that button sequence is different each time
   randomSeed(analogRead(0));
 
   //Setup
