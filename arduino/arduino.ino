@@ -13,4 +13,4 @@ void setup() {
 }
 
 //Loop not used since we just use a while loop in runMain();
-void loop(){}
+void loop() {}

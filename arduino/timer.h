@@ -12,7 +12,7 @@
 #define TIMER_H
 
 namespace timer {
-  void checkUpdateDisplay();
+void checkUpdateDisplay();
 }
 
 #endif

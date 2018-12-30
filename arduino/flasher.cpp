@@ -4,45 +4,45 @@
 #include "constants.h"
 
 namespace flasher {
-  namespace {
-    const unsigned int FLASHER_INTERVAL = 1000;
+namespace {
+const unsigned int FLASHER_INTERVAL = 1000;
 
-    bool flashing[constants::NUMBER_OF_LEDS];
+bool flashing[constants::NUMBER_OF_LEDS];
 
-    bool currentFlashingState = LOW;
-    
-    unsigned long nextRun = millis();
+bool currentFlashingState = LOW;
 
-    void flash() {
-      currentFlashingState = !currentFlashingState;
+unsigned long nextRun = millis();
 
-      for (uint8_t led = 0 ; led < constants::NUMBER_OF_LEDS ; led++) {
-        if (flashing[led]) {
-          if (currentFlashingState) {
-            led::turnOn(led);
-          } else {
-            led::turnOff(led);
-          }
-        }
+void flash() {
+  currentFlashingState = !currentFlashingState;
+
+  for (uint8_t led = 0 ; led < constants::NUMBER_OF_LEDS ; led++) {
+    if (flashing[led]) {
+      if (currentFlashingState) {
+        led::turnOn(led);
+      } else {
+        led::turnOff(led);
       }
-      led::shiftOut();
-      nextRun = millis() + FLASHER_INTERVAL;
     }
   }
+  led::shiftOut();
+  nextRun = millis() + FLASHER_INTERVAL;
+}
+}
 
-  void startFlashing(uint8_t ledNumber) {
-    flashing[ledNumber] = true;
-  }
+void startFlashing(uint8_t ledNumber) {
+  flashing[ledNumber] = true;
+}
 
-  void stopFlashing(uint8_t ledNumber) {
-    flashing[ledNumber] = false;
-    led::turnOff(ledNumber);
-    led::shiftOut();
-  }
+void stopFlashing(uint8_t ledNumber) {
+  flashing[ledNumber] = false;
+  led::turnOff(ledNumber);
+  led::shiftOut();
+}
 
-  void checkFlash() {
-    if (millis() > nextRun) {
-      flash();
-    }
+void checkFlash() {
+  if (millis() > nextRun) {
+    flash();
   }
+}
 }

@@ -11,7 +11,7 @@
 #include <Arduino.h>
 
 namespace main {
-  void runMain();
+void runMain();
 }
 
 #endif

@@ -5,6 +5,6 @@
 #include <Arduino.h>
 
 namespace screen {
-  void display(String message);
+void display(String message);
 }
 #endif

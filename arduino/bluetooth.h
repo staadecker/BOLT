@@ -5,15 +5,15 @@
 
 namespace bluetooth {
 
-  const char C_BUTTON_PRESS = 0x50; // "P"
-  
-  void listen();
+const char C_BUTTON_PRESS = 0x50; // "P"
 
-  bool shouldGoOnline();
+void listen();
 
-  void readReceived();
-  void sendPacket(String packetContent);
-  void setup();
+bool shouldGoOnline();
+
+void readReceived();
+void sendPacket(String packetContent);
+void setup();
 }
 
 #endif

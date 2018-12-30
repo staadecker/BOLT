@@ -2,12 +2,12 @@
 #define TESTS_H
 
 namespace tests {
-  void cycleLights();
+void cycleLights();
 
-  // To test light marked 3-4 on board use shiftRegister = 3 and value = 4
-  void singleLight(int shiftRegister, int value);
+// To test light marked 3-4 on board use shiftRegister = 3 and value = 4
+void singleLight(int shiftRegister, int value);
 
-  void printButtonPress();
+void printButtonPress();
 }
 
 #endif
