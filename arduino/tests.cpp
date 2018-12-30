@@ -41,4 +41,25 @@ void printButtonPress() {
     delay(10);
   }
 }
+
+void testButtonWithLED() {
+  button::setup();
+  led::setup();
+
+  int i = 0;
+
+  while (true) {
+    button::clearLast();
+    led::turnOn(i);
+    led::shiftOut();
+    while (not button::isPressed(i)) {
+    }
+
+    led::turnOff(i);
+    i++;
+    if (i == constants::NUMBER_OF_LEDS) {
+      i = 0;
+    }
+  }
+}
 }

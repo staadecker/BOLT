@@ -8,6 +8,7 @@ void cycleLights();
 void singleLight(int shiftRegister, int value);
 
 void printButtonPress();
+void testButtonWithLED();
 }
 
 #endif

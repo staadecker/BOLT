@@ -1,4 +1,4 @@
-t#include "game.h"
+#include "game.h"
 #include "main.h"
 #include "bluetooth.h"
 #include "button.h"

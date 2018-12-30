@@ -9,7 +9,8 @@ void setup() {
   //main::runMain();
   //tests::cycleLights();
   //tests::singleLights();
-  tests::printButtonPress();
+  //tests::printButtonPress();
+  //tests::testButtonWithLED();
 }
 
 //Loop not used since we just use a while loop in runMain();
