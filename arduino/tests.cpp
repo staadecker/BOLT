@@ -1,21 +1,12 @@
-#include "constants.h"
+#include "tests.h"
 #include "led.h"
+#include "constants.h"
 
-
-void setup() {
-  Serial.begin(9600);
-
-  // put your setup code here, to run once:
-  led::setup();
-
-  // testSingleLight();
-  cycleLights();
-}
-
-void loop() {
-}
-
+namespace tests {
+  
 void cycleLights() {
+  led::setup();
+  
   int DELAY = 1000;
 
   int i = 0;
@@ -32,10 +23,9 @@ void cycleLights() {
 }
 
 // To test light marked 3-4 on board use shiftRegister = 3 and value = 4
-void testSingleLight() {
-  int shiftRegister = 8;
-  int value = 8;
+void singleLight(int shiftRegister, int value) {
+  led::setup();
   led::turnOn(8 * (shiftRegister - 1) + (value - 1));
-
   led::shiftOut();
+}
 }
