@@ -6,9 +6,10 @@ void setup() {
 
   //Decide what you want to run.
   //main::runMain() for the main program or tests for a specific test
-  main::runMain();
+  //main::runMain();
   //tests::cycleLights();
   //tests::singleLights();
+  tests::printButtonPress();
 }
 
 //Loop not used since we just use a while loop in runMain();

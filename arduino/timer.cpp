@@ -11,7 +11,7 @@ namespace timer {
     unsigned long lastUpdate = 0;
 
     void updateDisplay() {
-      screen::display(String(game::getRemainingTime()));
+      //screen::display(String(game::getRemainingTime()));
       lastUpdate = millis();
     }
   }

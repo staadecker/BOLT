@@ -1,12 +1,13 @@
 #include "tests.h"
 #include "led.h"
 #include "constants.h"
+#include "button.h"
 
 namespace tests {
-  
+
 void cycleLights() {
   led::setup();
-  
+
   int DELAY = 1000;
 
   int i = 0;
@@ -27,5 +28,17 @@ void singleLight(int shiftRegister, int value) {
   led::setup();
   led::turnOn(8 * (shiftRegister - 1) + (value - 1));
   led::shiftOut();
+}
+
+void printButtonPress() {
+  button::setup();
+  int buttonLastPressed = button::getButtonLastPressed();
+  while (true) {
+    if (button::getButtonLastPressed() != buttonLastPressed) {
+      buttonLastPressed = button::getButtonLastPressed();
+      Serial.println("Pressed button: " + String(buttonLastPressed));
+    }
+    delay(10);
+  }
 }
 }

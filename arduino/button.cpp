@@ -59,6 +59,10 @@ namespace button {
     buttonPressed = BUTTON_NONE;
   }
 
+  int getButtonLastPressed(){
+    return buttonPressed;
+  }
+
   void setup() {
     attachInterrupt(digitalPinToInterrupt(constants::P_BUTTON_INTERRUPT), isr, FALLING); //Attach interrupt for 64 button shield
   }
