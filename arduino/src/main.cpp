@@ -1,15 +1,13 @@
-#include "game.h"
-#include "main.h"
-#include "bluetooth.h"
-#include "button.h"
-#include "led.h"
-#include "logger.h"
-#include "screen.h"
-#include "flasher.h"
+#include "lib/game.h"
+#include "lib/main.h"
+#include "lib/bluetooth.h"
+#include "lib/button.h"
+#include "lib/led.h"
+#include "lib/logger.h"
+#include "lib/screen.h"
+#include "lib/flasher.h"
 #include <Arduino.h>
 
-namespace main {
-namespace {
 void startReadyMode() {
   button::clearLast();
   screen::display("READY");
@@ -30,9 +28,8 @@ void bootUpSequence() {
   }
   led::shiftOut();
 }
-}
 
-void runMain() {
+void setup() {
   //Generate new random seed such that button sequence is different each time
   randomSeed(analogRead(0));
 
@@ -72,5 +69,7 @@ void runMain() {
 
     flasher::checkFlash(); // Will flash if should flash
   }
+
 }
-}
+
+void loop(){}

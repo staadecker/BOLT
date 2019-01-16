@@ -1,9 +1,13 @@
-#include "tests.h"
-#include "led.h"
-#include "constants.h"
-#include "button.h"
+#include "lib/led.h"
+#include "lib/constants.h"
+#include "lib/button.h"
+#include <Arduino.h>
 
-namespace tests {
+void setup(){
+
+}
+
+void loop(){}
 
 void cycleLights() {
   led::setup();
@@ -69,5 +73,4 @@ void testButtonWithLED() {
       i = 0;
     }
   }
-}
 }
