@@ -12,7 +12,7 @@ set(ARDUINO_AVR ${ARDUINO_PACKAGES}/hardware/avr/1.6.23)
 set(ARDUINO_AVRDUDE ${ARDUINO_PACKAGES}/tools/avrdude/6.3.0-arduino14)
 
 # LIST OF TARGETS
-set(TARGET_FILES src/main.cpp src/tests.cpp src/bluetooth-send-receive-test.cpp)
+set(TARGET_FILES main.cpp tests.cpp bluetooth-send-receive-test.cpp)
 set(TARGET_NAMES main test bluetooth-test)
 
 # BOARD SETTINGS
@@ -24,18 +24,22 @@ set(PROGRAMMER "stk500v1" CACHE STRING "Programmer Type")
 set(COMPILE_FLAGS "" CACHE STRING "Additional Compiler Flags")
 
 # SOURCE FILE LOCATIONS
-file(GLOB_RECURSE SRC_FILES src/*.cpp)
-message(${SRC_FILES})
+file(GLOB_RECURSE SRC_FILES lib/*.cpp)
+
 # Arduino libraries
 file(GLOB_RECURSE ARDUINO_CORE_SRC
         ${ARDUINO_AVR}/cores/arduino/*.c
-        ${ARDUINO_AVR}/cores/arduino/*.cpp)
+        ${ARDUINO_AVR}/cores/arduino/*.cpp
+        ${ARDUINO_AVR}/libraries/*.cpp
+        ${ARDUINO_AVR}/libraries/*.c)
 
 # Include directories
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${ARDUINO_AVR}/cores/arduino
+        ${ARDUINO_AVR}/cores/
         ${ARDUINO_AVR}/variants/${PIN_VARIANT}
+        ${ARDUINO_AVR}/libraries/SoftwareSerial/src
 )
 
 # Compiler suite specification

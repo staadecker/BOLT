@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <Arduino.h>
 
 //Enter AT commands in the Serial Monitor and get the results
 
