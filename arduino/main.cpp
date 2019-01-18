@@ -1,5 +1,4 @@
 #include "lib/game.h"
-#include "lib/main.h"
 #include "lib/bluetooth.h"
 #include "lib/button.h"
 #include "lib/led.h"
