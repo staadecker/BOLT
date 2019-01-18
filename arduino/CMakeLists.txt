@@ -1,5 +1,5 @@
 # Project name
-project(clion-arduino-demo)
+project(bolt)
 
 # CMake version
 cmake_minimum_required(VERSION 3.0)
