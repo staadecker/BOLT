@@ -4,14 +4,14 @@
 #include <Arduino.h>
 #include "constants.h"
 
-class Led {
+class LedManager {
     const uint8_t VCC_PWM = 95; //Value to adjust for optimal 2V output voltage
 
     // Array keeping track of states
     uint8_t states[NUMBER_OF_LEDS] = {};
 
 public:
-    void setup();
+    LedManager();
 
     void turnOn(uint8_t ledNumber);
 

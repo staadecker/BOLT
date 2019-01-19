@@ -7,11 +7,16 @@ ButtonManager ButtonManager::buttonManager = ButtonManager();
 ButtonManager::ButtonManager() = default;
 
 void ButtonManager::setup() {
-    attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), isr, FALLING); //Attach interrupt for 64 button shield
+    attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), staticIsr,
+                    FALLING); //Attach interrupt for 64 button shield
 }
 
 ButtonManager ButtonManager::get() {
     return ButtonManager::buttonManager;
+}
+
+void ButtonManager::staticIsr() {
+    buttonManager.isr();
 }
 
 //Method to call when the the interrupt pin is falling
@@ -34,27 +39,16 @@ void ButtonManager::isr() {
     }
 
     if (button > 64) {  // If button pressed
-        buttonManager.buttonPressedCallback(button - uint8_t(129));
+        buttonPressed = button - uint8_t(129);
+        buttonWasPressed = true;
+        callback->call(buttonPressed);
     }
-}
-
-
-void ButtonManager::buttonPressedCallback(uint8_t buttonNumber) {
-    buttonPressed = buttonNumber;
-    buttonWasPressed = true;
-    callback->call(buttonPressed);
 }
 
 //Checks whether the button got pressed
 bool ButtonManager::isPressed(int buttonToCheck) {
-    //If not button shield wait two seconds and return true
-    if (not IS_BUTTONS_CONNECTED and not IS_DEBUGGING) {
-        delay(2000);
-        return true;
-    }
-
     //If button pressed is the button to check return true
-    return buttonWasPressed && buttonPressed == buttonToCheck;
+    return buttonWasPressed and buttonPressed == buttonToCheck;
 }
 
 void ButtonManager::clearLast() {

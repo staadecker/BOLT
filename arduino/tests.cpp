@@ -1,22 +1,24 @@
-#include "lib/led.h"
+#include "lib/led-manager.h"
 #include "lib/constants.h"
 #include "lib/button-manager.h"
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 void cycleLights() {
-    led::setup();
+    Serial.begin(9600);
+    LedManager ledManager;
 
     unsigned long DELAY = 1000;
 
     uint8_t i = 0;
     while (true) {
-        led::turnOn(i);
-        led::shiftOut();
+        ledManager.turnOn(i);
+        ledManager.shiftOut();
         delay(DELAY);
-        led::turnOff(i);
+        ledManager.turnOff(i);
         i++;
         if (i == NUMBER_OF_LEDS) {
             i = 0;
@@ -26,25 +28,33 @@ void cycleLights() {
 
 // To test light marked 3-4 on board use shiftRegister = 3 and value = 4
 void singleLight(uint8_t shiftRegister, uint8_t value) {
-    led::setup();
-    led::turnOn(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
-    led::shiftOut();
+    Serial.begin(9600);
+    LedManager ledManager;
+
+    ledManager.turnOn(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
+    ledManager.shiftOut();
 }
 
 void allLightsTest() {
-    led::setup();
+    Serial.begin(9600);
+    LedManager ledManager;
+
     for (uint8_t i = 0; i < 64; i++) {
-        led::turnOn(i);
+        ledManager.turnOn(i);
     }
-    led::shiftOut();
+    ledManager.shiftOut();
 }
 
 void printButtonPressTest() {
-    ButtonManager::setup();
-    int buttonLastPressed = ButtonManager::get().getButtonLastPressed();
+    Serial.begin(9600);
+
+    ButtonManager buttonManager = ButtonManager::get();
+
+    buttonManager.setup();
+    int buttonLastPressed = buttonManager.getButtonLastPressed();
     while (true) {
-        if (ButtonManager::get().getButtonLastPressed() != buttonLastPressed) {
-            buttonLastPressed = ButtonManager::get().getButtonLastPressed();
+        if (buttonManager.getButtonLastPressed() != buttonLastPressed) {
+            buttonLastPressed = buttonManager.getButtonLastPressed();
             Serial.println("Pressed button: " + String(buttonLastPressed));
         }
         delay(10);
@@ -52,19 +62,22 @@ void printButtonPressTest() {
 }
 
 void buttonWithLEDTest() {
-    ButtonManager::setup();
-    led::setup();
+    Serial.begin(9600);
+    LedManager ledManager;
+    ButtonManager buttonManager = ButtonManager::get();
+
+    buttonManager.setup();
 
     uint8_t i = 0;
 
     while (true) {
-        ButtonManager::get().clearLast();
-        led::turnOn(i);
-        led::shiftOut();
-        while (not ButtonManager::get().isPressed(i)) {
+        buttonManager.clearLast();
+        ledManager.turnOn(i);
+        ledManager.shiftOut();
+        while (not buttonManager.isPressed(i)) {
         }
 
-        led::turnOff(i);
+        ledManager.turnOff(i);
         i++;
         if (i == NUMBER_OF_LEDS) {
             i = 0;

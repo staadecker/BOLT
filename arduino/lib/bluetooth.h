@@ -4,13 +4,13 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include "constants.h"
-#include "led.h"
+#include "led-manager.h"
 #include "button-manager.h"
 
 class Bluetooth : public ButtonCallbackInterface {
     SoftwareSerial BT = SoftwareSerial(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
 
-    Led led;
+    LedManager ledManager;
     ButtonManager buttonManager;
 
     static const char START_OF_PACKET = 0x02;  //Start of text
@@ -42,7 +42,7 @@ class Bluetooth : public ButtonCallbackInterface {
     void call(uint8_t buttonPressed) override;
 
 public:
-    Bluetooth(Led ledArg, ButtonManager buttonManagerArg);
+    Bluetooth(LedManager ledArg, ButtonManager buttonManagerArg);
 
     static const char C_BUTTON_PRESS = 0x50; // "P"
 

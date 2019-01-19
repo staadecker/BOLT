@@ -4,7 +4,8 @@
 #include "button-manager.h"
 
 
-Bluetooth::Bluetooth(Led ledArg, ButtonManager buttonManagerArg) : led(ledArg), buttonManager(buttonManagerArg) {
+Bluetooth::Bluetooth(LedManager ledArg, ButtonManager buttonManagerArg) : ledManager(ledArg),
+                                                                          buttonManager(buttonManagerArg) {
     if (IS_BLUETOOTH_CHIP_CONNECTED) {
         BT.begin(9600);
         BT.write("AT+NOTI1");
@@ -38,13 +39,13 @@ void Bluetooth::processPacketContent(String packetContent) {
                 isOnline = false;
                 break;
             case C_TURN_ON_LED:
-                led.turnOn(static_cast<uint8_t>(argument.toInt()));
+                ledManager.turnOn(static_cast<uint8_t>(argument.toInt()));
                 break;
             case C_TURN_OFF_LED:
-                led.turnOff(static_cast<uint8_t>(argument.toInt()));
+                ledManager.turnOff(static_cast<uint8_t>(argument.toInt()));
                 break;
             case C_SHIFT_OUT:
-                led.shiftOut();
+                ledManager.shiftOut();
                 break;
             default:
                 log(TYPE_ERROR, "bluetooth", "can't parse packet : " + packetContent);

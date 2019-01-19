@@ -16,18 +16,19 @@ class ButtonManager {
 
     ButtonCallbackInterface *callback;
 
-    ButtonManager();
+    ButtonManager(); //private constructor. Use get.
 
     static ButtonManager buttonManager;
 
-    static void isr();
+    static void staticIsr();
+
+    void isr();
 
 public:
-    static void setup();
+    void setup();
 
     static ButtonManager get();
 
-    void buttonPressedCallback(uint8_t buttonNumber);
 
     bool isPressed(int buttonToCheck);
 

@@ -1,9 +1,15 @@
-#include "led.h"
+#include "led-manager.h"
 #include "constants.h"
 #include "logger.h"
 
+LedManager::LedManager() {
+    pinMode(P_LED_VCC, OUTPUT);
+    pinMode(P_LED_DATA, OUTPUT);
+    pinMode(P_LED_CLOCK, OUTPUT);
+    pinMode(P_LED_LATCH, OUTPUT);
+}
 
-void Led::shiftOut() {
+void LedManager::shiftOut() {
     //Latch Low. VCC high
     digitalWrite(P_LED_VCC, HIGH);
     digitalWrite(P_LED_LATCH, LOW);
@@ -27,21 +33,16 @@ void Led::shiftOut() {
 
 }
 
-void Led::turnOn(uint8_t ledNumber) {
+void LedManager::turnOn(uint8_t ledNumber) {
     log(TYPE_DEBUG, "led", "Set led number " + String(ledNumber) + " ON");
 
     states[ledNumber] = HIGH;
 }
 
-void Led::turnOff(uint8_t ledNumber) {
+void LedManager::turnOff(uint8_t ledNumber) {
     log(TYPE_DEBUG, "led", "Set led number " + String(ledNumber) + " OFF");
 
     states[ledNumber] = LOW;
 }
 
-void Led::setup() {
-    pinMode(P_LED_VCC, OUTPUT);
-    pinMode(P_LED_DATA, OUTPUT);
-    pinMode(P_LED_CLOCK, OUTPUT);
-    pinMode(P_LED_LATCH, OUTPUT);
-}
+

@@ -1,8 +1,8 @@
 #include "flasher.h"
 
-#include "led.h"
+#include "led-manager.h"
 
-Flasher::Flasher(Led ledArg) : led(ledArg) {}
+Flasher::Flasher(LedManager ledArg) : led(ledArg) {}
 
 void Flasher::flash() {
     currentFlashingState = !currentFlashingState;

@@ -1,11 +1,11 @@
 #include "game.h"
 
 #include "screen.h"
-#include "led.h"
+#include "led-manager.h"
 #include "timer.h"
 #include "constants.h"
 
-Game::Game(const ButtonManager buttonsManagerArg, Led ledArg) : buttonManager(buttonsManagerArg), led(ledArg) {}
+Game::Game(const ButtonManager buttonsManagerArg, LedManager ledArg) : buttonManager(buttonsManagerArg), led(ledArg) {}
 
 void Game::countDown() {
     screen::display("3");
