@@ -6,10 +6,12 @@
 #include "lib/flasher.h"
 #include "lib/constants.h"
 
+Flasher flasher;
+
 void startReadyMode() {
     ButtonManager::get().clearLast();
     screen::display("READY");
-    flasher::startFlashing(0);
+    flasher.startFlashing(0);
 }
 
 // Makes chasing lights on the outer circle
@@ -51,7 +53,7 @@ void setup() {
 void loop() {
     //If connected to bluetooth go in online mode
     if (bluetooth::shouldGoOnline()) {
-        flasher::stopFlashing(0);
+        flasher.stopFlashing(0);
         screen::display("ONLINE");
 
         bluetooth::listen();
@@ -62,7 +64,7 @@ void loop() {
 
     //If middle button pressed go in offline mode
     if (ButtonManager::get().isPressed(0)) {
-        flasher::stopFlashing(0);
+        flasher.stopFlashing(0);
 
         Game(ButtonManager::get()).start();
 
@@ -70,5 +72,5 @@ void loop() {
         startReadyMode();
     }
 
-    flasher::checkFlash(); // Will flash if should flash
+    flasher.checkFlash(); // Will flash if should flash
 }
