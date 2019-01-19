@@ -1,76 +1,87 @@
 #include "lib/led.h"
 #include "lib/constants.h"
-#include "lib/button.h"
-#include <Arduino.h>
+#include "lib/button-manager.h"
 
-void setup(){
-
-}
-
-void loop(){}
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 void cycleLights() {
-  led::setup();
+    led::setup();
 
-  int DELAY = 1000;
+    unsigned long DELAY = 1000;
 
-  int i = 0;
-  while (true) {
-    led::turnOn(i);
-    led::shiftOut();
-    delay(DELAY);
-    led::turnOff(i);
-    i++;
-    if (i == constants::NUMBER_OF_LEDS) {
-      i = 0;
+    uint8_t i = 0;
+    while (true) {
+        led::turnOn(i);
+        led::shiftOut();
+        delay(DELAY);
+        led::turnOff(i);
+        i++;
+        if (i == NUMBER_OF_LEDS) {
+            i = 0;
+        }
     }
-  }
 }
 
 // To test light marked 3-4 on board use shiftRegister = 3 and value = 4
-void singleLight(int shiftRegister, int value) {
-  led::setup();
-  led::turnOn(8 * (shiftRegister - 1) + (value - 1));
-  led::shiftOut();
-}
-
-void allLightsTest(){
-  led::setup();
-  for(int i = 0 ; i< 64 ; i++){
-    led::turnOn(i);
-  }
-  led::shiftOut();
-}
-
-void printButtonPress() {
-  button::setup();
-  int buttonLastPressed = button::getButtonLastPressed();
-  while (true) {
-    if (button::getButtonLastPressed() != buttonLastPressed) {
-      buttonLastPressed = button::getButtonLastPressed();
-      Serial.println("Pressed button: " + String(buttonLastPressed));
-    }
-    delay(10);
-  }
-}
-
-void testButtonWithLED() {
-  button::setup();
-  led::setup();
-
-  int i = 0;
-
-  while (true) {
-    button::clearLast();
-    led::turnOn(i);
+void singleLight(uint8_t shiftRegister, uint8_t value) {
+    led::setup();
+    led::turnOn(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
     led::shiftOut();
-    while (not button::isPressed(i)) {
-    }
-
-    led::turnOff(i);
-    i++;
-    if (i == constants::NUMBER_OF_LEDS) {
-      i = 0;
-    }
-  }
 }
+
+void allLightsTest() {
+    led::setup();
+    for (uint8_t i = 0; i < 64; i++) {
+        led::turnOn(i);
+    }
+    led::shiftOut();
+}
+
+void printButtonPressTest() {
+    ButtonManager::setup();
+    int buttonLastPressed = ButtonManager::get().getButtonLastPressed();
+    while (true) {
+        if (ButtonManager::get().getButtonLastPressed() != buttonLastPressed) {
+            buttonLastPressed = ButtonManager::get().getButtonLastPressed();
+            Serial.println("Pressed button: " + String(buttonLastPressed));
+        }
+        delay(10);
+    }
+}
+
+void buttonWithLEDTest() {
+    ButtonManager::setup();
+    led::setup();
+
+    uint8_t i = 0;
+
+    while (true) {
+        ButtonManager::get().clearLast();
+        led::turnOn(i);
+        led::shiftOut();
+        while (not ButtonManager::get().isPressed(i)) {
+        }
+
+        led::turnOff(i);
+        i++;
+        if (i == NUMBER_OF_LEDS) {
+            i = 0;
+        }
+    }
+}
+
+
+void setup() {
+    //cycleLights();
+    //singleLight(3, 4);
+    //allLightsTest();
+    //printButtonPressTest();
+    //buttonWithLEDTest();
+}
+
+void loop() {}
+
+
+#pragma clang diagnostic pop

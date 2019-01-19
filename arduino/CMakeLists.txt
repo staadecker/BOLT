@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_CXX_STANDARD 17)
 
 #################################
 #### 1. Update Project Name  ####
@@ -59,8 +60,6 @@ set(MAIN_FILES
         bluetooth-send-receive-test.cpp)
 
 
-
-
 ## CODE BELOW ##
 
 # Verify that the specified paths exist
@@ -84,13 +83,13 @@ endif ()
 include_directories(${EXTERNAL_DEPENDENCIES})
 
 # Add to the sources list files in the dependencies
-foreach(DIRECTORY ${EXTERNAL_DEPENDENCIES})
+foreach (DIRECTORY ${EXTERNAL_DEPENDENCIES})
     file(GLOB_RECURSE CURRENT_FILES
             ${DIRECTORY}/*.cpp
             ${DIRECTORY}/*.c)
 
     list(APPEND SOURCE_FILES ${CURRENT_FILES})
-endforeach(DIRECTORY)
+endforeach (DIRECTORY)
 
 # Set compiler suite specification
 set(CMAKE_C_COMPILER ${ARDUINO_TOOLS}/bin/avr-gcc)
@@ -109,10 +108,10 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # remove -rdynamic for CXX
 set(CMAKE_EXE_LINKER_FLAGS "-Os -Wl,--gc-sections -mmcu=${MCU}")
 
 # Create an executable and an upload target for each main file
-foreach(FILE ${MAIN_FILES})
+foreach (FILE ${MAIN_FILES})
     add_executable(${FILE} ${FILE} ${SOURCE_FILES})
     add_custom_target(upload-${FILE}
             COMMAND ${CMAKE_OBJCOPY} -j .text -j .data -O ihex ${FILE} ${PROJECT_NAME}.hex # Create hex file
             COMMAND ${ARDUINO_AVRDUDE}/bin/avrdude -C${ARDUINO_AVRDUDE}/etc/avrdude.conf -F -p${MCU} -c${PROGRAMMER} -P${PORT} -D -Uflash:w:${PROJECT_NAME}.hex:i # Flash hex file to arduino
             DEPENDS ${FILE})
-endforeach(FILE)
+endforeach (FILE)
