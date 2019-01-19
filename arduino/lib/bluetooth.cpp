@@ -1,17 +1,13 @@
 #include "bluetooth.h"
 
 #include "logger.h"
-#include "button-manager.h"
 
 
-Bluetooth::Bluetooth(LedManager ledArg, ButtonManager buttonManagerArg) : ledManager(ledArg),
-                                                                          buttonManager(buttonManagerArg) {
-    if (IS_BLUETOOTH_CHIP_CONNECTED) {
-        BT.begin(9600);
-        BT.write("AT+NOTI1");
-        delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected
-        buttonManager.setCallback(this);
-    }
+Bluetooth::Bluetooth(LedManager ledArg, ButtonInterface *buttonInterface) : ledManager(ledArg) {
+    BT.begin(9600);
+    BT.write("AT+NOTI1");
+    delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected
+    buttonInterface->setCallback(this);
 }
 
 void Bluetooth::acknowledgePacket() {
@@ -131,9 +127,9 @@ void Bluetooth::readReceived() {
         }
     }
 
-    if (IS_DEBUGGING) {
-        checkSerial();
-    }
+    //if (IS_DEBUGGING) {
+    //   checkSerial();
+    //}
 }
 
 void Bluetooth::listen() {

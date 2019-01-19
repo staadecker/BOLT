@@ -4,8 +4,10 @@
 #include "led-manager.h"
 #include "timer.h"
 #include "constants.h"
+#include "threader.h"
 
-Game::Game(const ButtonManager buttonsManagerArg, LedManager ledArg) : buttonManager(buttonsManagerArg), led(ledArg) {}
+Game::Game(ButtonInterface *buttonInterfaceArg, LedManager ledArg) : buttonInterface(buttonInterfaceArg),
+                                                                     ledManager(ledArg) {}
 
 void Game::countDown() {
     screen::display("3");
@@ -16,38 +18,41 @@ void Game::countDown() {
     delay(1000);
 }
 
-unsigned long Game::runMain() {
-
-    uint8_t buttonsPressed = 0;
-
-    while (millis() < startTime + GAME_TIME) {
-
-        auto buttonNumber = static_cast<uint8_t>(random(0, NUMBER_OF_LEDS));  //Generate random button
-
-        buttonManager.clearLast();
-        led.turnOn(buttonNumber);  //Turn on led and wait for button press
-        led.shiftOut();
-
-        while (not buttonManager.isPressed(buttonNumber) and millis() < startTime + GAME_TIME) {
-            timer::checkUpdateDisplay();
-        }
-
-        led.turnOff(buttonNumber);
-
-        buttonsPressed++; //Increment counter
-    }
-
-    led.shiftOut();
-    return (millis() - startTime) / buttonsPressed;
-}
-
 void Game::start() {
     countDown();
 
+    buttonInterface->setCallback(this);
+
     startTime = millis();
 
-    unsigned long averageReactionSpeed = runMain();
+    ledNumber = static_cast<uint8_t>(random(0, NUMBER_OF_LEDS));  //Generate random button
+    ledManager.turnOn(ledNumber);
+    ledManager.shiftOut();
+
+    while (not isDone) {
+        //screen::display(String(millis() - startTime));
+        threader::runThreader();
+    }
+
+    unsigned long averageReactionSpeed = (millis() - startTime) / buttonsPressed;
 
     screen::display(String(averageReactionSpeed) + " average speed in millis");
     delay(2000);
+}
+
+void Game::call(uint8_t buttonPressed) {
+    if (buttonPressed == ledNumber) {
+        buttonsPressed++;
+        ledManager.turnOff(ledNumber);
+
+        if (millis() > startTime + GAME_TIME) {
+            buttonInterface->removeCallback();
+            ledManager.shiftOut();
+            isDone = true;
+        } else {
+            ledNumber = static_cast<uint8_t>(random(0, NUMBER_OF_LEDS));  //Generate random button
+            ledManager.turnOn(ledNumber);
+            ledManager.shiftOut();
+        }
+    }
 }

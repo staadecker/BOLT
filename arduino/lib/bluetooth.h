@@ -11,7 +11,6 @@ class Bluetooth : public ButtonCallbackInterface {
     SoftwareSerial BT = SoftwareSerial(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
 
     LedManager ledManager;
-    ButtonManager buttonManager;
 
     static const char START_OF_PACKET = 0x02;  //Start of text
     static const char END_OF_PACKET = 0x03;  //End of text
@@ -42,7 +41,7 @@ class Bluetooth : public ButtonCallbackInterface {
     void call(uint8_t buttonPressed) override;
 
 public:
-    Bluetooth(LedManager ledArg, ButtonManager buttonManagerArg);
+    Bluetooth(LedManager ledArg, ButtonInterface *buttonInterface);
 
     static const char C_BUTTON_PRESS = 0x50; // "P"
 

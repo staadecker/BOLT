@@ -1,27 +1,17 @@
 #include "button-manager.h"
 #include "constants.h"
-#include "bluetooth.h"
 
 ButtonManager ButtonManager::buttonManager = ButtonManager();
 
 ButtonManager::ButtonManager() = default;
 
-void ButtonManager::setup() {
-    attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), staticIsr,
+ButtonManager ButtonManager::create() {
+    attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), isr,
                     FALLING); //Attach interrupt for 64 button shield
-}
-
-ButtonManager ButtonManager::get() {
     return ButtonManager::buttonManager;
 }
 
-void ButtonManager::staticIsr() {
-    buttonManager.isr();
-}
-
-//Method to call when the the interrupt pin is falling
 void ButtonManager::isr() {
-
     uint8_t button = 0;
 
     for (int i = 0; i < 8; i++) {
@@ -39,30 +29,17 @@ void ButtonManager::isr() {
     }
 
     if (button > 64) {  // If button pressed
-        buttonPressed = button - uint8_t(129);
-        buttonWasPressed = true;
-        callback->call(buttonPressed);
+        if (buttonManager.callback) {
+            buttonManager.callback->call(button - uint8_t(129));
+        }
     }
 }
 
-//Checks whether the button got pressed
-bool ButtonManager::isPressed(int buttonToCheck) {
-    //If button pressed is the button to check return true
-    return buttonWasPressed and buttonPressed == buttonToCheck;
-}
-
-void ButtonManager::clearLast() {
-    buttonWasPressed = false;
-}
-
-int8_t ButtonManager::getButtonLastPressed() {
-    if (!buttonWasPressed) {
-        return -1;
-    }
-
-    return buttonPressed;
-}
 
 void ButtonManager::setCallback(ButtonCallbackInterface *callbackArg) {
     callback = callbackArg;
+}
+
+void ButtonManager::removeCallback() {
+    callback = nullptr;
 }

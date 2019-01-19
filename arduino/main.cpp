@@ -1,62 +1,53 @@
 #include "lib/game.h"
 #include "lib/bluetooth.h"
-#include "lib/led-manager.h"
 #include "lib/logger.h"
 #include "lib/screen.h"
 #include "lib/flasher.h"
-#include "lib/constants.h"
+#include "lib/threader.h"
+#include "main.h"
 
-void startReadyMode(Flasher flasher, ButtonManager buttonManager) {
-    buttonManager.clearLast();
-    screen::display("READY");
-    flasher.startFlashing(0);
-}
-
-// Makes chasing lights on the outer circle
-void bootUpSequence(LedManager led) {
-    for (uint8_t i = 32; i < 64; i++) {
-        led.turnOn(i);
-        led.shiftOut();
-        delay(70);
-        led.turnOff(i);
-    }
-
-    for (uint8_t i = 0; i < 64; i++) {
-        led.turnOff(i);
-    }
-    led.shiftOut();
-}
 
 void setup() {
+    MainRun().run();
+}
+
+void loop() {}
+
+
+void MainRun::run() {
     Serial.begin(9600);
 
     //Generate new random seed such that button sequence is different each time
     randomSeed(static_cast<unsigned long>(analogRead(0)));
 
-    //Setup
-    LedManager led; //Create an led manager
-    Flasher flasher(led); //Create a flasher
-    ButtonManager buttonManager = ButtonManager::get(); //TODO Take into account is_button_connected
-    Bluetooth *bluetooth = nullptr;
-
+    //Create button shield
     if (IS_BUTTONS_CONNECTED) {
-        buttonManager.setup();
+        ButtonManager buttonManagerTemp = ButtonManager::create();
+        buttonInterface = &buttonManagerTemp;
+    } else {
+        // TODO
     }
 
+    //Create bluetooth
     if (IS_BLUETOOTH_CHIP_CONNECTED) {
-        Bluetooth bluetooth_tmp = Bluetooth(led, buttonManager);
+        Bluetooth bluetooth_tmp = Bluetooth(ledManager, buttonInterface);
         bluetooth = &bluetooth_tmp;
     }
 
     log(TYPE_INFO, "main", "Setup done");
 
-    //bootUpSequence(led);
+    if (IS_LED_CONNECTED) {
+        bootUpSequence();
+    }
 
     if (not bluetooth or (not bluetooth->shouldGoOnline())) {
-        startReadyMode(flasher, buttonManager); //Unless already connected start ready mode
+        startReadyMode(flasher, buttonInterface); //Unless already connected start ready mode
     }
 
     while (true) {
+        threader::runThreader();
+        flasher.checkFlash(); // Will flash if should flash
+
         //If connected to bluetooth go in online mode
         if (bluetooth and bluetooth->shouldGoOnline()) {
             flasher.stopFlashing(0);
@@ -65,21 +56,42 @@ void setup() {
             bluetooth->listen();
 
             //When disconnected
-            startReadyMode(flasher, buttonManager);
+            startReadyMode(flasher, buttonInterface);
         }
-
-        //If middle button pressed go in offline mode
-        if (buttonManager.isPressed(0)) {
-            flasher.stopFlashing(0);
-
-            Game(buttonManager, led).start();
-
-            //When game ends
-            startReadyMode(flasher, buttonManager);
-        }
-
-        flasher.checkFlash(); // Will flash if should flash
     }
 }
 
-void loop() {}
+// Makes chasing lights on the outer circle
+void MainRun::bootUpSequence() {
+    for (uint8_t i = 32; i < 64; i++) {
+        ledManager.turnOn(i);
+        ledManager.shiftOut();
+        delay(70);
+        ledManager.turnOff(i);
+    }
+
+    for (uint8_t i = 0; i < 64; i++) {
+        ledManager.turnOff(i);
+    }
+    ledManager.shiftOut();
+}
+
+void MainRun::startReadyMode(Flasher flasher, ButtonInterface *buttonInterface) {
+    screen::display("READY");
+    buttonInterface->setCallback(this);
+    flasher.startFlashing(0);
+}
+
+void MainRun::call(uint8_t buttonNumber) {
+    if (buttonNumber == 0) {
+        flasher.stopFlashing(0);
+        buttonInterface->removeCallback();
+
+        Game(buttonInterface, ledManager).start();
+
+        //When game ends
+        startReadyMode(flasher, buttonInterface);
+    }
+}
+
+

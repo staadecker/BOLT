@@ -4,19 +4,22 @@
 #include "button-manager.h"
 #include "led-manager.h"
 
-class Game {
+class Game : public ButtonCallbackInterface {
     static const unsigned long GAME_TIME = 30000;
     unsigned long startTime;
+    uint8_t buttonsPressed = 0;
+    uint8_t ledNumber = 0;
+    bool isDone = false;
 
-    ButtonManager buttonManager;
-    LedManager led;
+    ButtonInterface *buttonInterface;
+    LedManager ledManager;
 
     void countDown();
 
-    unsigned long runMain();
+    void call(uint8_t buttonPressed) override;
 
 public:
-    Game(ButtonManager buttonManager, LedManager led);
+    Game(ButtonInterface *buttonInterface, LedManager led);
 
     void start();
 };

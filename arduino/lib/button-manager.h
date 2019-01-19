@@ -3,40 +3,24 @@
 #define BUTTON_H
 
 #include <Arduino.h>
+#include "button-interface.h"
 
-class ButtonCallbackInterface {
-public:
-    virtual void call(uint8_t buttonPressed);
-};
 
-class ButtonManager {
-    //Stores the value of the button pressed
-    volatile bool buttonWasPressed = false;
-    volatile uint8_t buttonPressed = 0;
-
+class ButtonManager : public ButtonInterface {
     ButtonCallbackInterface *callback;
 
     ButtonManager(); //private constructor. Use get.
 
     static ButtonManager buttonManager;
 
-    static void staticIsr();
-
-    void isr();
+    static void isr();
 
 public:
-    void setup();
+    static ButtonManager create();
 
-    static ButtonManager get();
+    void setCallback(ButtonCallbackInterface *callbackArg) override;
 
-
-    bool isPressed(int buttonToCheck);
-
-    void clearLast();
-
-    void setCallback(ButtonCallbackInterface *callbackArg);
-
-    int8_t getButtonLastPressed();
+    void removeCallback() override;
 };
 
 
