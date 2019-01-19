@@ -27,8 +27,8 @@ namespace game {
       uint8_t buttonsPressed = 0;
       
       while (millis() < startTime + GAME_TIME) {
-        
-        int buttonNumber = random(0, constants::NUMBER_OF_LEDS);  //Generate random button
+
+          int buttonNumber = random(0, NUMBER_OF_LEDS);  //Generate random button
 
         button::clearLast();
         led::turnOn(buttonNumber);  //Turn on led and wait for button press

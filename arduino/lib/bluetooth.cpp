@@ -9,7 +9,7 @@
 
 namespace bluetooth {
 namespace {
-SoftwareSerial BT(constants::P_SOFTWARE_SERIAL_RX, constants::P_SOFTWARE_SERIAL_TX);
+    SoftwareSerial BT(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
 
 const char START_OF_PACKET = 0x02;  //Start of text
 const char END_OF_PACKET = 0x03;  //End of text
@@ -147,7 +147,7 @@ void readReceived() {
     }
   }
 
-  if (constants::IS_DEBUGGING) {
+    if (IS_DEBUGGING) {
     checkSerial();
   }
 }
@@ -184,7 +184,7 @@ bool shouldGoOnline() {
 }
 
 void setup() {
-  if (constants::IS_BLUETOOTH_CHIP_CONNECTED) {
+    if (IS_BLUETOOTH_CHIP_CONNECTED) {
     BT.begin(9600);
     BT.write("AT+NOTI1");
     delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected

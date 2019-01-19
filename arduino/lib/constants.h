@@ -3,7 +3,6 @@
 #ifndef CONST_H
 #define CONST_H
 
-namespace constants {
 const int P_BUTTON_INTERRUPT = 2;
 const int P_BUTTON_DATA = 3;
 const int P_BUTTON_CLOCK = 4;
@@ -22,6 +21,6 @@ const bool IS_DEBUGGING = true;
 const bool IS_BLUETOOTH_CHIP_CONNECTED = true;
 
 const uint8_t NUMBER_OF_LEDS = 64;
-}
+
 
 #endif
