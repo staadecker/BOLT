@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_SYSTEM_NAME Generic)
 
 #################################
 #### 1. Update Project Name  ####
@@ -9,20 +10,29 @@ project(bolt)
 ##################################
 #### 2. Update Board Settings ####
 ##################################
-set(PORT "/dev/ttyACM0")
+#set(PORT "/dev/ttyACM0") # Linux
+set(PORT "COM3") # Windows
 set(MCU "atmega328p")
 set(CPU_SPEED "16000000")
 set(PIN_VARIANT "standard")
-set(PROGRAMMER "stk500v1")
-
+#set(PROGRAMMER "stk500v1") # Linux
+set(PROGRAMMER "arduino") # Windows
 
 ##############################################
 #### 3. Set the path to the Arduino tools ####
 ##############################################
-set(ARDUINO_PACKAGES "$ENV{HOME}/.arduino15/packages/arduino")
-set(ARDUINO_TOOLS ${ARDUINO_PACKAGES}/tools/avr-gcc/5.4.0-atmel3.6.1-arduino2)
-set(ARDUINO_AVR ${ARDUINO_PACKAGES}/hardware/avr/1.6.23)
-set(ARDUINO_AVRDUDE ${ARDUINO_PACKAGES}/tools/avrdude/6.3.0-arduino14)
+
+#WINDOWS
+set(ARDUINO_PACKAGES "C://Program Files (x86)/Arduino")
+set(ARDUINO_TOOLS ${ARDUINO_PACKAGES}/hardware/tools/avr)
+set(ARDUINO_AVR ${ARDUINO_PACKAGES}/hardware/arduino/avr)
+set(ARDUINO_AVRDUDE ${ARDUINO_PACKAGES}/hardware/tools/avr)
+
+#LINUX
+#set(ARDUINO_PACKAGES "$ENV{HOME}/.arduino15/packages/arduino")
+#set(ARDUINO_TOOLS ${ARDUINO_PACKAGES}/tools/avr-gcc/5.4.0-atmel3.6.1-arduino2)
+#set(ARDUINO_AVR ${ARDUINO_PACKAGES}/hardware/avr/1.6.23)
+#set(ARDUINO_AVRDUDE ${ARDUINO_PACKAGES}/tools/avrdude/6.3.0-arduino14)
 
 
 ###################################
