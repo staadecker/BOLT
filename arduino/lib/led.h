@@ -2,10 +2,15 @@
 #define LED_H
 
 #include <Arduino.h>
+#include "constants.h"
 
-namespace led {
+class Led {
+    const uint8_t VCC_PWM = 95; //Value to adjust for optimal 2V output voltage
 
+    // Array keeping track of states
+    uint8_t states[NUMBER_OF_LEDS] = {};
 
+public:
     void setup();
 
     void turnOn(uint8_t ledNumber);
@@ -13,6 +18,6 @@ namespace led {
     void turnOff(uint8_t ledNumber);
 
     void shiftOut();
-}
+};
 
 #endif

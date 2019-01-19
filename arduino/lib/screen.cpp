@@ -4,6 +4,6 @@
 
 namespace screen {
     void display(String message) {
-        logger::log(logger::TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
+        log(TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
     }
 }

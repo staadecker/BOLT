@@ -1,29 +1,29 @@
 #include "logger.h"
 
-namespace logger {
-    void log(byte type, String fileName, String message) {
-        if (type <= MODE) {
-            String typeName;
+const byte MODE = TYPE_INFO;
 
-            switch (type) {
-                case TYPE_ERROR:
-                    typeName = "ERROR";
-                    break;
-                case TYPE_WARNING:
-                    typeName = "WARNING";
-                    break;
-                case TYPE_DEBUG:
-                    typeName = "DEBUG";
-                    break;
-                case TYPE_INFO:
-                    typeName = "INFO";
-                    break;
+void log(byte type, String fileName, String message) {
+    if (type <= MODE) {
+        String typeName;
 
-                default:
-                    log(TYPE_ERROR, "test", "Unknown log type");
-            }
+        switch (type) {
+            case TYPE_ERROR:
+                typeName = "ERROR";
+                break;
+            case TYPE_WARNING:
+                typeName = "WARNING";
+                break;
+            case TYPE_DEBUG:
+                typeName = "DEBUG";
+                break;
+            case TYPE_INFO:
+                typeName = "INFO";
+                break;
 
-            Serial.println(typeName + " : " + fileName + " : " + message + ".");
+            default:
+                log(TYPE_ERROR, "test", "Unknown log type");
         }
+
+        Serial.println(typeName + " : " + fileName + " : " + message + ".");
     }
 }

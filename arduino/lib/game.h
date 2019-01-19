@@ -2,21 +2,21 @@
 #define GAME_H
 
 #include "button-manager.h"
+#include "led.h"
 
 class Game {
     static const unsigned long GAME_TIME = 30000;
     unsigned long startTime;
 
-    unsigned long getRemainingTime();
-
     ButtonManager buttonManager;
+    Led led;
 
     void countDown();
 
     unsigned long runMain();
 
 public:
-    explicit Game(ButtonManager buttonManager);
+    Game(ButtonManager buttonManager, Led led);
 
     void start();
 };

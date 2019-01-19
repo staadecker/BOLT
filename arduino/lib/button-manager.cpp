@@ -42,7 +42,7 @@ void ButtonManager::isr() {
 void ButtonManager::buttonPressedCallback(uint8_t buttonNumber) {
     buttonPressed = buttonNumber;
     buttonWasPressed = true;
-    bluetooth::sendPacket(bluetooth::C_BUTTON_PRESS + String(buttonPressed));
+    callback->call(buttonPressed);
 }
 
 //Checks whether the button got pressed
@@ -69,3 +69,6 @@ int8_t ButtonManager::getButtonLastPressed() {
     return buttonPressed;
 }
 
+void ButtonManager::setCallback(ButtonCallbackInterface *callbackArg) {
+    callback = callbackArg;
+}

@@ -2,20 +2,21 @@
 
 #include "led.h"
 
+Flasher::Flasher(Led ledArg) : led(ledArg) {}
 
 void Flasher::flash() {
     currentFlashingState = !currentFlashingState;
 
-    for (uint8_t led = 0; led < NUMBER_OF_LEDS; led++) {
-        if (flashing[led]) {
+    for (uint8_t ledNumber = 0; ledNumber < NUMBER_OF_LEDS; ledNumber++) {
+        if (flashing[ledNumber]) {
             if (currentFlashingState) {
-                led::turnOn(led);
+                led.turnOn(ledNumber);
             } else {
-                led::turnOff(led);
+                led.turnOff(ledNumber);
             }
         }
     }
-    led::shiftOut();
+    led.shiftOut();
     nextRun = millis() + FLASHER_INTERVAL;
 }
 
@@ -26,8 +27,8 @@ void Flasher::startFlashing(uint8_t ledNumber) {
 
 void Flasher::stopFlashing(uint8_t ledNumber) {
     flashing[ledNumber] = false;
-    led::turnOff(ledNumber);
-    led::shiftOut();
+    led.turnOff(ledNumber);
+    led.shiftOut();
 }
 
 void Flasher::checkFlash() {
