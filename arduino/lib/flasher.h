@@ -1,19 +1,22 @@
 #ifndef FLASHER_H
 #define FLASHER_H
 
-#include <Arduino.h>
+#include <USBAPI.h>
 #include "constants.h"
 #include "led-manager.h"
+#include "threader.h"
 
-class Flasher {
+class Flasher : ThreaderCallback {
     const unsigned int FLASHER_INTERVAL = 500;
 
     bool flashing[NUMBER_OF_LEDS] = {};
-    bool currentFlashingState = LOW;
+    bool stateIsOn = false;
+    uint8_t numberFlashing = 0;
+    uint8_t threaderId = 0;
     unsigned long nextRun = millis();
-    LedManager led;
+    LedManager ledManager;
 
-    void flash();
+    void switchState();
 
 public:
     explicit Flasher(LedManager led);
@@ -22,7 +25,7 @@ public:
 
     void stopFlashing(uint8_t ledNumber);
 
-    void checkFlash();
+    void call() override;
 };
 
 #endif

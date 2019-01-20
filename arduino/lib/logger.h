@@ -1,8 +1,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <Arduino.h>
 
+#include <USBAPI.h>
 
 const byte TYPE_ERROR = 0;
 const byte TYPE_WARNING = 1;

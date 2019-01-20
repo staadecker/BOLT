@@ -3,11 +3,8 @@
 #include "lib/logger.h"
 #include "lib/screen.h"
 #include "lib/flasher.h"
-#include "lib/threader.h"
 #include "main.h"
 #include "lib/button-debug.h"
-
-
 
 
 void setup() {
@@ -48,9 +45,7 @@ void MainRun::run() {
     }
 
     while (true) {
-        delay(100);
         threader::runThreader();
-        flasher.checkFlash(); // Will flash if should flash
 
         //If connected to bluetooth go in online mode
         if (bluetooth and bluetooth->shouldGoOnline()) {
@@ -83,8 +78,6 @@ void MainRun::bootUpSequence() {
 void MainRun::startReadyMode(Flasher flasher, ButtonInterface *buttonInterface) {
     screen::display("READY");
     buttonInterface->setCallback(this);
-    Serial.println("done addings");
-    delay(1000);
     flasher.startFlashing(0);
 }
 

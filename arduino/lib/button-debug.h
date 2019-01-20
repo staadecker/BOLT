@@ -11,7 +11,7 @@
 
 class ButtonDebug : public ButtonInterface, public ThreaderCallback {
     ButtonCallbackInterface *listener = nullptr;
-    uint8_t threaderId;
+    uint8_t threaderId = 0;
 
 public:
     void setCallback(ButtonCallbackInterface *buttonCallbackInterface) override;

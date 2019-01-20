@@ -1,6 +1,5 @@
+#include <USBAPI.h>
 #include "timer.h"
-
-#include "screen.h"
 
 namespace timer {
     namespace {

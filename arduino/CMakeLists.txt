@@ -112,6 +112,6 @@ foreach (FILE ${MAIN_FILES})
     add_executable(${FILE} ${FILE} ${SOURCE_FILES})
     add_custom_target(upload-${FILE}
             COMMAND ${CMAKE_OBJCOPY} -j .text -j .data -O ihex ${FILE} ${PROJECT_NAME}.hex # Create hex file
-            COMMAND ${ARDUINO_AVRDUDE}/bin/avrdude -C${ARDUINO_AVRDUDE}/etc/avrdude.conf -F -p${MCU} -c${PROGRAMMER} -P${PORT} -D -Uflash:w:${PROJECT_NAME}.hex:i # Flash hex file to arduino
+            COMMAND ${ARDUINO_AVRDUDE}/bin/avrdude -v -C${ARDUINO_AVRDUDE}/etc/avrdude.conf -F -p${MCU} -c${PROGRAMMER} -P${PORT} -D -Uflash:w:${PROJECT_NAME}.hex:i # Flash hex file to arduino
             DEPENDS ${FILE})
 endforeach (FILE)

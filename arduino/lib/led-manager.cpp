@@ -1,6 +1,5 @@
+#include <USBAPI.h>
 #include "led-manager.h"
-#include "constants.h"
-#include "logger.h"
 
 LedManager::LedManager() {
     pinMode(P_LED_VCC, OUTPUT);
@@ -34,13 +33,13 @@ void LedManager::shiftOut() {
 }
 
 void LedManager::turnOn(uint8_t ledNumber) {
-    log(TYPE_DEBUG, "led", "Set led number " + String(ledNumber) + " ON");
+    //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " ON");
 
     states[ledNumber] = HIGH;
 }
 
 void LedManager::turnOff(uint8_t ledNumber) {
-    log(TYPE_DEBUG, "led", "Set led number " + String(ledNumber) + " OFF");
+    //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " OFF");
 
     states[ledNumber] = LOW;
 }

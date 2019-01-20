@@ -1,39 +1,49 @@
 #include "flasher.h"
 
-#include "led-manager.h"
+Flasher::Flasher(LedManager ledArg) : ledManager(ledArg) {}
 
-Flasher::Flasher(LedManager ledArg) : led(ledArg) {}
+void Flasher::switchState() {
+    stateIsOn = !stateIsOn;
 
-void Flasher::flash() {
-    currentFlashingState = !currentFlashingState;
-
+    //TODO optimize
     for (uint8_t ledNumber = 0; ledNumber < NUMBER_OF_LEDS; ledNumber++) {
         if (flashing[ledNumber]) {
-            if (currentFlashingState) {
-                led.turnOn(ledNumber);
+            if (stateIsOn) {
+                ledManager.turnOn(ledNumber);
             } else {
-                led.turnOff(ledNumber);
+                ledManager.turnOff(ledNumber);
             }
         }
     }
-    led.shiftOut();
+    ledManager.shiftOut();
     nextRun = millis() + FLASHER_INTERVAL;
 }
 
 
 void Flasher::startFlashing(uint8_t ledNumber) {
-    flashing[ledNumber] = true;
+    if (not flashing[ledNumber]) {
+        flashing[ledNumber] = true;
+        numberFlashing++;
+
+        if (numberFlashing == 1) {
+            threaderId = threader::addCallback(this);
+        }
+    }
 }
 
 void Flasher::stopFlashing(uint8_t ledNumber) {
-    flashing[ledNumber] = false;
-    led.turnOff(ledNumber);
-    led.shiftOut();
+    if (flashing[ledNumber]) {
+        flashing[ledNumber] = false;
+        numberFlashing--;
+        threader::removeCallback(threaderId);
+        ledManager.turnOff(ledNumber);
+        ledManager.shiftOut();
+    }
 }
 
-void Flasher::checkFlash() {
+void Flasher::call() {
     if (millis() > nextRun) {
-        flash();
+        switchState();
     }
 }
 

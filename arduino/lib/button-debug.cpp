@@ -2,8 +2,9 @@
 // Created by machs on 2019-01-19.
 //
 
+#include <HardwareSerial.h>
+#include <USBAPI.h>
 #include "button-debug.h"
-#include <Arduino.h>
 
 void ButtonDebug::setCallback(ButtonCallbackInterface *buttonCallbackInterface) {
     listener = buttonCallbackInterface;
@@ -26,7 +27,7 @@ void ButtonDebug::call() {
                     buttonNumber += (char) Serial.read();
                     delay(10);
                 }
-                Serial.println("Debug button pressed : " + buttonNumber);
+                //Serial.println("Debug button pressed : " + buttonNumber);
                 listener->call(static_cast<uint8_t>(buttonNumber.toInt()));
             }
         }

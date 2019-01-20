@@ -32,5 +32,6 @@ namespace threader {
                 callback->call();
             }
         }
+        delay(10);
     }
 }

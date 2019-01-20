@@ -1,3 +1,5 @@
+
+#include <USBAPI.h>
 #include "button-manager.h"
 #include "constants.h"
 
@@ -8,6 +10,7 @@ ButtonManager::ButtonManager() = default;
 ButtonManager ButtonManager::create() {
     attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), isr,
                     FALLING); //Attach interrupt for 64 button shield
+    Serial.println("Created isr");
     return ButtonManager::buttonManager;
 }
 
@@ -37,8 +40,6 @@ void ButtonManager::isr() {
 
 
 void ButtonManager::setCallback(ButtonCallbackInterface *callbackArg) {
-    Serial.println("weird");
-    delay(1000);
     callback = callbackArg;
 }
 

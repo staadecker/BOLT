@@ -5,7 +5,7 @@
 #ifndef BOLT_BUTTONINTERFACE_H
 #define BOLT_BUTTONINTERFACE_H
 
-#include <Arduino.h>
+#include <stdint.h>
 
 class ButtonCallbackInterface {
 public:

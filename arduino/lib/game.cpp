@@ -1,9 +1,7 @@
+#include <USBAPI.h>
 #include "game.h"
 
 #include "screen.h"
-#include "led-manager.h"
-#include "timer.h"
-#include "constants.h"
 #include "threader.h"
 
 Game::Game(ButtonInterface *buttonInterfaceArg, LedManager ledArg) : buttonInterface(buttonInterfaceArg),

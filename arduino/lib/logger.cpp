@@ -1,3 +1,4 @@
+#include <HardwareSerial.h>
 #include "logger.h"
 
 const byte MODE = TYPE_INFO;

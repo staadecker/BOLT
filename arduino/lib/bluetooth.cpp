@@ -76,12 +76,6 @@ String Bluetooth::getPacketContent() {
     return ""; // If while loop ended because off timeout, end game
 }
 
-
-void Bluetooth::checkSerial() {
-    // TODO Fix check serial
-
-}
-
 void Bluetooth::readReceived() {
     Serial.println("Reading received");
     delay(1000);
@@ -116,10 +110,6 @@ void Bluetooth::readReceived() {
             log(TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
         }
     }
-
-    //if (IS_DEBUGGING) {
-    //   checkSerial();
-    //}
 }
 
 void Bluetooth::listen() {

@@ -2,7 +2,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
-#include <Arduino.h>
+#include <WString.h>
 
 namespace screen {
     void display(String message);
