@@ -37,6 +37,8 @@ void ButtonManager::isr() {
 
 
 void ButtonManager::setCallback(ButtonCallbackInterface *callbackArg) {
+    Serial.println("weird");
+    delay(1000);
     callback = callbackArg;
 }
 

@@ -1,5 +1,4 @@
 #include "lib/led-manager.h"
-#include "lib/constants.h"
 #include "lib/button-manager.h"
 
 
@@ -45,45 +44,43 @@ void allLightsTest() {
     ledManager.shiftOut();
 }
 
+class OnPrintCallback : public ButtonCallbackInterface { ;
+
+    void call(uint8_t buttonNumber) override {
+        Serial.println("Pressed button: " + String(buttonNumber));
+    }
+};
+
 void printButtonPressTest() {
     Serial.begin(9600);
 
-    ButtonManager buttonManager = ButtonManager::get();
-
-    buttonManager.setup();
-    int buttonLastPressed = buttonManager.getButtonLastPressed();
-    while (true) {
-        if (buttonManager.getButtonLastPressed() != buttonLastPressed) {
-            buttonLastPressed = buttonManager.getButtonLastPressed();
-            Serial.println("Pressed button: " + String(buttonLastPressed));
-        }
-        delay(10);
-    }
+    ButtonManager buttonManager = ButtonManager::create();
+    OnPrintCallback callbackTemp = OnPrintCallback();
+    buttonManager.setCallback(&callbackTemp);
 }
 
-void buttonWithLEDTest() {
-    Serial.begin(9600);
-    LedManager ledManager;
-    ButtonManager buttonManager = ButtonManager::get();
 
-    buttonManager.setup();
-
-    uint8_t i = 0;
-
-    while (true) {
-        buttonManager.clearLast();
-        ledManager.turnOn(i);
-        ledManager.shiftOut();
-        while (not buttonManager.isPressed(i)) {
-        }
-
-        ledManager.turnOff(i);
-        i++;
-        if (i == NUMBER_OF_LEDS) {
-            i = 0;
-        }
-    }
-}
+//void buttonWithLEDTest() {
+//    Serial.begin(9600);
+//    LedManager ledManager;
+//    ButtonManager buttonManager = ButtonManager::create();
+//
+//    uint8_t i = 0;
+//
+//    while (true) {
+//        buttonManager.clearLast();
+//        ledManager.turnOn(i);
+//        ledManager.shiftOut();
+//        while (not buttonManager.isPressed(i)) {
+//        }
+//
+//        ledManager.turnOff(i);
+//        i++;
+//        if (i == NUMBER_OF_LEDS) {
+//            i = 0;
+//        }
+//    }
+//}
 
 
 void setup() {

@@ -5,6 +5,8 @@
 #ifndef BOLT_BUTTONINTERFACE_H
 #define BOLT_BUTTONINTERFACE_H
 
+#include <Arduino.h>
+
 class ButtonCallbackInterface {
 public:
     virtual void call(uint8_t buttonPressed);

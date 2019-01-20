@@ -79,22 +79,12 @@ String Bluetooth::getPacketContent() {
 
 void Bluetooth::checkSerial() {
     // TODO Fix check serial
-//  while (Serial.available()) {
-//    int value = Serial.read();
-//    delay(10);
-//    if (value == 80) {
-//      String buttonNumber = "";
-//      while (Serial.available()) {
-//        buttonNumber += (char) Serial.read();
-//        delay(10);
-//      }
-//      Serial.println("Debug button pressed : " + buttonNumber);
-//      button::buttonPressedCallback(buttonNumber.toInt());
-//    }
-//  }
+
 }
 
 void Bluetooth::readReceived() {
+    Serial.println("Reading received");
+    delay(1000);
     if (BT.available()) {
         String unknown = "";
 

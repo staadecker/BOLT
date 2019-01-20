@@ -5,6 +5,9 @@
 #include "lib/flasher.h"
 #include "lib/threader.h"
 #include "main.h"
+#include "lib/button-debug.h"
+
+
 
 
 void setup() {
@@ -25,7 +28,9 @@ void MainRun::run() {
         ButtonManager buttonManagerTemp = ButtonManager::create();
         buttonInterface = &buttonManagerTemp;
     } else {
-        // TODO
+        ButtonDebug buttonDebugTemp;
+        buttonInterface = &buttonDebugTemp;
+        buttonInterface->removeCallback();
     }
 
     //Create bluetooth
@@ -33,8 +38,6 @@ void MainRun::run() {
         Bluetooth bluetooth_tmp = Bluetooth(ledManager, buttonInterface);
         bluetooth = &bluetooth_tmp;
     }
-
-    log(TYPE_INFO, "main", "Setup done");
 
     if (IS_LED_CONNECTED) {
         bootUpSequence();
@@ -45,6 +48,7 @@ void MainRun::run() {
     }
 
     while (true) {
+        delay(100);
         threader::runThreader();
         flasher.checkFlash(); // Will flash if should flash
 
@@ -79,6 +83,8 @@ void MainRun::bootUpSequence() {
 void MainRun::startReadyMode(Flasher flasher, ButtonInterface *buttonInterface) {
     screen::display("READY");
     buttonInterface->setCallback(this);
+    Serial.println("done addings");
+    delay(1000);
     flasher.startFlashing(0);
 }
 
