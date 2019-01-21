@@ -1,5 +1,5 @@
-#include "lib/led-manager.h"
-#include "lib/button-manager.h"
+#include "lib/ledController.h"
+#include "lib/buttonShieldReceiver.h"
 
 
 #pragma clang diagnostic push
@@ -8,7 +8,7 @@
 
 void cycleLights() {
     Serial.begin(9600);
-    LedManager ledManager;
+    LedController ledManager;
 
     unsigned long DELAY = 1000;
 
@@ -28,7 +28,7 @@ void cycleLights() {
 // To test light marked 3-4 on board use shiftRegister = 3 and value = 4
 void singleLight(uint8_t shiftRegister, uint8_t value) {
     Serial.begin(9600);
-    LedManager ledManager;
+    LedController ledManager;
 
     ledManager.turnOn(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
     ledManager.shiftOut();
@@ -36,7 +36,7 @@ void singleLight(uint8_t shiftRegister, uint8_t value) {
 
 void allLightsTest() {
     Serial.begin(9600);
-    LedManager ledManager;
+    LedController ledManager;
 
     for (uint8_t i = 0; i < 64; i++) {
         ledManager.turnOn(i);
@@ -44,9 +44,9 @@ void allLightsTest() {
     ledManager.shiftOut();
 }
 
-class OnPrintCallback : public ButtonCallbackInterface { ;
+class OnPrintCallback : public ButtonPressListener { ;
 
-    void call(uint8_t buttonNumber) override {
+    void buttonPressed(const uint8_t &buttonNumber) override {
         Serial.println("Pressed button: " + String(buttonNumber));
     }
 };
@@ -54,9 +54,9 @@ class OnPrintCallback : public ButtonCallbackInterface { ;
 void printButtonPressTest() {
     Serial.begin(9600);
 
-    ButtonManager buttonManager = ButtonManager::create();
+    ButtonShieldReceiver buttonManager = ButtonShieldReceiver::ButtonShieldReceiver();
     OnPrintCallback callbackTemp = OnPrintCallback();
-    buttonManager.setCallback(&callbackTemp);
+    buttonManager.addListener(&callbackTemp);
 }
 
 

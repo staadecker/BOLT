@@ -1,7 +1,5 @@
 #include "flasher.h"
 
-Flasher::Flasher(LedManager ledArg) : ledManager(ledArg) {}
-
 void Flasher::switchState() {
     stateIsOn = !stateIsOn;
 
@@ -20,28 +18,28 @@ void Flasher::switchState() {
 }
 
 
-void Flasher::startFlashing(uint8_t ledNumber) {
+void Flasher::startFlashing(const uint8_t &ledNumber) {
     if (not flashing[ledNumber]) {
         flashing[ledNumber] = true;
         numberFlashing++;
 
         if (numberFlashing == 1) {
-            threaderId = threader::addCallback(this);
+            threadManager::addThread(this);
         }
     }
 }
 
-void Flasher::stopFlashing(uint8_t ledNumber) {
+void Flasher::stopFlashing(const uint8_t &ledNumber) {
     if (flashing[ledNumber]) {
         flashing[ledNumber] = false;
         numberFlashing--;
-        threader::removeCallback(threaderId);
+        threadManager::removeThread(this);
         ledManager.turnOff(ledNumber);
         ledManager.shiftOut();
     }
 }
 
-void Flasher::call() {
+void Flasher::runThread() {
     if (millis() > nextRun) {
         switchState();
     }

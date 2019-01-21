@@ -1,11 +1,8 @@
-#include <USBAPI.h>
 #include "game.h"
 
-#include "screen.h"
-#include "threader.h"
 
-Game::Game(ButtonInterface *buttonInterfaceArg, LedManager ledArg) : buttonInterface(buttonInterfaceArg),
-                                                                     ledManager(ledArg) {}
+Game::Game(ButtonReceiver *buttonInterface, const LedController &led) : buttonInterface(buttonInterface),
+                                                                        ledManager(led) {}
 
 void Game::countDown() {
     screen::display("3");
@@ -19,7 +16,7 @@ void Game::countDown() {
 void Game::start() {
     countDown();
 
-    buttonInterface->setCallback(this);
+    buttonInterface->addListener(this);
 
     startTime = millis();
 
@@ -29,7 +26,7 @@ void Game::start() {
 
     while (not isDone) {
         //screen::display(String(millis() - startTime));
-        threader::runThreader();
+        threadManager::runThreader();
     }
 
     unsigned long averageReactionSpeed = (millis() - startTime) / buttonsPressed;
@@ -38,13 +35,13 @@ void Game::start() {
     delay(2000);
 }
 
-void Game::call(uint8_t buttonPressed) {
+void Game::buttonPressed(const uint8_t &buttonPressed) {
     if (buttonPressed == ledNumber) {
         buttonsPressed++;
         ledManager.turnOff(ledNumber);
 
         if (millis() > startTime + GAME_TIME) {
-            buttonInterface->removeCallback();
+            buttonInterface->removeListener();
             ledManager.shiftOut();
             isDone = true;
         } else {

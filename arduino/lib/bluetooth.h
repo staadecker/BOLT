@@ -2,14 +2,13 @@
 #define BLUETOOTH_H
 
 #include <SoftwareSerial.h>
-#include "constants.h"
-#include "led-manager.h"
-#include "button-manager.h"
+#include "buttonReceiver.h"
+#include "ledController.h"
 
-class Bluetooth : public ButtonCallbackInterface {
+class Bluetooth : public ButtonPressListener {
     SoftwareSerial BT = SoftwareSerial(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
 
-    LedManager ledManager;
+    LedController ledManager;
 
     static const char START_OF_PACKET = 0x02;  //Start of text
     static const char END_OF_PACKET = 0x03;  //End of text
@@ -31,14 +30,14 @@ class Bluetooth : public ButtonCallbackInterface {
 
     void acknowledgePacket();
 
-    void processPacketContent(String packetContent);
+    void processPacketContent(const String &packetContent);
 
     String getPacketContent();
 
-    void call(uint8_t buttonPressed) override;
+    void buttonPressed(const uint8_t &buttonPressed) override;
 
 public:
-    Bluetooth(LedManager ledArg, ButtonInterface *buttonInterface);
+    Bluetooth(const LedController &ledArg, ButtonReceiver *buttonInterface);
 
     static const char C_BUTTON_PRESS = 0x50; // "P"
 
@@ -48,7 +47,7 @@ public:
 
     void readReceived();
 
-    void sendPacket(String packetContent);
+    void sendPacket(const String &packetContent);
 
 
 };

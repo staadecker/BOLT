@@ -5,31 +5,31 @@
 #include "threader.h"
 #include "logger.h"
 
-namespace threader {
+namespace threadManager {
     static const uint8_t MAX = 8;
 
-    ThreaderCallback *callbacks[MAX] = {};
+    Thread *threads[MAX] = {};
 
-    uint8_t addCallback(ThreaderCallback *threaderCallback) {
+    void addThread(Thread *thread) {
         for (uint8_t i = 0; i < MAX; ++i) {
-            if (not callbacks[i]) {
-                callbacks[i] = threaderCallback;
-                return i;
+            if (not threads[i]) {
+                threads[i] = thread;
+                thread->threadId = i;
+                return;
             }
         }
 
         log(TYPE_ERROR, "threader", "Could not add callback. Maxed out.");
-        return MAX;
     }
 
-    void removeCallback(uint8_t id) {
-        callbacks[id] = nullptr;
+    void removeThread(Thread *thread) {
+        threads[thread->threadId] = nullptr;
     }
 
     void runThreader() {
-        for (ThreaderCallback *callback : callbacks) {
+        for (Thread *callback : threads) {
             if (callback) {
-                callback->call();
+                callback->runThread();
             }
         }
         delay(10);

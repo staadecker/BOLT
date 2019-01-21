@@ -1,25 +1,28 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "button-manager.h"
-#include "led-manager.h"
+#include "buttonShieldReceiver.h"
+#include "ledController.h"
+#include "screen.h"
+#include "threader.h"
+#include <USBAPI.h>
 
-class Game : public ButtonCallbackInterface {
+class Game : public ButtonPressListener {
     static const unsigned long GAME_TIME = 30000;
     unsigned long startTime;
     uint8_t buttonsPressed = 0;
     uint8_t ledNumber = 0;
     bool isDone = false;
 
-    ButtonInterface *buttonInterface;
-    LedManager ledManager;
+    ButtonReceiver *buttonInterface;
+    LedController ledManager;
 
     void countDown();
 
-    void call(uint8_t buttonPressed) override;
+    void buttonPressed(const uint8_t &buttonPressed) override;
 
 public:
-    Game(ButtonInterface *buttonInterface, LedManager led);
+    Game(ButtonReceiver *buttonInterface, const LedController &led);
 
     void start();
 };

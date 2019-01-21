@@ -7,15 +7,17 @@
 
 #include <stdint-gcc.h>
 
-class ThreaderCallback {
+class Thread {
 public:
-    virtual void call();
+    virtual void runThread();
+
+    uint8_t threadId = 0;
 };
 
-namespace threader {
-    uint8_t addCallback(ThreaderCallback *threaderCallback);
+namespace threadManager {
+    void addThread(Thread *thread);
 
-    void removeCallback(uint8_t id);
+    void removeThread(Thread *thread);
 
     void runThreader();
 };

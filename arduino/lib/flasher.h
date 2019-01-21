@@ -3,29 +3,28 @@
 
 #include <USBAPI.h>
 #include "constants.h"
-#include "led-manager.h"
+#include "ledController.h"
 #include "threader.h"
 
-class Flasher : ThreaderCallback {
+class Flasher : Thread {
     const unsigned int FLASHER_INTERVAL = 500;
 
     bool flashing[NUMBER_OF_LEDS] = {};
     bool stateIsOn = false;
     uint8_t numberFlashing = 0;
-    uint8_t threaderId = 0;
     unsigned long nextRun = millis();
-    LedManager ledManager;
+    LedController &ledManager;
 
     void switchState();
 
 public:
-    explicit Flasher(LedManager led);
+    explicit Flasher(LedController &led) : ledManager(led) {};
 
-    void startFlashing(uint8_t ledNumber);
+    void startFlashing(const uint8_t &ledNumber);
 
-    void stopFlashing(uint8_t ledNumber);
+    void stopFlashing(const uint8_t &ledNumber);
 
-    void call() override;
+    void runThread() override;
 };
 
 #endif

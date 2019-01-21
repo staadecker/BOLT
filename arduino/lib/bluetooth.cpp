@@ -1,13 +1,13 @@
 #include "bluetooth.h"
-
+#include "constants.h"
 #include "logger.h"
 
 
-Bluetooth::Bluetooth(LedManager ledArg, ButtonInterface *buttonInterface) : ledManager(ledArg) {
+Bluetooth::Bluetooth(const LedController &ledArg, ButtonReceiver *buttonInterface) : ledManager(ledArg) {
     BT.begin(9600);
     BT.write("AT+NOTI1");
     delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected
-    buttonInterface->setCallback(this);
+    buttonInterface->addListener(this);
 }
 
 void Bluetooth::acknowledgePacket() {
@@ -15,7 +15,7 @@ void Bluetooth::acknowledgePacket() {
     log(TYPE_INFO, "bluetooth", "Acknowledged packet");
 }
 
-void Bluetooth::processPacketContent(String packetContent) {
+void Bluetooth::processPacketContent(const String &packetContent) {
     if (packetContent.equals("")) {
         return;
     }
@@ -123,7 +123,7 @@ void Bluetooth::listen() {
     }
 }
 
-void Bluetooth::sendPacket(String packetContent) {
+void Bluetooth::sendPacket(const String &packetContent) {
     if (isOnline) {
         log(TYPE_INFO, "bluetooth", "Sent packet : " + packetContent);
         BT.write(START_OF_PACKET);
@@ -143,6 +143,6 @@ bool Bluetooth::shouldGoOnline() {
     return isOnline;
 }
 
-void Bluetooth::call(uint8_t buttonPressed) {
+void Bluetooth::buttonPressed(const uint8_t &buttonPressed) {
     sendPacket(Bluetooth::C_BUTTON_PRESS + String(buttonPressed));
 }

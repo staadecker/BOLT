@@ -2,9 +2,10 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+
 #include <WString.h>
 
 namespace screen {
-    void display(String message);
+    void display(const String &message);
 }
 #endif

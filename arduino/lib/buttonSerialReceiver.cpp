@@ -2,21 +2,16 @@
 // Created by machs on 2019-01-19.
 //
 
+
 #include <HardwareSerial.h>
 #include <USBAPI.h>
-#include "button-debug.h"
+#include "buttonSerialReceiver.h"
 
-void ButtonDebug::setCallback(ButtonCallbackInterface *buttonCallbackInterface) {
-    listener = buttonCallbackInterface;
-    threaderId = threader::addCallback(this);
+ButtonSerialReceiver::ButtonSerialReceiver() {
+    threadManager::addThread(this);
 }
 
-void ButtonDebug::removeCallback() {
-    threader::removeCallback(threaderId);
-    listener = nullptr;
-}
-
-void ButtonDebug::call() {
+void ButtonSerialReceiver::runThread() {
     if (listener and Serial.available()) {
         while (Serial.available()) {
             int value = Serial.read();
@@ -28,7 +23,7 @@ void ButtonDebug::call() {
                     delay(10);
                 }
                 //Serial.println("Debug button pressed : " + buttonNumber);
-                listener->call(static_cast<uint8_t>(buttonNumber.toInt()));
+                listener->buttonPressed(static_cast<uint8_t>(buttonNumber.toInt()));
             }
         }
     }

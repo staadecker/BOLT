@@ -1,10 +1,8 @@
-#include "lib/game.h"
-#include "lib/bluetooth.h"
-#include "lib/logger.h"
-#include "lib/screen.h"
-#include "lib/flasher.h"
 #include "main.h"
-#include "lib/button-debug.h"
+#include "lib/buttonShieldReceiver.h"
+#include "lib/buttonSerialReceiver.h"
+#include "lib/screen.h"
+#include "lib/game.h"
 
 
 void setup() {
@@ -22,18 +20,17 @@ void MainRun::run() {
 
     //Create button shield
     if (IS_BUTTONS_CONNECTED) {
-        ButtonManager buttonManagerTemp = ButtonManager::create();
-        buttonInterface = &buttonManagerTemp;
+        ButtonShieldReceiver buttonManagerTemp = ButtonShieldReceiver::create(); //Create object
+        buttonInterface = &buttonManagerTemp; //Assign to buttonInterface
     } else {
-        ButtonDebug buttonDebugTemp;
-        buttonInterface = &buttonDebugTemp;
-        buttonInterface->removeCallback();
+        ButtonSerialReceiver buttonDebugTemp; //Create object
+        buttonInterface = &buttonDebugTemp; //Assign to buttonInterface
     }
 
     //Create bluetooth
     if (IS_BLUETOOTH_CHIP_CONNECTED) {
-        Bluetooth bluetooth_tmp = Bluetooth(ledManager, buttonInterface);
-        bluetooth = &bluetooth_tmp;
+        Bluetooth bluetooth_tmp = Bluetooth(ledManager, buttonInterface); //Create object
+        bluetooth = &bluetooth_tmp; //Assign to buttonInterface
     }
 
     if (IS_LED_CONNECTED) {
@@ -45,7 +42,7 @@ void MainRun::run() {
     }
 
     while (true) {
-        threader::runThreader();
+        threadManager::runThreader();
 
         //If connected to bluetooth go in online mode
         if (bluetooth and bluetooth->shouldGoOnline()) {
@@ -75,16 +72,16 @@ void MainRun::bootUpSequence() {
     ledManager.shiftOut();
 }
 
-void MainRun::startReadyMode(Flasher flasher, ButtonInterface *buttonInterface) {
+void MainRun::startReadyMode(Flasher &flasher, ButtonReceiver *buttonReceiver) {
     screen::display("READY");
-    buttonInterface->setCallback(this);
+    buttonReceiver->addListener(this);
     flasher.startFlashing(0);
 }
 
-void MainRun::call(uint8_t buttonNumber) {
+void MainRun::buttonPressed(const uint8_t &buttonNumber) {
     if (buttonNumber == 0) {
         flasher.stopFlashing(0);
-        buttonInterface->removeCallback();
+        buttonInterface->removeListener();
 
         Game(buttonInterface, ledManager).start();
 

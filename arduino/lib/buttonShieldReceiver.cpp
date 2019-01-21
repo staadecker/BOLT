@@ -1,20 +1,20 @@
 
 #include <USBAPI.h>
-#include "button-manager.h"
+#include "buttonShieldReceiver.h"
 #include "constants.h"
 
-ButtonManager ButtonManager::buttonManager = ButtonManager();
+ButtonShieldReceiver ButtonShieldReceiver::buttonShield = ButtonShieldReceiver();
 
-ButtonManager::ButtonManager() = default;
+ButtonShieldReceiver::ButtonShieldReceiver() = default;
 
-ButtonManager ButtonManager::create() {
+ButtonShieldReceiver ButtonShieldReceiver::create() {
     attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), isr,
                     FALLING); //Attach interrupt for 64 button shield
     Serial.println("Created isr");
-    return ButtonManager::buttonManager;
+    return ButtonShieldReceiver::buttonShield;
 }
 
-void ButtonManager::isr() {
+void ButtonShieldReceiver::isr() {
     uint8_t button = 0;
 
     for (int i = 0; i < 8; i++) {
@@ -32,17 +32,8 @@ void ButtonManager::isr() {
     }
 
     if (button > 64) {  // If button pressed
-        if (buttonManager.callback) {
-            buttonManager.callback->call(button - uint8_t(129));
+        if (buttonShield.listener) {
+            buttonShield.listener->buttonPressed(button - uint8_t(129));
         }
     }
-}
-
-
-void ButtonManager::setCallback(ButtonCallbackInterface *callbackArg) {
-    callback = callbackArg;
-}
-
-void ButtonManager::removeCallback() {
-    callback = nullptr;
 }

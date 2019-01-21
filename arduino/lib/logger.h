@@ -10,7 +10,7 @@ const byte TYPE_INFO = 2;
 const byte TYPE_DEBUG = 3;
 
 
-void log(byte type, String fileName, String message);
+void log(const byte &type, const String &fileName, const String &message);
 
 
 #endif

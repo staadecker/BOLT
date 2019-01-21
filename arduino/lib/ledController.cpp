@@ -1,14 +1,13 @@
-#include <USBAPI.h>
-#include "led-manager.h"
+#include "ledController.h"
 
-LedManager::LedManager() {
+LedController::LedController() {
     pinMode(P_LED_VCC, OUTPUT);
     pinMode(P_LED_DATA, OUTPUT);
     pinMode(P_LED_CLOCK, OUTPUT);
     pinMode(P_LED_LATCH, OUTPUT);
 }
 
-void LedManager::shiftOut() {
+void LedController::shiftOut() {
     //Latch Low. VCC high
     digitalWrite(P_LED_VCC, HIGH);
     digitalWrite(P_LED_LATCH, LOW);
@@ -32,13 +31,13 @@ void LedManager::shiftOut() {
 
 }
 
-void LedManager::turnOn(uint8_t ledNumber) {
+void LedController::turnOn(const uint8_t &ledNumber) {
     //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " ON");
 
     states[ledNumber] = HIGH;
 }
 
-void LedManager::turnOff(uint8_t ledNumber) {
+void LedController::turnOff(const uint8_t &ledNumber) {
     //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " OFF");
 
     states[ledNumber] = LOW;

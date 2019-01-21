@@ -5,21 +5,23 @@
 #ifndef BOLT_MAIN_H
 #define BOLT_MAIN_H
 
-#include "lib/button-interface.h"
+
+#include "lib/ledController.h"
 #include "lib/flasher.h"
+#include "lib/bluetooth.h"
+#include "lib/buttonReceiver.h"
 
-
-class MainRun : public ButtonCallbackInterface {
-    LedManager ledManager; //Create an led manager
+class MainRun : public ButtonPressListener {
+    LedController ledManager; //Create an led manager
     Flasher flasher = Flasher(ledManager); //Create a flasher
-    ButtonInterface *buttonInterface = nullptr;
+    ButtonReceiver *buttonInterface = nullptr;
     Bluetooth *bluetooth = nullptr;
 
     void bootUpSequence();
 
-    void startReadyMode(Flasher flasher, ButtonInterface *buttonInterface);
+    void startReadyMode(Flasher &flasher, ButtonReceiver *buttonReceiver);
 
-    void call(uint8_t buttonNumber) override;
+    void buttonPressed(const uint8_t &buttonNumber) override;
 
 public:
     void run();
