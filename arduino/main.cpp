@@ -38,7 +38,7 @@ void MainRun::run() {
     }
 
     if (not bluetooth or (not bluetooth->shouldGoOnline())) {
-        startReadyMode(flasher, buttonInterface); //Unless already connected start ready mode
+        startReadyMode(); //Unless already connected start ready mode
     }
 
     while (true) {
@@ -52,7 +52,7 @@ void MainRun::run() {
             bluetooth->listen();
 
             //When disconnected
-            startReadyMode(flasher, buttonInterface);
+            startReadyMode();
         }
     }
 }
@@ -72,9 +72,9 @@ void MainRun::bootUpSequence() {
     ledManager.shiftOut();
 }
 
-void MainRun::startReadyMode(Flasher &flasher, ButtonReceiver *buttonReceiver) {
+void MainRun::startReadyMode() {
     screen::display("READY");
-    buttonReceiver->addListener(this);
+    buttonInterface->addListener(this);
     flasher.startFlashing(0);
 }
 
@@ -86,7 +86,7 @@ void MainRun::buttonPressed(const uint8_t &buttonNumber) {
         Game(buttonInterface, ledManager).start();
 
         //When game ends
-        startReadyMode(flasher, buttonInterface);
+        startReadyMode();
     }
 }
 

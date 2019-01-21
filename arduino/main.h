@@ -19,7 +19,7 @@ class MainRun : public ButtonPressListener {
 
     void bootUpSequence();
 
-    void startReadyMode(Flasher &flasher, ButtonReceiver *buttonReceiver);
+    void startReadyMode();
 
     void buttonPressed(const uint8_t &buttonNumber) override;
 

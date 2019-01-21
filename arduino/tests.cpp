@@ -54,7 +54,7 @@ class OnPrintCallback : public ButtonPressListener { ;
 void printButtonPressTest() {
     Serial.begin(9600);
 
-    ButtonShieldReceiver buttonManager = ButtonShieldReceiver::ButtonShieldReceiver();
+    ButtonShieldReceiver buttonManager = ButtonShieldReceiver::create();
     OnPrintCallback callbackTemp = OnPrintCallback();
     buttonManager.addListener(&callbackTemp);
 }

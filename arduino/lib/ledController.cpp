@@ -1,4 +1,5 @@
 #include "ledController.h"
+#include "logger.h"
 
 LedController::LedController() {
     pinMode(P_LED_VCC, OUTPUT);
@@ -32,7 +33,7 @@ void LedController::shiftOut() {
 }
 
 void LedController::turnOn(const uint8_t &ledNumber) {
-    //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " ON");
+    log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " ON");
 
     states[ledNumber] = HIGH;
 }
