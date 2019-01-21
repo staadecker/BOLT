@@ -12,3 +12,11 @@ Check [`bolt-arduino/constants.h`](bolt-arduino/constants.h) to find what pins t
 
 Follow [this tutorial](https://blog.yavilevich.com/2018/04/should-you-throw-away-your-cc41-hm-10-clones-now-that-android-8-is-here/).
 
+# Setting up CLion 
+
+Make sure to update CMakeLists.txt for your OS.
+
+## For Windows
+
+Use the official distribution of MinGW as the toolchain. See [here](http://mingw.org/wiki/Getting_Started). Install with GUI and then install gcc-core, gcc-g++ and Make.
+
