@@ -1,8 +1,8 @@
 #include "game.h"
 
 
-Game::Game(ButtonReceiver *buttonInterface, const LedController &led) : buttonInterface(buttonInterface),
-                                                                        ledManager(led) {}
+Game::Game(ButtonReceiver *buttonReceiver, LedController &ledController, DoneGameCallback *doneGameCallback)
+        : buttonReceiver(buttonReceiver), ledController(ledController), doneGameCallback(doneGameCallback) {}
 
 void Game::countDown() {
     screen::display("3");
@@ -16,38 +16,36 @@ void Game::countDown() {
 void Game::start() {
     countDown();
 
-    buttonInterface->addListener(this);
+    buttonReceiver->addListener(this);
 
     startTime = millis();
 
     ledNumber = static_cast<uint8_t>(random(0, NUMBER_OF_LEDS));  //Generate random button
-    ledManager.turnOn(ledNumber);
-    ledManager.shiftOut();
-
-    while (not isDone) {
-        //screen::display(String(millis() - startTime));
-        threadManager::runThreader();
-    }
-
-    unsigned long averageReactionSpeed = (millis() - startTime) / buttonsPressed;
-
-    screen::display(String(averageReactionSpeed) + " average speed in millis");
-    delay(2000);
+    ledController.turnOn(ledNumber);
+    ledController.shiftOut();
 }
 
 void Game::buttonPressed(const uint8_t &buttonPressed) {
     if (buttonPressed == ledNumber) {
         buttonsPressed++;
-        ledManager.turnOff(ledNumber);
+        ledController.turnOff(ledNumber);
 
-        if (millis() > startTime + GAME_TIME) {
-            buttonInterface->removeListener();
-            ledManager.shiftOut();
-            isDone = true;
-        } else {
+        if (millis() <= startTime + GAME_TIME) {
             ledNumber = static_cast<uint8_t>(random(0, NUMBER_OF_LEDS));  //Generate random button
-            ledManager.turnOn(ledNumber);
-            ledManager.shiftOut();
+            ledController.turnOn(ledNumber);
+            ledController.shiftOut();
+        } else {
+            buttonReceiver->removeListener();
+            ledController.shiftOut();
+            unsigned long averageReactionSpeed = (millis() - startTime) / buttonsPressed;
+            char screenMessage[29];
+
+            sprintf(screenMessage, "%04d", averageReactionSpeed);
+            strcat(screenMessage, " average speed in millis");
+
+            screen::display(screenMessage);
+            delay(2000);
+            doneGameCallback->done();
         }
     }
 }

@@ -5,13 +5,15 @@
 #ifndef BOLT_THREADER_H
 #define BOLT_THREADER_H
 
-#include <stdint-gcc.h>
+namespace threadManager {
+    static const unsigned char MAX = 8;
+}
 
 class Thread {
 public:
     virtual void runThread();
 
-    uint8_t threadId = 0;
+    unsigned char threadId = threadManager::MAX;
 };
 
 namespace threadManager {

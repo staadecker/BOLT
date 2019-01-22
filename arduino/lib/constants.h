@@ -20,7 +20,7 @@ const bool IS_SCREEN_CONNECTED = false;
 const bool IS_BLUETOOTH_CHIP_CONNECTED = false;
 const bool IS_LED_CONNECTED = false;
 
-const uint8_t NUMBER_OF_LEDS = 64;
+const unsigned char NUMBER_OF_LEDS = 64;
 
 
 #endif

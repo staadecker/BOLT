@@ -1,9 +1,10 @@
+#include <string.h>
+#include <HardwareSerial.h>
 #include "screen.h"
-#include "logger.h"
-
 
 namespace screen {
-    void display(const String &message) {
-        log(TYPE_INFO, "screen", "Displaying : \"" + message + "\"");
+    void display(const char *message) {
+        Serial.print("Displaying: ");
+        Serial.println(message);
     }
 }

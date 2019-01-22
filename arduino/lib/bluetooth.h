@@ -4,14 +4,12 @@
 #include <SoftwareSerial.h>
 #include "buttonReceiver.h"
 #include "ledController.h"
+#include "threader.h"
+#include "doneGameCallback.h"
 
-class Bluetooth : public ButtonPressListener {
-    SoftwareSerial BT = SoftwareSerial(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
-
-    LedController ledManager;
-
-    static const char START_OF_PACKET = 0x02;  //Start of text
-    static const char END_OF_PACKET = 0x03;  //End of text
+class Bluetooth : public ButtonPressListener, public Thread {
+    static const char START_OF_PACKET = 0x02;  //Start of packet
+    static const char END_OF_PACKET = 0x03;  //End of packet
     static const char ACKNOWLEDGE = 0x06; //Acknowledge
 
     static const char C_BEGIN = 0x42; //"B"
@@ -19,37 +17,39 @@ class Bluetooth : public ButtonPressListener {
     static const char C_TURN_OFF_LED = 0x49; //"I"
     static const char C_TURN_ON_LED = 0x4F; //"O"
     static const char C_SHIFT_OUT = 0x53; //"S"
+    static const char C_BUTTON_PRESS = 0x50; // "P"
 
-    static const unsigned long PACKET_TIMEOUT = 1000;
+    static constexpr char BEGIN_PACKET[] = {START_OF_PACKET, C_BEGIN, END_OF_PACKET};
+
     static const unsigned int ACKNOWLEDGE_TIMEOUT = 2000;
 
-    bool isOnline = false;
+    SoftwareSerial BT = SoftwareSerial(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
 
-    bool activeTimeOut = false;
     volatile unsigned long acknowledgeTimeout = 0;
 
-    void acknowledgePacket();
-
-    void processPacketContent(const String &packetContent);
-
-    String getPacketContent();
+    LedController &ledManager;
+    DoneGameCallback *doneGameCallback;
+    ButtonReceiver *buttonReceiver;
 
     void buttonPressed(const uint8_t &buttonPressed) override;
 
+    char *readReceived();
+
+    bool containsBeginPacket(const char *content);
+
+    void sendPacket(const char *packetContent);
+
+    void runThread() override;
+
+    void exitBluetoothMode();
+
+    void analyzeContent(const char *content);
 public:
-    Bluetooth(const LedController &ledArg, ButtonReceiver *buttonInterface);
+    Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback);
 
-    static const char C_BUTTON_PRESS = 0x50; // "P"
-
-    void listen();
+    void goOnline();
 
     bool shouldGoOnline();
-
-    void readReceived();
-
-    void sendPacket(const String &packetContent);
-
-
 };
 
 #endif

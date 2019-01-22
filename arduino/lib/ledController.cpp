@@ -1,5 +1,5 @@
+#include <USBAPI.h>
 #include "ledController.h"
-#include "logger.h"
 
 LedController::LedController() {
     pinMode(P_LED_VCC, OUTPUT);
@@ -32,8 +32,9 @@ void LedController::shiftOut() {
 
 }
 
-void LedController::turnOn(const uint8_t &ledNumber) {
-    log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " ON");
+void LedController::turnOn(const unsigned char &ledNumber) {
+    Serial.print("Turn ON led number ");
+    Serial.println(ledNumber);
 
     states[ledNumber] = HIGH;
 }

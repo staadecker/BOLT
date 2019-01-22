@@ -9,8 +9,11 @@ void setup() {
     MainRun().run();
 }
 
-void loop() {}
+void loop() {
+    threadManager::runThreader();
+}
 
+MainRun::MainRun() = default;
 
 void MainRun::run() {
     Serial.begin(9600);
@@ -21,15 +24,15 @@ void MainRun::run() {
     //Create button shield
     if (IS_BUTTONS_CONNECTED) {
         ButtonShieldReceiver buttonManagerTemp = ButtonShieldReceiver::create(); //Create object
-        buttonInterface = &buttonManagerTemp; //Assign to buttonInterface
+        buttonReceiver = &buttonManagerTemp; //Assign to buttonInterface
     } else {
         ButtonSerialReceiver buttonDebugTemp; //Create object
-        buttonInterface = &buttonDebugTemp; //Assign to buttonInterface
+        buttonReceiver = &buttonDebugTemp; //Assign to buttonInterface
     }
 
     //Create bluetooth
     if (IS_BLUETOOTH_CHIP_CONNECTED) {
-        Bluetooth bluetooth_tmp = Bluetooth(ledManager, buttonInterface); //Create object
+        Bluetooth bluetooth_tmp = Bluetooth(ledController, buttonReceiver, this); //Create object
         bluetooth = &bluetooth_tmp; //Assign to buttonInterface
     }
 
@@ -37,57 +40,49 @@ void MainRun::run() {
         bootUpSequence();
     }
 
-    if (not bluetooth or (not bluetooth->shouldGoOnline())) {
-        startReadyMode(); //Unless already connected start ready mode
-    }
-
-    while (true) {
-        threadManager::runThreader();
-
-        //If connected to bluetooth go in online mode
-        if (bluetooth and bluetooth->shouldGoOnline()) {
-            flasher.stopFlashing(0);
-            screen::display("ONLINE");
-
-            bluetooth->listen();
-
-            //When disconnected
-            startReadyMode();
-        }
-    }
+    done(); // Go to the same mode as if a game ended
 }
 
 // Makes chasing lights on the outer circle
 void MainRun::bootUpSequence() {
     for (uint8_t i = 32; i < 64; i++) {
-        ledManager.turnOn(i);
-        ledManager.shiftOut();
+        ledController.turnOn(i);
+        ledController.shiftOut();
         delay(70);
-        ledManager.turnOff(i);
+        ledController.turnOff(i);
     }
 
     for (uint8_t i = 0; i < 64; i++) {
-        ledManager.turnOff(i);
+        ledController.turnOff(i);
     }
-    ledManager.shiftOut();
-}
-
-void MainRun::startReadyMode() {
-    screen::display("READY");
-    buttonInterface->addListener(this);
-    flasher.startFlashing(0);
+    ledController.shiftOut();
 }
 
 void MainRun::buttonPressed(const uint8_t &buttonNumber) {
     if (buttonNumber == 0) {
         flasher.stopFlashing(0);
-        buttonInterface->removeListener();
+        buttonReceiver->removeListener();
+        threadManager::removeThread(this);
 
-        Game(buttonInterface, ledManager).start();
-
-        //When game ends
-        startReadyMode();
+        Game(buttonReceiver, ledController, this).start();
     }
 }
 
+void MainRun::done() {
+    screen::display("READY");
+    buttonReceiver->addListener(this);
+    flasher.startFlashing(0);
+    threadManager::addThread(this);
+}
+
+void MainRun::runThread() {
+    if (bluetooth and bluetooth->shouldGoOnline()) {
+        flasher.stopFlashing(0);
+        buttonReceiver->removeListener();
+        threadManager::removeThread(this);
+
+        screen::display("ONLINE");
+        bluetooth->goOnline();
+    }
+}
 

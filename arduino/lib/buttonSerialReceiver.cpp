@@ -17,13 +17,14 @@ void ButtonSerialReceiver::runThread() {
             int value = Serial.read();
             delay(10);
             if (value == 80) {
-                String buttonNumber = "";
-                while (Serial.available()) {
-                    buttonNumber += (char) Serial.read();
+                char buttonNumber[3];
+                unsigned char index = 0;
+                while (index < 2 and Serial.available()) {
+                    buttonNumber[index] = (char) Serial.read();
                     delay(10);
+                    index++;
                 }
-                //Serial.println("Debug button pressed : " + buttonNumber);
-                listener->buttonPressed(static_cast<uint8_t>(buttonNumber.toInt()));
+                listener->buttonPressed(static_cast<uint8_t>(atoi(buttonNumber)));
             }
         }
     }

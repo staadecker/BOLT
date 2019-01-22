@@ -1,21 +1,21 @@
 #ifndef LED_H
 #define LED_H
 
-#include <USBAPI.h>
+
 #include "constants.h"
 
 class LedController {
-    const uint8_t VCC_PWM = 95; //Value to adjust for optimal 2V output voltage
+    const unsigned char VCC_PWM = 95; //Value to adjust for optimal 2V output voltage
 
     // Array keeping track of states
-    uint8_t states[NUMBER_OF_LEDS] = {};
+    unsigned char states[NUMBER_OF_LEDS] = {}; //TODO switch to boolean
 
 public:
     LedController();
 
-    void turnOn(const uint8_t &ledNumber);
+    void turnOn(const unsigned char &ledNumber);
 
-    void turnOff(const uint8_t &ledNumber);
+    void turnOff(const unsigned char &ledNumber);
 
     void shiftOut();
 };

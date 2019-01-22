@@ -1,148 +1,149 @@
+#include <USBAPI.h>
 #include "bluetooth.h"
-#include "constants.h"
-#include "logger.h"
 
+constexpr char Bluetooth::BEGIN_PACKET[3]; //Do not remove or else doesn't compile.
 
-Bluetooth::Bluetooth(const LedController &ledArg, ButtonReceiver *buttonInterface) : ledManager(ledArg) {
+Bluetooth::Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback)
+        : ledManager(ledArg), doneGameCallback(doneGameCallback), buttonReceiver(buttonReceiver) {
     BT.begin(9600);
-    BT.write("AT+NOTI1");
-    delay(1000); //Delay to allow BT chip to send response to AT command to see if device is connected
-    buttonInterface->addListener(this);
-}
-
-void Bluetooth::acknowledgePacket() {
-    BT.write(ACKNOWLEDGE);
-    log(TYPE_INFO, "bluetooth", "Acknowledged packet");
-}
-
-void Bluetooth::processPacketContent(const String &packetContent) {
-    if (packetContent.equals("")) {
-        return;
-    }
-
-    char command = packetContent[0];
-    String argument = packetContent.substring(1);
-
-    if (command == C_BEGIN) {
-        isOnline = true;
-        acknowledgePacket();
-    }
-
-        //Only analyse packet if a connection is already made
-    else if (isOnline) {
-        switch (command) {
-            case C_END:
-                isOnline = false;
-                break;
-            case C_TURN_ON_LED:
-                ledManager.turnOn(static_cast<uint8_t>(argument.toInt()));
-                break;
-            case C_TURN_OFF_LED:
-                ledManager.turnOff(static_cast<uint8_t>(argument.toInt()));
-                break;
-            case C_SHIFT_OUT:
-                ledManager.shiftOut();
-                break;
-            default:
-                log(TYPE_ERROR, "bluetooth", "can't parse packet : " + packetContent);
-        }
-
-        acknowledgePacket();
-    }
-}
-
-String Bluetooth::getPacketContent() {
-    String packet = "";
-
-    unsigned long timeOutTime = millis() + PACKET_TIMEOUT;
-
-    while (millis() < timeOutTime) {
-        if (BT.available()) {
-            auto newByte = static_cast<char>(BT.read());
-            delay(10);
-
-            timeOutTime = millis() + PACKET_TIMEOUT;
-
-            if (newByte == END_OF_PACKET) {
-                log(TYPE_INFO, "bluetooth", "Received packet : " + packet);
-                return packet;
-            } else {
-                packet += newByte;
-            }
-        }
-    }
-
-    log(TYPE_WARNING, "bluetooth", "Timeout while reading packet content: " + packet);
-    return ""; // If while loop ended because off timeout, end game
-}
-
-void Bluetooth::readReceived() {
-    Serial.println("Reading received");
-    delay(1000);
-    if (BT.available()) {
-        String unknown = "";
-
-        while (BT.available()) {
-            auto newByte = char(BT.read());
-            delay(10);
-
-            switch (newByte) {
-                case ACKNOWLEDGE:
-                    log(TYPE_INFO, "bluetooth", "Received acknowledge");
-                    activeTimeOut = false;
-                    break;
-                case START_OF_PACKET:
-                    processPacketContent(getPacketContent());
-                    break;
-                default:
-                    unknown += newByte;
-
-            }
-        }
-
-        if (unknown.equals("OK+LOST")) {
-            isOnline = false;
-        } else if (unknown.equals("OK+CONN")) {
-            log(TYPE_INFO, "bluetooth", "A device connected to the board");
-        } else if (unknown.equals("OK+Set:1")) {
-            //Response from AT command. To ignore.
-        } else if (not unknown.equals("")) {
-            log(TYPE_WARNING, "bluetooth", "Received unknown bytes: " + unknown);
-        }
-    }
-}
-
-void Bluetooth::listen() {
-    while (isOnline) {
-        readReceived();
-        if (activeTimeOut and millis() > acknowledgeTimeout) {
-            isOnline = false;
-            activeTimeOut = false;
-            log(TYPE_WARNING, "bluetooth", "No acknowledge received. Disconnecting");
-        }
-    }
-}
-
-void Bluetooth::sendPacket(const String &packetContent) {
-    if (isOnline) {
-        log(TYPE_INFO, "bluetooth", "Sent packet : " + packetContent);
-        BT.write(START_OF_PACKET);
-        for (unsigned int i = 0; i < packetContent.length(); i++) {
-            BT.write(static_cast<uint8_t>(packetContent.charAt(i)));
-        }
-        BT.write(END_OF_PACKET);
-
-        if (!activeTimeOut) {
-            acknowledgeTimeout = millis() + ACKNOWLEDGE_TIMEOUT;
-        }
-    }
 }
 
 bool Bluetooth::shouldGoOnline() {
-    readReceived();
-    return isOnline;
+    return containsBeginPacket(readReceived());
 }
 
-void Bluetooth::buttonPressed(const uint8_t &buttonPressed) {
-    sendPacket(Bluetooth::C_BUTTON_PRESS + String(buttonPressed));
+void Bluetooth::goOnline() {
+    buttonReceiver->addListener(this);
+    threadManager::addThread(this);
+}
+
+void Bluetooth::runThread() {
+    analyzeContent(readReceived());
+}
+
+bool Bluetooth::containsBeginPacket(const char *content) {
+    return strstr(content, BEGIN_PACKET);
+}
+
+char *Bluetooth::readReceived() {
+    static char content[256];
+
+    unsigned char index = 0;
+    while (BT.available() and index < 255) {
+        content[index] = char(BT.read());
+        delay(10);
+        index++;
+    }
+
+    content[index + 1] = '\0';
+
+    return content;
+}
+
+
+void Bluetooth::sendPacket(const char *packetContent) {
+    Serial.print("Sent packet: ");
+    Serial.println(packetContent);
+
+    char packet[sizeof(packetContent) + 2];
+    packet[0] = START_OF_PACKET;
+    strcat(packet, packetContent);
+    packet[strlen(packet)] = END_OF_PACKET;
+    packet[strlen(packet) + 1] = '\0';
+
+    BT.write(packet);
+
+    if (acknowledgeTimeout == -1u) {
+        acknowledgeTimeout = millis() + ACKNOWLEDGE_TIMEOUT;
+    }
+}
+
+
+void Bluetooth::analyzeContent(const char *content) {
+    uint8_t index = 0;
+
+    while (index < strlen(content)) {
+        if (content[index] == START_OF_PACKET) {
+            bool packetDone = false;
+
+            while (!packetDone) {
+                if (index >= strlen(content)) {
+                    Serial.println("Did not receive end of packet byte");
+                    break;
+                }
+
+                switch (content[index]) {
+                    case C_BEGIN: {
+                        index++;
+                        break;
+                    }
+                    case C_END: {
+                        index++;
+                        exitBluetoothMode();
+                        break;
+                    }
+                    case C_TURN_ON_LED: {
+                        char ledNumber[3];
+                        ledNumber[0] = content[index + 1];
+                        ledNumber[1] = content[index + 2];
+                        ledNumber[2] = '\0';
+
+                        ledManager.turnOn(atoi(ledNumber));
+                        index += 3;
+                        break;
+                    }
+
+                    case C_TURN_OFF_LED: {
+                        char ledNumber[3];
+                        ledNumber[0] = content[index + 1];
+                        ledNumber[1] = content[index + 2];
+                        ledNumber[2] = '\0';
+
+
+                        ledManager.turnOff(static_cast<const unsigned char &>(atoi(ledNumber)));
+                        index += 3;
+                        break;
+                    }
+                    case C_SHIFT_OUT: {
+                        ledManager.shiftOut();
+                        index++;
+                        break;
+                    }
+                    case END_OF_PACKET: {
+                        index++;
+                        packetDone = true;
+                        BT.write(ACKNOWLEDGE);
+                        break;
+                    }
+                    default: {
+                        packetDone = true; //This will exit the inner loop and result in the error being printed in the loop bellow.
+                    }
+                }
+            }
+        } else if (content[index] == ACKNOWLEDGE) {
+            acknowledgeTimeout = -1uL;
+            index++;
+        } else {
+            Serial.print("Could not parse this content: ");
+            Serial.println(content);
+            break;
+        }
+    }
+}
+
+void Bluetooth::buttonPressed(const unsigned char &buttonPressed) {
+    char packetContent[4];
+    packetContent[0] = Bluetooth::C_BUTTON_PRESS;
+
+    char buttonNumber[3];
+    sprintf(buttonNumber, "%05d", buttonPressed);
+    strcat(packetContent, buttonNumber);
+
+    sendPacket(packetContent);
+}
+
+void Bluetooth::exitBluetoothMode() {
+    threadManager::removeThread(this);
+    buttonReceiver->removeListener();
+    doneGameCallback->done();
 }
