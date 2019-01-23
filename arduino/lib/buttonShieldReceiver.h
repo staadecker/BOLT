@@ -13,7 +13,9 @@ class ButtonShieldReceiver : public ButtonReceiver {
     static void isr();
 
 public:
-    static ButtonShieldReceiver create();
+    static ButtonShieldReceiver &create();
+
+    void checkForButtonPress() override;
 };
 
 

@@ -4,7 +4,7 @@
 
 namespace screen {
     void display(const char *message) {
-        Serial.print("Displaying: ");
+        Serial.print(F("Displaying: "));
         Serial.println(message);
     }
 }

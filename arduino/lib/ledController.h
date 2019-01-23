@@ -8,7 +8,7 @@ class LedController {
     const unsigned char VCC_PWM = 95; //Value to adjust for optimal 2V output voltage
 
     // Array keeping track of states
-    unsigned char states[NUMBER_OF_LEDS] = {}; //TODO switch to boolean
+    bool states[NUMBER_OF_LEDS] = {}; //TODO switch to boolean
 
 public:
     LedController();

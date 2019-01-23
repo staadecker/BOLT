@@ -7,10 +7,10 @@ ButtonShieldReceiver ButtonShieldReceiver::buttonShield = ButtonShieldReceiver()
 
 ButtonShieldReceiver::ButtonShieldReceiver() = default;
 
-ButtonShieldReceiver ButtonShieldReceiver::create() {
+ButtonShieldReceiver &ButtonShieldReceiver::create() {
     attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), isr,
                     FALLING); //Attach interrupt for 64 button shield
-    Serial.println("Created isr");
+    Serial.println(F("Created isr"));
     return ButtonShieldReceiver::buttonShield;
 }
 
@@ -37,3 +37,5 @@ void ButtonShieldReceiver::isr() {
         }
     }
 }
+
+void ButtonShieldReceiver::checkForButtonPress() {}

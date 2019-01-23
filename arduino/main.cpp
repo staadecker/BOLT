@@ -1,50 +1,35 @@
-#include "main.h"
 #include "lib/buttonShieldReceiver.h"
 #include "lib/buttonSerialReceiver.h"
 #include "lib/screen.h"
 #include "lib/game.h"
+#include "lib/bluetooth.h"
+#include <MemoryUsage.h>
+#include <Arduino.h>
 
+LedController ledController; //Create an led manager
+//Flasher flasher = Flasher(ledController); //Create a flasher
+ButtonReceiver *buttonReceiver;
+Bluetooth *bluetooth = nullptr;
 
-void setup() {
-    MainRun().run();
-}
+class MainButtonListener : public ButtonPressListener {
+    void buttonPressed(const unsigned char &buttonNumber) override {
+        if (buttonNumber == 0) {
+            //flasher.stopFlashing(0);
+            buttonReceiver->removeListener();
 
-void loop() {
-    threadManager::runThreader();
-}
+            Game(buttonReceiver, ledController).start();
 
-MainRun::MainRun() = default;
+            screen::display("READY");
+            buttonReceiver->addListener(this);
 
-void MainRun::run() {
-    Serial.begin(9600);
-
-    //Generate new random seed such that button sequence is different each time
-    randomSeed(static_cast<unsigned long>(analogRead(0)));
-
-    //Create button shield
-    if (IS_BUTTONS_CONNECTED) {
-        ButtonShieldReceiver buttonManagerTemp = ButtonShieldReceiver::create(); //Create object
-        buttonReceiver = &buttonManagerTemp; //Assign to buttonInterface
-    } else {
-        ButtonSerialReceiver buttonDebugTemp; //Create object
-        buttonReceiver = &buttonDebugTemp; //Assign to buttonInterface
+        }
     }
+};
 
-    //Create bluetooth
-    if (IS_BLUETOOTH_CHIP_CONNECTED) {
-        Bluetooth bluetooth_tmp = Bluetooth(ledController, buttonReceiver, this); //Create object
-        bluetooth = &bluetooth_tmp; //Assign to buttonInterface
-    }
+MainButtonListener mainButtonListener = MainButtonListener();
 
-    if (IS_LED_CONNECTED) {
-        bootUpSequence();
-    }
-
-    done(); // Go to the same mode as if a game ended
-}
-
-// Makes chasing lights on the outer circle
-void MainRun::bootUpSequence() {
+//// Makes chasing lights on the outer circle
+static void bootUpSequence() {
     for (uint8_t i = 32; i < 64; i++) {
         ledController.turnOn(i);
         ledController.shiftOut();
@@ -58,31 +43,46 @@ void MainRun::bootUpSequence() {
     ledController.shiftOut();
 }
 
-void MainRun::buttonPressed(const uint8_t &buttonNumber) {
-    if (buttonNumber == 0) {
-        flasher.stopFlashing(0);
-        buttonReceiver->removeListener();
-        threadManager::removeThread(this);
 
-        Game(buttonReceiver, ledController, this).start();
+void setup() {
+    Serial.begin(9600);
+    Serial.println(F("Starting code..."));
+
+    //Generate new random seed such that button sequence is different each time
+    randomSeed(static_cast<unsigned long>(analogRead(0)));
+
+    //Create button shield
+    if (IS_BUTTONS_CONNECTED) {
+        buttonReceiver = &ButtonShieldReceiver::create(); //Assign to buttonInterface
+    } else {
+        static ButtonSerialReceiver buttonSerialReceiverTmp; //Create object
+        buttonReceiver = &buttonSerialReceiverTmp; //Assign to buttonInterface
     }
-}
 
-void MainRun::done() {
+    //Create bluetooth
+    if (IS_BLUETOOTH_CHIP_CONNECTED) {
+        static Bluetooth bluetooth_tmp = Bluetooth(ledController, buttonReceiver); //Create object
+        bluetooth = &bluetooth_tmp; //Assign to buttonInterface
+    }
+
+    if (IS_LED_CONNECTED) {
+        bootUpSequence();
+    }
+
     screen::display("READY");
-    buttonReceiver->addListener(this);
-    flasher.startFlashing(0);
-    threadManager::addThread(this);
+    buttonReceiver->addListener(&mainButtonListener);
 }
 
-void MainRun::runThread() {
-    if (bluetooth and bluetooth->shouldGoOnline()) {
-        flasher.stopFlashing(0);
+void loop() {
+    buttonReceiver->checkForButtonPress();
+
+    if (bluetooth != nullptr and bluetooth->shouldGoOnline()) {
+        //flasher.stopFlashing(0);
         buttonReceiver->removeListener();
-        threadManager::removeThread(this);
 
         screen::display("ONLINE");
         bluetooth->goOnline();
+        screen::display("READY");
+        buttonReceiver->addListener(&mainButtonListener);
     }
 }
-

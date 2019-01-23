@@ -3,8 +3,8 @@
 
 constexpr char Bluetooth::BEGIN_PACKET[3]; //Do not remove or else doesn't compile.
 
-Bluetooth::Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback)
-        : ledManager(ledArg), doneGameCallback(doneGameCallback), buttonReceiver(buttonReceiver) {
+Bluetooth::Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver)
+        : ledManager(ledArg), buttonReceiver(buttonReceiver) {
     BT.begin(9600);
 }
 
@@ -14,11 +14,11 @@ bool Bluetooth::shouldGoOnline() {
 
 void Bluetooth::goOnline() {
     buttonReceiver->addListener(this);
-    threadManager::addThread(this);
-}
+    while (analyzeContent(readReceived())) {
+        buttonReceiver->checkForButtonPress();
+    }
 
-void Bluetooth::runThread() {
-    analyzeContent(readReceived());
+    buttonReceiver->removeListener();
 }
 
 bool Bluetooth::containsBeginPacket(const char *content) {
@@ -42,7 +42,7 @@ char *Bluetooth::readReceived() {
 
 
 void Bluetooth::sendPacket(const char *packetContent) {
-    Serial.print("Sent packet: ");
+    Serial.print(F("Sent packet: "));
     Serial.println(packetContent);
 
     char packet[sizeof(packetContent) + 2];
@@ -59,7 +59,7 @@ void Bluetooth::sendPacket(const char *packetContent) {
 }
 
 
-void Bluetooth::analyzeContent(const char *content) {
+bool Bluetooth::analyzeContent(const char *content) {
     uint8_t index = 0;
 
     while (index < strlen(content)) {
@@ -68,7 +68,7 @@ void Bluetooth::analyzeContent(const char *content) {
 
             while (!packetDone) {
                 if (index >= strlen(content)) {
-                    Serial.println("Did not receive end of packet byte");
+                    Serial.println(F("Did not receive end of packet byte"));
                     break;
                 }
 
@@ -78,9 +78,7 @@ void Bluetooth::analyzeContent(const char *content) {
                         break;
                     }
                     case C_END: {
-                        index++;
-                        exitBluetoothMode();
-                        break;
+                        return false;
                     }
                     case C_TURN_ON_LED: {
                         char ledNumber[3];
@@ -124,11 +122,12 @@ void Bluetooth::analyzeContent(const char *content) {
             acknowledgeTimeout = -1uL;
             index++;
         } else {
-            Serial.print("Could not parse this content: ");
+            Serial.print(F("Could not parse this content: "));
             Serial.println(content);
-            break;
+            return false;
         }
     }
+    return true;
 }
 
 void Bluetooth::buttonPressed(const unsigned char &buttonPressed) {
@@ -140,10 +139,4 @@ void Bluetooth::buttonPressed(const unsigned char &buttonPressed) {
     strcat(packetContent, buttonNumber);
 
     sendPacket(packetContent);
-}
-
-void Bluetooth::exitBluetoothMode() {
-    threadManager::removeThread(this);
-    buttonReceiver->removeListener();
-    doneGameCallback->done();
 }

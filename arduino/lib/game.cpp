@@ -1,8 +1,8 @@
 #include "game.h"
 
 
-Game::Game(ButtonReceiver *buttonReceiver, LedController &ledController, DoneGameCallback *doneGameCallback)
-        : buttonReceiver(buttonReceiver), ledController(ledController), doneGameCallback(doneGameCallback) {}
+Game::Game(ButtonReceiver *buttonReceiver, LedController &ledController)
+        : buttonReceiver(buttonReceiver), ledController(ledController) {}
 
 void Game::countDown() {
     screen::display("3");
@@ -23,6 +23,10 @@ void Game::start() {
     ledNumber = static_cast<uint8_t>(random(0, NUMBER_OF_LEDS));  //Generate random button
     ledController.turnOn(ledNumber);
     ledController.shiftOut();
+
+    while (isRunning) {
+        buttonReceiver->checkForButtonPress();
+    }
 }
 
 void Game::buttonPressed(const uint8_t &buttonPressed) {
@@ -45,7 +49,6 @@ void Game::buttonPressed(const uint8_t &buttonPressed) {
 
             screen::display(screenMessage);
             delay(2000);
-            doneGameCallback->done();
         }
     }
 }

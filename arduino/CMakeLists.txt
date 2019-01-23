@@ -43,6 +43,7 @@ set(EXTERNAL_DEPENDENCIES
         ${ARDUINO_AVR}/cores/arduino
         ${ARDUINO_AVR}/variants/${PIN_VARIANT}
         ${ARDUINO_AVR}/libraries/SoftwareSerial/src
+        C://Users/machs/AppData/Local/Arduino15/MemoryUsage
         )
 
 ###############################################################
@@ -100,7 +101,7 @@ set(CMAKE_RANLIB ${ARDUINO_TOOLS}/bin/avr-ranlib)
 set(CMAKE_LINKER ${ARDUINO_TOOLS}/bin/avr-ld)
 
 # Set compiler flags
-add_definitions(-mmcu=${MCU} -DF_CPU=${CPU_SPEED} -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections)
+add_definitions(-mmcu=${MCU} -DF_CPU=${CPU_SPEED} -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -Wno-attributes)
 
 # Set linker flags
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")   # remove -rdynamic for C
