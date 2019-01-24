@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 #################################
 #### 1. Update Project Name  ####
@@ -43,7 +43,7 @@ set(EXTERNAL_DEPENDENCIES
         ${ARDUINO_AVR}/cores/arduino
         ${ARDUINO_AVR}/variants/${PIN_VARIANT}
         ${ARDUINO_AVR}/libraries/SoftwareSerial/src
-        C://Users/machs/AppData/Local/Arduino15/MemoryUsage
+        #C://Users/machs/AppData/Local/Arduino15/MemoryUsage
         )
 
 ###############################################################
@@ -101,7 +101,7 @@ set(CMAKE_RANLIB ${ARDUINO_TOOLS}/bin/avr-ranlib)
 set(CMAKE_LINKER ${ARDUINO_TOOLS}/bin/avr-ld)
 
 # Set compiler flags
-add_definitions(-mmcu=${MCU} -DF_CPU=${CPU_SPEED} -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -Wno-attributes)
+add_definitions(-mmcu=${MCU} -DF_CPU=${CPU_SPEED} -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -Wno-attributes -fno-threadsafe-statics -std=gnu++14)
 
 # Set linker flags
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")   # remove -rdynamic for C

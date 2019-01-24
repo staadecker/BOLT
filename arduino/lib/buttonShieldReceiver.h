@@ -14,8 +14,6 @@ class ButtonShieldReceiver : public ButtonReceiver {
 
 public:
     static ButtonShieldReceiver &create();
-
-    void checkForButtonPress() override;
 };
 
 

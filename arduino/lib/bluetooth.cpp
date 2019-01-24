@@ -3,8 +3,8 @@
 
 constexpr char Bluetooth::BEGIN_PACKET[3]; //Do not remove or else doesn't compile.
 
-Bluetooth::Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver)
-        : ledManager(ledArg), buttonReceiver(buttonReceiver) {
+Bluetooth::Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback)
+        : ledManager(ledArg), doneGameCallback(doneGameCallback), buttonReceiver(buttonReceiver) {
     BT.begin(9600);
 }
 
@@ -14,11 +14,11 @@ bool Bluetooth::shouldGoOnline() {
 
 void Bluetooth::goOnline() {
     buttonReceiver->addListener(this);
-    while (analyzeContent(readReceived())) {
-        buttonReceiver->checkForButtonPress();
-    }
+    threadManager::addThread(this);
+}
 
-    buttonReceiver->removeListener();
+void Bluetooth::runThread() {
+    analyzeContent(readReceived());
 }
 
 bool Bluetooth::containsBeginPacket(const char *content) {
@@ -59,8 +59,8 @@ void Bluetooth::sendPacket(const char *packetContent) {
 }
 
 
-bool Bluetooth::analyzeContent(const char *content) {
-    uint8_t index = 0;
+void Bluetooth::analyzeContent(const char *content) {
+    unsigned char index = 0;
 
     while (index < strlen(content)) {
         if (content[index] == START_OF_PACKET) {
@@ -78,7 +78,9 @@ bool Bluetooth::analyzeContent(const char *content) {
                         break;
                     }
                     case C_END: {
-                        return false;
+                        index++;
+                        exitBluetoothMode();
+                        break;
                     }
                     case C_TURN_ON_LED: {
                         char ledNumber[3];
@@ -124,13 +126,12 @@ bool Bluetooth::analyzeContent(const char *content) {
         } else {
             Serial.print(F("Could not parse this content: "));
             Serial.println(content);
-            return false;
+            break;
         }
     }
-    return true;
 }
 
-void Bluetooth::buttonPressed(const unsigned char &buttonPressed) {
+void Bluetooth::buttonPressed(const unsigned char buttonPressed) {
     char packetContent[4];
     packetContent[0] = Bluetooth::C_BUTTON_PRESS;
 
@@ -139,4 +140,10 @@ void Bluetooth::buttonPressed(const unsigned char &buttonPressed) {
     strcat(packetContent, buttonNumber);
 
     sendPacket(packetContent);
+}
+
+void Bluetooth::exitBluetoothMode() {
+    threadManager::removeThread(this);
+    buttonReceiver->removeListener();
+    doneGameCallback->goToStartMode();
 }

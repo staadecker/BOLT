@@ -7,8 +7,11 @@
 #include <USBAPI.h>
 #include "buttonSerialReceiver.h"
 
+ButtonSerialReceiver::ButtonSerialReceiver() {
+    threadManager::addThread(this);
+}
 
-void ButtonSerialReceiver::checkForButtonPress() {
+void ButtonSerialReceiver::runThread() {
     if (listener != nullptr and Serial.available()) {
         while (Serial.available()) {
             int value = Serial.read();
@@ -22,8 +25,10 @@ void ButtonSerialReceiver::checkForButtonPress() {
                     index++;
                 }
                 buttonNumber[index] = '\0';
+
                 Serial.print(F("Received button press: "));
                 Serial.println(buttonNumber);
+
                 listener->buttonPressed(atoi(buttonNumber));
             }
         }

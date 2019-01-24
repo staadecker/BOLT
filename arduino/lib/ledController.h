@@ -13,9 +13,9 @@ class LedController {
 public:
     LedController();
 
-    void turnOn(const unsigned char &ledNumber);
+    void turnOn(unsigned char ledNumber);
 
-    void turnOff(const unsigned char &ledNumber);
+    void turnOff(unsigned char ledNumber);
 
     void shiftOut();
 };

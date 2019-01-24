@@ -15,8 +15,8 @@ void LedController::shiftOut() {
 
 
     //Shift out
-    for (uint8_t i = NUMBER_OF_LEDS; i <= NUMBER_OF_LEDS; i--) {
-        digitalWrite(P_LED_DATA, states[i]);
+    for (unsigned char i = NUMBER_OF_LEDS; i <= NUMBER_OF_LEDS; i--) {
+        digitalWrite(P_LED_DATA, static_cast<unsigned char>(states[i]));
 
         //Clock
         digitalWrite(P_LED_CLOCK, HIGH);
@@ -32,14 +32,14 @@ void LedController::shiftOut() {
 
 }
 
-void LedController::turnOn(const unsigned char &ledNumber) {
+void LedController::turnOn(unsigned char ledNumber) {
     Serial.print(F("Turn ON led "));
     Serial.println(ledNumber);
 
     states[ledNumber] = HIGH;
 }
 
-void LedController::turnOff(const uint8_t &ledNumber) {
+void LedController::turnOff(unsigned char ledNumber) {
     //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " OFF");
 
     states[ledNumber] = LOW;

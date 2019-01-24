@@ -7,7 +7,7 @@
 
 void ButtonReceiver::addListener(ButtonPressListener *buttonCallbackInterface) {
     if (listener != nullptr) {
-        Serial.println(F("Replacing existing listener"));
+        Serial.println(F("Overwriting listener"));
     }
     listener = buttonCallbackInterface;
 }

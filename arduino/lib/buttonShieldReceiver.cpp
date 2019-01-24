@@ -15,7 +15,7 @@ ButtonShieldReceiver &ButtonShieldReceiver::create() {
 }
 
 void ButtonShieldReceiver::isr() {
-    uint8_t button = 0;
+    unsigned char button = 0;
 
     for (int i = 0; i < 8; i++) {
 
@@ -33,9 +33,7 @@ void ButtonShieldReceiver::isr() {
 
     if (button > 64) {  // If button pressed
         if (buttonShield.listener) {
-            buttonShield.listener->buttonPressed(button - uint8_t(129));
+            buttonShield.listener->buttonPressed(button - static_cast<unsigned char>(129));
         }
     }
 }
-
-void ButtonShieldReceiver::checkForButtonPress() {}

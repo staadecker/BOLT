@@ -5,13 +5,10 @@
 #ifndef BOLT_BUTTONINTERFACE_H
 #define BOLT_BUTTONINTERFACE_H
 
-#include <stdint.h>
-#include <HardwareSerial.h>
-
 
 class ButtonPressListener {
 public:
-    virtual void buttonPressed(const unsigned char &buttonPressed) = 0;
+    virtual void buttonPressed(unsigned char buttonPressed) = 0;
 };
 
 class ButtonReceiver {
@@ -21,8 +18,6 @@ public:
     void addListener(ButtonPressListener *buttonPressListener);
 
     void removeListener();
-
-    virtual void checkForButtonPress() = 0; //Used by buttonSerialReceiver
 };
 
 #endif //BOLT_BUTTONINTERFACE_H

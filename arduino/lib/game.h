@@ -4,6 +4,7 @@
 #include "buttonShieldReceiver.h"
 #include "ledController.h"
 #include "screen.h"
+#include "doneGameCallback.h"
 #include <USBAPI.h>
 
 class Game : public ButtonPressListener {
@@ -11,19 +12,17 @@ class Game : public ButtonPressListener {
     unsigned long startTime;
     unsigned char buttonsPressed = 0;
     unsigned char ledNumber = 0;
-    bool isRunning = true;
 
     ButtonReceiver *buttonReceiver;
     LedController &ledController;
-
-    void countDown();
-
-    void buttonPressed(const uint8_t &buttonPressed) override;
+    DoneGameCallback *doneGameCallback;
 
 public:
-    Game(ButtonReceiver *buttonReceiver, LedController &ledController);
+    Game(ButtonReceiver *buttonReceiver, LedController &ledController, DoneGameCallback *doneGameCallback);
 
     void start();
+
+    void buttonPressed(unsigned char buttonPressed) override;
 };
 
 #endif

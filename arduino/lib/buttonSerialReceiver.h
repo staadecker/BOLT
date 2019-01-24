@@ -7,10 +7,13 @@
 
 
 #include "buttonReceiver.h"
+#include "threader.h"
 
-class ButtonSerialReceiver : public ButtonReceiver {
+class ButtonSerialReceiver : public ButtonReceiver, public Thread {
 public:
-    void checkForButtonPress() override;
+    ButtonSerialReceiver();
+
+    void runThread() override;
 };
 
 

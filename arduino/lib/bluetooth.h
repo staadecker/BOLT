@@ -4,8 +4,10 @@
 #include <SoftwareSerial.h>
 #include "buttonReceiver.h"
 #include "ledController.h"
+#include "threader.h"
+#include "doneGameCallback.h"
 
-class Bluetooth : public ButtonPressListener {
+class Bluetooth : public ButtonPressListener, public Thread {
     static const char START_OF_PACKET = 0x02;  //Start of packet
     static const char END_OF_PACKET = 0x03;  //End of packet
     static const char ACKNOWLEDGE = 0x06; //Acknowledge
@@ -26,9 +28,10 @@ class Bluetooth : public ButtonPressListener {
     volatile unsigned long acknowledgeTimeout = 0;
 
     LedController &ledManager;
+    DoneGameCallback *doneGameCallback;
     ButtonReceiver *buttonReceiver;
 
-    void buttonPressed(const uint8_t &buttonPressed) override;
+    void buttonPressed(unsigned char buttonPressed) override;
 
     char *readReceived();
 
@@ -36,9 +39,13 @@ class Bluetooth : public ButtonPressListener {
 
     void sendPacket(const char *packetContent);
 
-    bool analyzeContent(const char *content);
+    void runThread() override;
+
+    void exitBluetoothMode();
+
+    void analyzeContent(const char *content);
 public:
-    Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver);
+    Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback);
 
     void goOnline();
 
