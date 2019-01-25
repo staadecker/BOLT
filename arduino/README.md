@@ -1,19 +1,19 @@
-# Bolt-Arduino
+# Bolt Arduino
 
 This folder contains the Arduino code for the BOLT project.
 
-## The hardware setup
+## The Hardware Setup
 
 The Arduino controls 64 buttons using a 64-button shield. It controls the LEDs using eight 8-bit shift registers. It communicates to a bluetooth device with an external bluetooth chip.
 
-## The code
+## The Code
 
 The code that runs on the Arduino controls the LED's and registers the button presses. It also allows a device to connect via bluetooth. This device will be informed of button presses and will be able to send commands to turn the LEDs on or off.
 
-### Modes
+### Arduino states (modes)
 
-The code has two modes.
-1. An offline simple reaction time tester than can be run without any phone.
-2. A online mode where the arduino simply acts as a bridge between the buttons/LEDs and the phone.
+1. **Start state.** The board is either waiting for the user to switch to the offline state by pressing the middle button (#0) or the online state (switched to when a bluetooth packet is received).
 
+2. **Offline state.** The state is a simple game that measures the users reaction speed.
 
+3. **Online mode.** In this state, the arduino simply acts as a bridge between the buttons/LEDs and the phone. The Arduino is listening for bluetooth commands sent from the phone.
