@@ -1,17 +1,17 @@
 #include "main.h"
 #include "lib/buttonSerialReceiver.h"
 
-ReadyMode readyMode; //Must be define globally to still be accessible in loop function
+StartingState startingState; //Must be define globally to still be accessible in loop function
 
 void setup() {
-    readyMode.setup();
+    startingState.setup();
 }
 
 void loop() {
     runnablesManager::execute(); //Parts of the code will add themselves to the runnablesManager who will run them.
 }
 
-void ReadyMode::setup() {
+void StartingState::setup() {
     Serial.begin(9600);
     Serial.println(F("Starting..."));
 
@@ -39,10 +39,10 @@ void ReadyMode::setup() {
         bootUpSequence();
     }
 
-    returnToReadyMode();
+    returnToStartState(); //More setup (same method as when a game ends and you are returning to the starting state)
 }
 
-void ReadyMode::returnToReadyMode() {
+void StartingState::returnToStartState() {
     screen::displayOnScreen("READY");
     buttonReceiver->addListener(this); // Register for callback to see if button 0 is pressed (indicating start of game)
     flasher.startFlashingLED(0); // Flash button zero to make user start game
@@ -50,13 +50,13 @@ void ReadyMode::returnToReadyMode() {
             this); //Add this as thread to constantly check if received start packet from bluetooth
 }
 
-void ReadyMode::exitReadyMode() {
+void StartingState::exitReadyMode() {
     buttonReceiver->removeListener();
     flasher.stopFlashingLED(0);
     runnablesManager::removeRunnable(this);
 }
 
-void ReadyMode::onButtonPressed(const unsigned char buttonPressed) {
+void StartingState::onButtonPressed(const unsigned char buttonPressed) {
     if (buttonPressed == 0) {
         exitReadyMode();
 
@@ -71,25 +71,25 @@ void ReadyMode::onButtonPressed(const unsigned char buttonPressed) {
 }
 
 
-void ReadyMode::onRun() {
-    if (bluetoothManager and bluetoothManager->shouldStartBluetoothMode()) {
+void StartingState::onRun() {
+    if (bluetoothManager and bluetoothManager->shouldGoInBluetoothState()) {
         exitReadyMode();
         screen::displayOnScreen("ONLINE");
 
-        bluetoothManager->startBluetoothMode();
+        bluetoothManager->goInBluetoothState();
     }
 }
 
 // Makes chasing lights on the outer circle
-void ReadyMode::bootUpSequence() {
-    for (uint8_t i = 32; i < 64; i++) {
+void StartingState::bootUpSequence() {
+    for (unsigned char i = 32; i < 64; i++) {
         ledController.turnOnLed(i);
         ledController.shiftOutLEDs();
         delay(70);
         ledController.turnOffLed(i);
     }
 
-    for (uint8_t i = 0; i < 64; i++) {
+    for (unsigned char i = 0; i < 64; i++) {
         ledController.turnOffLed(i);
     }
     ledController.shiftOutLEDs();

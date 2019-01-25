@@ -7,12 +7,12 @@
 
 #include "lib/ledController.h"
 #include "lib/flasher.h"
-#include "lib/bluetooth.h"
+#include "lib/bluetoothManager.h"
 #include "lib/buttonReceiver.h"
-#include "lib/returnToReadyModeCallback.h"
-#include "lib/game.h"
+#include "lib/returnToStartingStateCallback.h"
+#include "lib/offlineGame.h"
 
-class ReadyMode : public ButtonPressListener, public ReturnToReadyModeCallback, public Runnable {
+class StartingState : public ButtonPressListener, public ReturnToStartingStateCallback, public Runnable {
     LedController ledController; //Create an led manager
     Flasher flasher = Flasher(ledController); //Create a flasher
     ButtonPressReceiver *buttonReceiver = nullptr;
@@ -28,7 +28,7 @@ class ReadyMode : public ButtonPressListener, public ReturnToReadyModeCallback, 
 public:
     void setup();
 
-    void returnToReadyMode() override;
+    void returnToStartState() override;
 
     void onRun() override;
 };

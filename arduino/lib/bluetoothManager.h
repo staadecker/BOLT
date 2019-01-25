@@ -4,8 +4,8 @@
 #include <SoftwareSerial.h>
 #include "buttonReceiver.h"
 #include "ledController.h"
-#include "threader.h"
-#include "returnToReadyModeCallback.h"
+#include "runnablesManager.h"
+#include "returnToStartingStateCallback.h"
 
 //This class is responsible for managing the bluetooth interactions with a phone
 //When created the class opens a Software serial connection with the Bluetooth chip
@@ -29,7 +29,7 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
     SoftwareSerial BtSerial = SoftwareSerial(PIN_BLUETOOTH_SERIAL_RX, PIN_BLUETOOTH_SERIAL_TX);
 
     LedController &ledManager;
-    ReturnToReadyModeCallback *returnToReadyModeCallback;
+    ReturnToStartingStateCallback *returnToStartingStateCallback;
     ButtonPressReceiver *buttonPressReceiver;
 
     void onButtonPressed(unsigned char buttonPressed) override;
@@ -42,7 +42,7 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
 
     void onRun() override;
 
-    void returnToReadyMode();
+    void returnToStartingState();
 
     //Most complicated piece of code in class
     //Iterates over the bytes in the receivedData one-by-one and run the required methods
@@ -51,11 +51,11 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
 
 public:
     BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
-                     ReturnToReadyModeCallback *returnToReadyModeCallback);
+                     ReturnToStartingStateCallback *returnToStartingStateCallback);
 
-    void startBluetoothMode();
+    void goInBluetoothState();
 
-    bool shouldStartBluetoothMode();
+    bool shouldGoInBluetoothState();
 };
 
 #endif

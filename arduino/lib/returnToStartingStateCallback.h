@@ -5,9 +5,9 @@
 #ifndef BOLT_DONEGAMECALLBACK_H
 #define BOLT_DONEGAMECALLBACK_H
 
-class ReturnToReadyModeCallback {
+class ReturnToStartingStateCallback {
 public:
-    virtual void returnToReadyMode() = 0;
+    virtual void returnToStartState() = 0;
 };
 
 #endif //BOLT_DONEGAMECALLBACK_H

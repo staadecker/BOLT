@@ -1,22 +1,22 @@
 #include <USBAPI.h>
-#include "bluetooth.h"
+#include "bluetoothManager.h"
 
 //Do not remove or else doesn't compile. See https://stackoverflow.com/questions/8016780/undefined-reference-to-static-constexpr-char
 constexpr char BluetoothManager::BEGIN_CONNECTION_PACKET[3];
 
 
 BluetoothManager::BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
-                                   ReturnToReadyModeCallback *returnToReadyModeCallback)
-        : ledManager(ledArg), returnToReadyModeCallback(returnToReadyModeCallback),
+                                   ReturnToStartingStateCallback *returnToStartingStateCallback)
+        : ledManager(ledArg), returnToStartingStateCallback(returnToStartingStateCallback),
           buttonPressReceiver(buttonPressReceiver) {
     BtSerial.begin(9600);
 }
 
-bool BluetoothManager::shouldStartBluetoothMode() {
+bool BluetoothManager::shouldGoInBluetoothState() {
     return doesContainBeginConnectionPacket(readBluetoothSerial());
 }
 
-void BluetoothManager::startBluetoothMode() {
+void BluetoothManager::goInBluetoothState() {
     buttonPressReceiver->addListener(this);
     runnablesManager::addRunnable(this);
 }
@@ -87,10 +87,10 @@ void BluetoothManager::onButtonPressed(const unsigned char buttonPressed) {
     sendPacket(packetContent);
 }
 
-void BluetoothManager::returnToReadyMode() {
+void BluetoothManager::returnToStartingState() {
     runnablesManager::removeRunnable(this);
     buttonPressReceiver->removeListener();
-    returnToReadyModeCallback->returnToReadyMode();
+    returnToStartingStateCallback->returnToStartState();
 }
 
 void BluetoothManager::parseReceivedData(const char *receivedData) {
@@ -114,7 +114,7 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                 if (receivedData[index] ==
                     BEGIN_CONNECTION) {// Nothing to do. Acknowledge will be sent when end of packet byte received
                 } else if (receivedData[index] == END_CONNECTION) {
-                    returnToReadyMode();
+                    returnToStartingState();
                 } else if (receivedData[index] == TURN_ON_LED or receivedData[index] == TURN_OFF_LED) {
                     if (index + 2 >= lengthOfData) {
                         Serial.println("Error: No bytes received indicating led number.");

@@ -4,7 +4,7 @@
 #include <USBAPI.h>
 #include "constants.h"
 #include "ledController.h"
-#include "threader.h"
+#include "runnablesManager.h"
 
 class Flasher : Runnable {
     const unsigned int FLASHING_INTERVAL = 500;

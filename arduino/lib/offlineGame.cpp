@@ -1,10 +1,10 @@
-#include "game.h"
+#include "offlineGame.h"
 
 
 OfflineGame::OfflineGame(ButtonPressReceiver *buttonReceiver, LedController &ledController,
-                         ReturnToReadyModeCallback *doneGameCallback)
+                         ReturnToStartingStateCallback *returnToStartingStateCallback)
         : buttonPressReceiver(buttonReceiver), ledController(ledController),
-          returnToReadyModeCallback(doneGameCallback) {}
+          returnToStartingStateCallback(returnToStartingStateCallback) {}
 
 void OfflineGame::startGame() {
     screen::displayOnScreen("3...");
@@ -46,7 +46,7 @@ void OfflineGame::onButtonPressed(const unsigned char buttonPressed) {
             screen::displayOnScreen(screenMessage);
             delay(2000);
 
-            returnToReadyModeCallback->returnToReadyMode();
+            returnToStartingStateCallback->returnToStartState();
         }
     }
 }

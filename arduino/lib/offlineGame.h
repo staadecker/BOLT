@@ -4,7 +4,7 @@
 #include "buttonShieldReceiver.h"
 #include "ledController.h"
 #include "screen.h"
-#include "returnToReadyModeCallback.h"
+#include "returnToStartingStateCallback.h"
 #include <USBAPI.h>
 
 class OfflineGame : public ButtonPressListener {
@@ -15,11 +15,11 @@ class OfflineGame : public ButtonPressListener {
 
     ButtonPressReceiver *buttonPressReceiver;
     LedController &ledController;
-    ReturnToReadyModeCallback *returnToReadyModeCallback;
+    ReturnToStartingStateCallback *returnToStartingStateCallback;
 
 public:
     OfflineGame(ButtonPressReceiver *buttonReceiver, LedController &ledController,
-                ReturnToReadyModeCallback *doneGameCallback);
+                ReturnToStartingStateCallback *returnToStartingStateCallback);
 
     void startGame();
 
