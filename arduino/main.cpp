@@ -1,6 +1,6 @@
 #include "lib/startState.h"
 
-StartingState startingState; //Must be define globally to still be accessible in loop function
+StartState startingState; //Must be define globally to still be accessible in loop function
 
 void setup() {
     startingState.setup();

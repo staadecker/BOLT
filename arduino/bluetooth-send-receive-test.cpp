@@ -12,8 +12,8 @@
 
 SoftwareSerial BT(9, 10); // RX, TX
 // Connect HM10      Arduino Uno
-//     Pin 1/TXD          Pin 7
-//     Pin 2/RXD          Pin 8
+//     Pin 1/TXD          Pin 9
+//     Pin 2/RXD          Pin 10
 
 String command;
 

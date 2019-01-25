@@ -5,7 +5,7 @@
 #ifndef BOLT_DONEGAMECALLBACK_H
 #define BOLT_DONEGAMECALLBACK_H
 
-class ReturnToStartingStateCallback {
+class ReturnToStartStateCallback {
 public:
     virtual void returnToStartState() = 0;
 };

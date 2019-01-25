@@ -8,7 +8,7 @@
 #include "buttonSerialReceiver.h"
 
 
-void StartingState::setup() {
+void StartState::setup() {
     Serial.begin(9600);
     Serial.println(F("Starting..."));
 
@@ -39,7 +39,7 @@ void StartingState::setup() {
     returnToStartState(); //More setup (same method as when a game ends and you are returning to the starting state)
 }
 
-void StartingState::returnToStartState() {
+void StartState::returnToStartState() {
     screen::displayOnScreen("READY");
     buttonReceiver->addListener(this); // Register for callback to see if button 0 is pressed (indicating start of game)
     flasher.startFlashingLED(0); // Flash button zero to make user start game
@@ -47,13 +47,13 @@ void StartingState::returnToStartState() {
             this); //Add this as thread to constantly check if received start packet from bluetooth
 }
 
-void StartingState::exitReadyMode() {
+void StartState::exitReadyMode() {
     buttonReceiver->removeListener();
     flasher.stopFlashingLED(0);
     runnablesManager::removeRunnable(this);
 }
 
-void StartingState::onButtonPressed(const unsigned char buttonPressed) {
+void StartState::onButtonPressed(const unsigned char buttonPressed) {
     if (buttonPressed == 0) {
         exitReadyMode();
 
@@ -67,7 +67,7 @@ void StartingState::onButtonPressed(const unsigned char buttonPressed) {
     }
 }
 
-void StartingState::onRun() {
+void StartState::onRun() {
     if (bluetoothManager and bluetoothManager->shouldGoInBluetoothState()) {
         exitReadyMode();
         screen::displayOnScreen("ONLINE");
@@ -77,7 +77,7 @@ void StartingState::onRun() {
 }
 
 // Makes chasing lights on the outer circle
-void StartingState::bootUpSequence() {
+void StartState::bootUpSequence() {
     for (unsigned char i = 32; i < 64; i++) {
         ledController.turnOnLed(i);
         ledController.shiftOutLEDs();

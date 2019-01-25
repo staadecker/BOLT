@@ -3,7 +3,7 @@
 
 
 OfflineGame::OfflineGame(ButtonPressReceiver *buttonReceiver, LedController &ledController,
-                         ReturnToStartingStateCallback *returnToStartingStateCallback)
+                         ReturnToStartStateCallback *returnToStartingStateCallback)
         : buttonPressReceiver(buttonReceiver), ledController(ledController),
           returnToStartingStateCallback(returnToStartingStateCallback) {}
 

@@ -11,7 +11,7 @@
 #include "offlineGame.h"
 
 
-class StartingState : public ButtonPressListener, public ReturnToStartingStateCallback, public Runnable {
+class StartState : public ButtonPressListener, public ReturnToStartStateCallback, public Runnable {
     LedController ledController; //Create an led manager
     Flasher flasher = Flasher(ledController); //Create a flasher
     ButtonPressReceiver *buttonReceiver = nullptr;

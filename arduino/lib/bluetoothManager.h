@@ -29,7 +29,7 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
     SoftwareSerial BtSerial = SoftwareSerial(PIN_BLUETOOTH_SERIAL_RX, PIN_BLUETOOTH_SERIAL_TX);
 
     LedController &ledManager;
-    ReturnToStartingStateCallback *returnToStartingStateCallback;
+    ReturnToStartStateCallback *returnToStartingStateCallback;
     ButtonPressReceiver *buttonPressReceiver;
 
     void onButtonPressed(unsigned char buttonPressed) override;
@@ -51,7 +51,7 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
 
 public:
     BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
-                     ReturnToStartingStateCallback *returnToStartingStateCallback);
+                     ReturnToStartStateCallback *returnToStartingStateCallback);
 
     void goInBluetoothState();
 

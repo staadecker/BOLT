@@ -14,11 +14,11 @@ class OfflineGame : public ButtonPressListener {
 
     ButtonPressReceiver *buttonPressReceiver;
     LedController &ledController;
-    ReturnToStartingStateCallback *returnToStartingStateCallback;
+    ReturnToStartStateCallback *returnToStartingStateCallback;
 
 public:
     OfflineGame(ButtonPressReceiver *buttonReceiver, LedController &ledController,
-                ReturnToStartingStateCallback *returnToStartingStateCallback);
+                ReturnToStartStateCallback *returnToStartingStateCallback);
 
     void startGame();
 

@@ -6,7 +6,7 @@ constexpr char BluetoothManager::BEGIN_CONNECTION_PACKET[3];
 
 
 BluetoothManager::BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
-                                   ReturnToStartingStateCallback *returnToStartingStateCallback)
+                                   ReturnToStartStateCallback *returnToStartingStateCallback)
         : ledManager(ledArg), returnToStartingStateCallback(returnToStartingStateCallback),
           buttonPressReceiver(buttonPressReceiver) {
     BtSerial.begin(9600);
@@ -26,6 +26,11 @@ void BluetoothManager::onRun() {
 }
 
 bool BluetoothManager::doesContainBeginConnectionPacket(const char *receivedData) {
+    if (receivedData[0] != '\0') {
+        Serial.print("Received data: ");
+        Serial.println(receivedData);
+    }
+
     return strstr(receivedData, BEGIN_CONNECTION_PACKET); //strstr checks if string contains substring
 }
 
@@ -116,7 +121,7 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                 } else if (receivedData[index] == END_CONNECTION) {
                     returnToStartingState();
                 } else if (receivedData[index] == TURN_ON_LED or receivedData[index] == TURN_OFF_LED) {
-                    if (index + 2 >= lengthOfData) {
+                    if (index + 2U >= lengthOfData) {
                         Serial.println("Error: No bytes received indicating led number.");
                     }
 
