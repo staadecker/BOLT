@@ -26,11 +26,6 @@ void BluetoothManager::onRun() {
 }
 
 bool BluetoothManager::doesContainBeginConnectionPacket(const char *receivedData) {
-    if (receivedData[0] != '\0') {
-        Serial.print("Received data: ");
-        Serial.println(receivedData);
-    }
-
     return strstr(receivedData, BEGIN_CONNECTION_PACKET); //strstr checks if string contains substring
 }
 
@@ -47,6 +42,11 @@ char *BluetoothManager::readBluetoothSerial() {
     }
 
     content[index] = '\0'; // Add null terminator where string ends
+
+    if (index != 0) {
+        Serial.print("Received bluetooth data: ");
+        Serial.println(content);
+    }
 
     return content;
 }
@@ -107,17 +107,19 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
         if (receivedData[index] == ACKNOWLEDGE_BYTE) {
             index++;
         } else if (receivedData[index] == START_OF_PACKET) {
+            index++;
+
             bool readingPacketContent = true;
 
             while (readingPacketContent) {
                 if (index >= lengthOfData) {
                     Serial.println(
-                            F("Error: Did not receive end of packet byte. Part of packet might already been processed."));
+                            F("Error: Did not receive end of packet byte. Part of packet might already be processed."));
                     break;
                 }
 
-                if (receivedData[index] ==
-                    BEGIN_CONNECTION) {// Nothing to do. Acknowledge will be sent when end of packet byte received
+                if (receivedData[index] == BEGIN_CONNECTION) {
+                    // Nothing to do. Acknowledge will be sent when end of packet byte received
                 } else if (receivedData[index] == END_CONNECTION) {
                     returnToStartingState();
                 } else if (receivedData[index] == TURN_ON_LED or receivedData[index] == TURN_OFF_LED) {
@@ -126,8 +128,10 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                     }
 
                     char ledNumber[3];
-                    ledNumber[0] = receivedData[index + 1];
-                    ledNumber[1] = receivedData[index + 2];
+                    index++;
+                    ledNumber[0] = receivedData[index];
+                    index++;
+                    ledNumber[1] = receivedData[index];
                     ledNumber[2] = '\0';
 
                     if (receivedData[index] == TURN_ON_LED) {
@@ -136,16 +140,14 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                         ledManager.turnOffLed(static_cast<unsigned char>(atoi(ledNumber)));
                     }
 
-                    index += 2; //Increment extra 2 because read 2 bytes for led numbers
-
                 } else if (receivedData[index] == SHIFT_OUT) {
                     ledManager.shiftOutLEDs();
                 } else if (receivedData[index] == END_OF_PACKET) {
                     BtSerial.write(ACKNOWLEDGE_BYTE);
-                    readingPacketContent = false; //No false because done reading
+                    readingPacketContent = false;
                 } else {
-                    Serial.print(F("Error: Could not parse content received over bluetooth: "));
-                    Serial.println(receivedData);
+                    Serial.print(F("Error: Could not parse content received over bluetooth (in packet): "));
+                    Serial.println(receivedData[index]);
                     readingPacketContent = false;
                 }
 
@@ -153,7 +155,7 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
             }
         } else {
             Serial.print(F("Error: Could not parse content received over bluetooth: "));
-            Serial.println(receivedData);
+            Serial.println(receivedData[index]);
             break;
         }
     }

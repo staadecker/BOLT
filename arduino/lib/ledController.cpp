@@ -32,9 +32,6 @@ void LedController::shiftOutLEDs() {
 }
 
 void LedController::turnOnLed(unsigned char ledNumber) {
-    Serial.print(F("Turn ON led "));
-    Serial.println(ledNumber);
-
     ledStates[ledNumber] = HIGH;
 }
 

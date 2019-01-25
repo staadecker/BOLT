@@ -20,6 +20,10 @@ void OfflineGame::startGame() {
     gameStartTime = millis();
 
     currentLedTurnedOn = static_cast<unsigned char>(random(0, NUMBER_OF_LEDS));  //Generate random button
+
+    Serial.print(F("Turning ON led "));
+    Serial.println(currentLedTurnedOn);
+
     ledController.turnOnLed(currentLedTurnedOn);
     ledController.shiftOutLEDs();
 }

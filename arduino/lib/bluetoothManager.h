@@ -15,8 +15,8 @@
 //The bluetooth packet format can be found in bluetooth-protocol.md in the main folder of the repo
 class BluetoothManager : public ButtonPressListener, public Runnable {
     //Constants used to create and parse packets
-    static const char START_OF_PACKET = 0x02;  //Start of packet
-    static const char END_OF_PACKET = 0x03;  //End of packet
+    static const char START_OF_PACKET = 0x01;  //Start of packet
+    static const char END_OF_PACKET = 0x04;  //End of packet
     static const char ACKNOWLEDGE_BYTE = 0x06; //Acknowledge
     static const char BEGIN_CONNECTION = 'B';
     static const char END_CONNECTION = 'E';
