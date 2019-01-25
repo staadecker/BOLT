@@ -10,7 +10,7 @@
 //Use Baud Rate 9600 on Serial Monitor
 //Use "No line endings" on Serial Monitor
 
-SoftwareSerial BT(9, 10); // RX, TX
+SoftwareSerial BtSerial(9, 10); // RX, TX
 // Connect HM10      Arduino Uno
 //     Pin 1/TXD          Pin 9
 //     Pin 2/RXD          Pin 10
@@ -19,7 +19,7 @@ String command;
 
 void setup() {
     Serial.begin(9600);
-    BT.begin(9600);
+    BtSerial.begin(9600);
 
     Serial.println("READY");
 }
@@ -38,15 +38,15 @@ void loop() {
 
         Serial.print(">> ");
         Serial.println(command);
-        BT.write(char_array);
+        BtSerial.write(char_array);
     }
 
-    if (BT.available()) {
+    if (BtSerial.available()) {
 
         Serial.print("<< ");
 
-        while (BT.available()) {
-            Serial.print(char(BT.read()));
+        while (BtSerial.available()) {
+            Serial.print(char(BtSerial.read()));
             delay(10);
         }
 

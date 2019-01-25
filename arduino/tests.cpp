@@ -1,95 +1,104 @@
 #include <HardwareSerial.h>
+#include <USBAPI.h>
 #include "lib/ledController.h"
 #include "lib/buttonShieldReceiver.h"
 
 
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma ide diagnostic ignored "OCUnusedStructInspection"
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
 
 void cycleLights() {
-    Serial.begin(9600);
     LedController ledManager;
 
     unsigned long DELAY = 1000;
 
-    uint8_t i = 0;
+    unsigned char ledNumber = 0;
+
     while (true) {
-        ledManager.turnOnLed(i);
+        ledManager.turnOnLed(ledNumber);
         ledManager.shiftOutLEDs();
+
         delay(DELAY);
-        ledManager.turnOffLed(i);
-        i++;
-        if (i == NUMBER_OF_LEDS) {
-            i = 0;
+
+        ledManager.turnOffLed(ledNumber);
+
+        ledNumber++;
+        if (ledNumber == NUMBER_OF_LEDS) {
+            ledNumber = 0;
         }
     }
 }
 
 // To test light marked 3-4 on board use shiftRegister = 3 and value = 4
-void singleLight(uint8_t shiftRegister, uint8_t value) {
+void singleLightTest(unsigned char shiftRegister, unsigned char value) {
     Serial.begin(9600);
     LedController ledManager;
 
-    ledManager.turnOnLed(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
+    ledManager.turnOnLed((unsigned char) (8) * (shiftRegister - (unsigned char) (1)) + (value - (unsigned char) (1)));
     ledManager.shiftOutLEDs();
 }
 
 void allLightsTest() {
-    Serial.begin(9600);
     LedController ledManager;
 
-    for (uint8_t i = 0; i < 64; i++) {
+    for (unsigned char i = 0; i < NUMBER_OF_LEDS; i++) {
         ledManager.turnOnLed(i);
     }
+
     ledManager.shiftOutLEDs();
 }
 
-class OnPrintCallback : public ButtonPressListener { ;
+class PrintButtonTest : public ButtonPressListener { ;
 
-    void buttonPressed(const uint8_t &buttonNumber) override {
+    void start() {
+        Serial.begin(9600);
+
+        ButtonShieldButtonPressReceiver buttonManager = ButtonShieldButtonPressReceiver::create();
+        buttonManager.addListener(this);
+    }
+
+    void onButtonPressed(unsigned char buttonNumber) override {
         Serial.println("Pressed button: " + String(buttonNumber));
     }
 };
 
-void printButtonPressTest() {
-    Serial.begin(9600);
 
-    ButtonShieldButtonPressReceiver buttonManager = ButtonShieldButtonPressReceiver::create();
-    OnPrintCallback callbackTemp = OnPrintCallback();
-    buttonManager.addListener(&callbackTemp);
-}
+class ButtonWithLEDTest : public ButtonPressListener {
+    unsigned char buttonNumber = 0;
 
+    LedController ledController;
 
-//void buttonWithLEDTest() {
-//    Serial.begin(9600);
-//    LedManager ledManager;
-//    ButtonManager buttonManager = ButtonManager::create();
-//
-//    uint8_t i = 0;
-//
-//    while (true) {
-//        buttonManager.clearLast();
-//        ledManager.turnOn(i);
-//        ledManager.shiftOut();
-//        while (not buttonManager.isPressed(i)) {
-//        }
-//
-//        ledManager.turnOff(i);
-//        i++;
-//        if (i == NUMBER_OF_LEDS) {
-//            i = 0;
-//        }
-//    }
-//}
+public:
+    void start() {
+
+        ButtonShieldButtonPressReceiver buttonPressReceiver = ButtonShieldButtonPressReceiver::create();
+        buttonPressReceiver.addListener(this);
+
+        ledController.turnOnLed(buttonNumber);
+        ledController.shiftOutLEDs();
+    }
+
+    void onButtonPressed(unsigned char buttonPressed) override {
+        if (buttonPressed == buttonNumber) {
+            ledController.turnOffLed(buttonPressed);
+
+            buttonNumber++;
+
+            if (buttonNumber == NUMBER_OF_LEDS) {
+                buttonNumber = 0;
+            }
+
+            ledController.turnOnLed(buttonNumber);
+            ledController.shiftOutLEDs();
+        }
+    }
+};
 
 
 void setup() {
-    //cycleLights();
-    //singleLight(3, 4);
-    //allLightsTest();
-    //printButtonPressTest();
-    //buttonWithLEDTest();
 }
 
 void loop() {}
