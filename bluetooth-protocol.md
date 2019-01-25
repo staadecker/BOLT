@@ -2,14 +2,6 @@
 
 This protocol dictates how the information being sent between the Arduino and the phone should be formatted.
 
-## Arduino states
-
-| State | When | What | Enter state | Leave state |
-|-------|------|------|-------------|-------------|
-| Online | While playing an online game | Device is only listensing for bluetooth packets | Receive a START packet | Receive and END packet <br> OR <br> Connection Lost (incomplete packet/no acknowledge) |
-| Start | When user is not playing a game | Device is listening for bluetooth packets | Game ends | Game starts (online or offline) |
-| Offline | When user is playing an offline game | Device is not listening for packets | Offline game started (middle button pressed) | Offline game ends |
-
 ## Packet Format
 
 Packet's data is sent using ASCII. The maximum length of a packet is 255 bytes.
