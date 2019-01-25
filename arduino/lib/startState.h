@@ -1,16 +1,15 @@
 //
-// Created by machs on 2019-01-19.
+// Created by machs on 1/24/2019.
 //
 
-#ifndef BOLT_MAIN_H
-#define BOLT_MAIN_H
+#ifndef BOLT_STARTSTATE_H
+#define BOLT_STARTSTATE_H
 
-#include "lib/ledController.h"
-#include "lib/flasher.h"
-#include "lib/bluetoothManager.h"
-#include "lib/buttonReceiver.h"
-#include "lib/returnToStartingStateCallback.h"
-#include "lib/offlineGame.h"
+
+#include "bluetoothManager.h"
+#include "flasher.h"
+#include "offlineGame.h"
+
 
 class StartingState : public ButtonPressListener, public ReturnToStartingStateCallback, public Runnable {
     LedController ledController; //Create an led manager
@@ -33,5 +32,4 @@ public:
     void onRun() override;
 };
 
-
-#endif //BOLT_MAIN_H
+#endif //BOLT_STARTSTATE_H

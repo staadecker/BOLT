@@ -5,7 +5,6 @@
 #include "ledController.h"
 #include "screen.h"
 #include "returnToStartingStateCallback.h"
-#include <USBAPI.h>
 
 class OfflineGame : public ButtonPressListener {
     static const unsigned long GAME_DURATION = 30000;
