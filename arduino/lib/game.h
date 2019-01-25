@@ -4,25 +4,26 @@
 #include "buttonShieldReceiver.h"
 #include "ledController.h"
 #include "screen.h"
-#include "doneGameCallback.h"
+#include "returnToReadyModeCallback.h"
 #include <USBAPI.h>
 
-class Game : public ButtonPressListener {
-    static const unsigned long GAME_TIME = 30000;
-    unsigned long startTime;
-    unsigned char buttonsPressed = 0;
-    unsigned char ledNumber = 0;
+class OfflineGame : public ButtonPressListener {
+    static const unsigned long GAME_DURATION = 30000;
+    unsigned long gameStartTime;
+    unsigned char buttonsPressedInGame = 0;
+    unsigned char currentLedTurnedOn = 0;
 
-    ButtonReceiver *buttonReceiver;
+    ButtonPressReceiver *buttonPressReceiver;
     LedController &ledController;
-    DoneGameCallback *doneGameCallback;
+    ReturnToReadyModeCallback *returnToReadyModeCallback;
 
 public:
-    Game(ButtonReceiver *buttonReceiver, LedController &ledController, DoneGameCallback *doneGameCallback);
+    OfflineGame(ButtonPressReceiver *buttonReceiver, LedController &ledController,
+                ReturnToReadyModeCallback *doneGameCallback);
 
-    void start();
+    void startGame();
 
-    void buttonPressed(unsigned char buttonPressed) override;
+    void onButtonPressed(unsigned char buttonPressed) override;
 };
 
 #endif

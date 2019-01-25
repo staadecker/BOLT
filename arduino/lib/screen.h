@@ -3,6 +3,6 @@
 #define SCREEN_H
 
 namespace screen {
-    void display(const char *message);
+    void displayOnScreen(const char *message);
 }
 #endif

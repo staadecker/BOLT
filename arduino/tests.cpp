@@ -1,3 +1,4 @@
+#include <HardwareSerial.h>
 #include "lib/ledController.h"
 #include "lib/buttonShieldReceiver.h"
 
@@ -14,10 +15,10 @@ void cycleLights() {
 
     uint8_t i = 0;
     while (true) {
-        ledManager.turnOn(i);
-        ledManager.shiftOut();
+        ledManager.turnOnLed(i);
+        ledManager.shiftOutLEDs();
         delay(DELAY);
-        ledManager.turnOff(i);
+        ledManager.turnOffLed(i);
         i++;
         if (i == NUMBER_OF_LEDS) {
             i = 0;
@@ -30,8 +31,8 @@ void singleLight(uint8_t shiftRegister, uint8_t value) {
     Serial.begin(9600);
     LedController ledManager;
 
-    ledManager.turnOn(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
-    ledManager.shiftOut();
+    ledManager.turnOnLed(uint8_t(8) * (shiftRegister - uint8_t(1)) + (value - uint8_t(1)));
+    ledManager.shiftOutLEDs();
 }
 
 void allLightsTest() {
@@ -39,9 +40,9 @@ void allLightsTest() {
     LedController ledManager;
 
     for (uint8_t i = 0; i < 64; i++) {
-        ledManager.turnOn(i);
+        ledManager.turnOnLed(i);
     }
-    ledManager.shiftOut();
+    ledManager.shiftOutLEDs();
 }
 
 class OnPrintCallback : public ButtonPressListener { ;
@@ -54,7 +55,7 @@ class OnPrintCallback : public ButtonPressListener { ;
 void printButtonPressTest() {
     Serial.begin(9600);
 
-    ButtonShieldReceiver buttonManager = ButtonShieldReceiver::create();
+    ButtonShieldButtonPressReceiver buttonManager = ButtonShieldButtonPressReceiver::create();
     OnPrintCallback callbackTemp = OnPrintCallback();
     buttonManager.addListener(&callbackTemp);
 }

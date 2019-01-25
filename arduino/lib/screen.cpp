@@ -3,7 +3,7 @@
 #include "screen.h"
 
 namespace screen {
-    void display(const char *message) {
+    void displayOnScreen(const char *message) {
         Serial.print(F("Displaying: "));
         Serial.println(message);
     }

@@ -6,25 +6,26 @@
 #include "ledController.h"
 #include "threader.h"
 
-class Flasher : Thread {
-    const unsigned int FLASHER_INTERVAL = 500;
+class Flasher : Runnable {
+    const unsigned int FLASHING_INTERVAL = 500;
 
-    bool flashing[NUMBER_OF_LEDS] = {};
-    bool stateIsOn = false;
-    unsigned char numberFlashing = 0;
-    unsigned long nextRun = millis();
+    bool flashingLEDs[NUMBER_OF_LEDS] = {}; //Which LEDs are flashing
+    bool currentFlashState = false;
+    unsigned char numberOfLEDsFlashing = 0;
+    unsigned long timeToNextFlash = millis();
+
     LedController &ledManager;
 
-    void switchState();
+    void switchFlashingState();
 
 public:
     explicit Flasher(LedController &led) : ledManager(led) {};
 
-    void startFlashing(unsigned char ledNumber);
+    void startFlashingLED(unsigned char ledNumber);
 
-    void stopFlashing(unsigned char ledNumber);
+    void stopFlashingLED(unsigned char ledNumber);
 
-    void runThread() override;
+    void onRun() override;
 };
 
 #endif

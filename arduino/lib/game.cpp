@@ -1,47 +1,52 @@
 #include "game.h"
 
 
-Game::Game(ButtonReceiver *buttonReceiver, LedController &ledController, DoneGameCallback *doneGameCallback)
-        : buttonReceiver(buttonReceiver), ledController(ledController), doneGameCallback(doneGameCallback) {}
+OfflineGame::OfflineGame(ButtonPressReceiver *buttonReceiver, LedController &ledController,
+                         ReturnToReadyModeCallback *doneGameCallback)
+        : buttonPressReceiver(buttonReceiver), ledController(ledController),
+          returnToReadyModeCallback(doneGameCallback) {}
 
-void Game::start() {
-    screen::display("3");
+void OfflineGame::startGame() {
+    screen::displayOnScreen("3...");
     delay(1000);
-    screen::display("2");
+    screen::displayOnScreen("2...");
     delay(1000);
-    screen::display("1");
+    screen::displayOnScreen("1...");
     delay(1000);
 
-    buttonReceiver->addListener(this);
+    buttonPressReceiver->addListener(this);
 
-    startTime = millis();
+    gameStartTime = millis();
 
-    ledNumber = static_cast<unsigned char>(random(0, NUMBER_OF_LEDS));  //Generate random button
-    ledController.turnOn(ledNumber);
-    ledController.shiftOut();
+    currentLedTurnedOn = static_cast<unsigned char>(random(0, NUMBER_OF_LEDS));  //Generate random button
+    ledController.turnOnLed(currentLedTurnedOn);
+    ledController.shiftOutLEDs();
 }
 
-void Game::buttonPressed(const unsigned char buttonPressed) {
-    if (buttonPressed == ledNumber) {
-        buttonsPressed++;
-        ledController.turnOff(ledNumber);
+void OfflineGame::onButtonPressed(const unsigned char buttonPressed) {
+    if (buttonPressed == currentLedTurnedOn) {
+        buttonsPressedInGame++;
+        ledController.turnOffLed(currentLedTurnedOn);
 
-        if (millis() <= startTime + GAME_TIME) {
-            ledNumber = static_cast<unsigned char>(random(0, NUMBER_OF_LEDS));  //Generate random button
-            ledController.turnOn(ledNumber);
-            ledController.shiftOut();
+        if (millis() < gameStartTime + GAME_DURATION) {
+            currentLedTurnedOn = static_cast<unsigned char>(random(0, NUMBER_OF_LEDS));  //Generate new random button
+            ledController.turnOnLed(currentLedTurnedOn);
+            ledController.shiftOutLEDs();
         } else {
-            buttonReceiver->removeListener();
-            ledController.shiftOut();
-            unsigned long averageReactionSpeed = (millis() - startTime) / buttonsPressed;
-            char screenMessage[29];
+            //GAME ENDED
+            buttonPressReceiver->removeListener();
+            ledController.shiftOutLEDs();
 
+            unsigned long averageReactionSpeed = (millis() - gameStartTime) / buttonsPressedInGame;
+
+            char screenMessage[29];
             sprintf(screenMessage, "%04d", static_cast<int>(averageReactionSpeed));
             strcat(screenMessage, " average speed in millis");
 
-            screen::display(screenMessage);
+            screen::displayOnScreen(screenMessage);
             delay(2000);
-            doneGameCallback->goToStartMode();
+
+            returnToReadyModeCallback->returnToReadyMode();
         }
     }
 }

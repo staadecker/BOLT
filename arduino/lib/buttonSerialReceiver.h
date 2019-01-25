@@ -9,11 +9,11 @@
 #include "buttonReceiver.h"
 #include "threader.h"
 
-class ButtonSerialReceiver : public ButtonReceiver, public Thread {
+class SerialButtonPressReceiver : public ButtonPressReceiver, public Runnable {
 public:
-    ButtonSerialReceiver();
+    SerialButtonPressReceiver();
 
-    void runThread() override;
+    void onRun() override;
 };
 
 

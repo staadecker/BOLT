@@ -5,13 +5,13 @@
 #include <HardwareSerial.h>
 #include "buttonReceiver.h"
 
-void ButtonReceiver::addListener(ButtonPressListener *buttonCallbackInterface) {
-    if (listener != nullptr) {
-        Serial.println(F("Overwriting listener"));
+void ButtonPressReceiver::addListener(ButtonPressListener *pButtonPressListener) {
+    if (buttonPressListener != nullptr) {
+        Serial.println(F("Warning: A button press listener already existed. Overwriting it."));
     }
-    listener = buttonCallbackInterface;
+    buttonPressListener = pButtonPressListener;
 }
 
-void ButtonReceiver::removeListener() {
-    listener = nullptr;
+void ButtonPressReceiver::removeListener() {
+    buttonPressListener = nullptr;
 }

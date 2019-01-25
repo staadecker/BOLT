@@ -9,28 +9,28 @@
 #include "lib/flasher.h"
 #include "lib/bluetooth.h"
 #include "lib/buttonReceiver.h"
-#include "lib/doneGameCallback.h"
+#include "lib/returnToReadyModeCallback.h"
 #include "lib/game.h"
 
-class MainRun : public ButtonPressListener, public DoneGameCallback, public Thread {
+class ReadyMode : public ButtonPressListener, public ReturnToReadyModeCallback, public Runnable {
     LedController ledController; //Create an led manager
     Flasher flasher = Flasher(ledController); //Create a flasher
-    ButtonReceiver *buttonReceiver = nullptr;
-    Bluetooth *bluetooth = nullptr;
-    Game *game = nullptr;
+    ButtonPressReceiver *buttonReceiver = nullptr;
+    BluetoothManager *bluetoothManager = nullptr;
+    OfflineGame *offlineGame = nullptr;
 
     void bootUpSequence();
 
-    void buttonPressed(unsigned char buttonNumber) override;
+    void onButtonPressed(unsigned char buttonNumber) override;
 
-    void exitStartMode();
+    void exitReadyMode();
 
 public:
     void setup();
 
-    void goToStartMode() override;
+    void returnToReadyMode() override;
 
-    void runThread() override;
+    void onRun() override;
 };
 
 

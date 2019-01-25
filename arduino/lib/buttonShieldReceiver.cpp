@@ -3,37 +3,36 @@
 #include "buttonShieldReceiver.h"
 #include "constants.h"
 
-ButtonShieldReceiver ButtonShieldReceiver::buttonShield = ButtonShieldReceiver();
+ButtonShieldButtonPressReceiver ButtonShieldButtonPressReceiver::instanceOfButtonShield = ButtonShieldButtonPressReceiver();
 
-ButtonShieldReceiver::ButtonShieldReceiver() = default;
+ButtonShieldButtonPressReceiver::ButtonShieldButtonPressReceiver() = default;
 
-ButtonShieldReceiver &ButtonShieldReceiver::create() {
-    attachInterrupt(digitalPinToInterrupt(P_BUTTON_INTERRUPT), isr,
+ButtonShieldButtonPressReceiver &ButtonShieldButtonPressReceiver::create() {
+    attachInterrupt(digitalPinToInterrupt(PIN_BUTTON_SHIELD_INTERRUPT), readButtonPress,
                     FALLING); //Attach interrupt for 64 button shield
-    Serial.println(F("Created isr"));
-    return ButtonShieldReceiver::buttonShield;
+
+    return ButtonShieldButtonPressReceiver::instanceOfButtonShield;
 }
 
-void ButtonShieldReceiver::isr() {
-    unsigned char button = 0;
+void ButtonShieldButtonPressReceiver::readButtonPress() {
+    unsigned char buttonNumber = 0;
 
-    for (int i = 0; i < 8; i++) {
+    for (unsigned char i = 0; i < 8; i++) {
+        while (digitalRead(PIN_BUTTON_SHIELD_CLOCK) == LOW);  //Wait for clock to go high
 
-        while (digitalRead(P_BUTTON_CLOCK) == LOW);  //Wait for clock to go high
-
-        button += digitalRead(P_BUTTON_DATA);  //If value is high add one
+        buttonNumber += digitalRead(PIN_BUTTON_SHIELD_DATA);  //If value is high add one
 
         //If not last time in loop, shift bits
         if (i != 7) {
-            button = button << 1u; //u for unsigned
+            buttonNumber = buttonNumber << 1u;
         }
 
-        while (digitalRead(P_BUTTON_CLOCK) == HIGH);  //Wait for clock to go low
+        while (digitalRead(PIN_BUTTON_SHIELD_CLOCK) == HIGH);  //Wait for clock to go low
     }
 
-    if (button > 64) {  // If button pressed
-        if (buttonShield.listener) {
-            buttonShield.listener->buttonPressed(button - static_cast<unsigned char>(129));
+    if (buttonNumber > 64) {  // Button number starts at 129 when it is a press (rather than a un-press
+        if (instanceOfButtonShield.buttonPressListener) {
+            instanceOfButtonShield.buttonPressListener->onButtonPressed(buttonNumber - static_cast<unsigned char>(129));
         }
     }
 }

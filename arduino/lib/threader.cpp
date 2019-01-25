@@ -5,31 +5,32 @@
 #include <USBAPI.h>
 #include "threader.h"
 
-namespace threadManager {
-    Thread *threads[MAX] = {};
+namespace runnablesManager {
+    Runnable *runnables[MAXIMUM_NUMBER_OF_RUNNABLES] = {};
 
-    void addThread(Thread *thread) {
-        for (unsigned char i = 0; i < MAX; ++i) {
-            if (not threads[i]) {
-                threads[i] = thread;
-                thread->threadId = i;
+    void addRunnable(Runnable *runnable) {
+        for (unsigned char index = 0; index < MAXIMUM_NUMBER_OF_RUNNABLES; ++index) {
+            if (runnables[index] == nullptr) {
+                runnables[index] = runnable;
+                runnable->runnableId = index; //Set the runnable's id to the index in the list
                 return;
             }
         }
 
-        Serial.println("Could not add callback. Maxed out.");
+        Serial.println("Could not add runnable. Already too many.");
     }
 
-    void removeThread(Thread *thread) {
-        threads[thread->threadId] = nullptr;
+    void removeRunnable(Runnable *runnable) {
+        runnables[runnable->runnableId] = nullptr;
     }
 
-    void runThreader() {
-        for (Thread *callback : threads) {
-            if (callback) {
-                callback->runThread();
+    void execute() {
+        for (Runnable *callback : runnables) {
+            if (callback != nullptr) {
+                callback->onRun();
             }
         }
+
         delay(10);
     }
 }

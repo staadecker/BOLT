@@ -5,25 +5,25 @@
 #ifndef BOLT_THREADER_H
 #define BOLT_THREADER_H
 
-namespace threadManager {
+namespace runnablesManager {
     namespace {
-        const unsigned char MAX = 8;
+        const unsigned char MAXIMUM_NUMBER_OF_RUNNABLES = 8;
     }
 }
 
-class Thread {
+class Runnable {
 public:
-    virtual void runThread() = 0;
+    virtual void onRun() = 0;
 
-    unsigned char threadId = threadManager::MAX;
+    unsigned char runnableId = runnablesManager::MAXIMUM_NUMBER_OF_RUNNABLES;
 };
 
-namespace threadManager {
-    void addThread(Thread *thread);
+namespace runnablesManager {
+    void addRunnable(Runnable *runnable);
 
-    void removeThread(Thread *thread);
+    void removeRunnable(Runnable *runnable);
 
-    void runThreader();
+    void execute();
 };
 
 

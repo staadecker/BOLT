@@ -5,51 +5,57 @@
 #include "buttonReceiver.h"
 #include "ledController.h"
 #include "threader.h"
-#include "doneGameCallback.h"
+#include "returnToReadyModeCallback.h"
 
-class Bluetooth : public ButtonPressListener, public Thread {
+//This class is responsible for managing the bluetooth interactions with a phone
+//When created the class opens a Software serial connection with the Bluetooth chip
+//The class has two modes. The first is when it's just listening to see if a phone has connected
+//The second is once the phone has connected and the game is running
+//The start and end packet indicate when the modes should change
+//The bluetooth packet format can be found in bluetooth-protocol.md in the main folder of the repo
+class BluetoothManager : public ButtonPressListener, public Runnable {
+    //Constants used to create and parse packets
     static const char START_OF_PACKET = 0x02;  //Start of packet
     static const char END_OF_PACKET = 0x03;  //End of packet
-    static const char ACKNOWLEDGE = 0x06; //Acknowledge
+    static const char ACKNOWLEDGE_BYTE = 0x06; //Acknowledge
+    static const char BEGIN_CONNECTION = 'B';
+    static const char END_CONNECTION = 'E';
+    static const char TURN_OFF_LED = 'I';
+    static const char TURN_ON_LED = 'O';
+    static const char SHIFT_OUT = 'S';
+    static const char BUTTON_PRESSED = 'P';
+    static constexpr char BEGIN_CONNECTION_PACKET[] = {START_OF_PACKET, BEGIN_CONNECTION, END_OF_PACKET};
 
-    static const char C_BEGIN = 0x42; //"B"
-    static const char C_END = 0x45; //"E"
-    static const char C_TURN_OFF_LED = 0x49; //"I"
-    static const char C_TURN_ON_LED = 0x4F; //"O"
-    static const char C_SHIFT_OUT = 0x53; //"S"
-    static const char C_BUTTON_PRESS = 0x50; // "P"
-
-    static constexpr char BEGIN_PACKET[] = {START_OF_PACKET, C_BEGIN, END_OF_PACKET};
-
-    static const unsigned int ACKNOWLEDGE_TIMEOUT = 2000;
-
-    SoftwareSerial BT = SoftwareSerial(P_SOFTWARE_SERIAL_RX, P_SOFTWARE_SERIAL_TX);
-
-    volatile unsigned long acknowledgeTimeout = 0;
+    SoftwareSerial BtSerial = SoftwareSerial(PIN_BLUETOOTH_SERIAL_RX, PIN_BLUETOOTH_SERIAL_TX);
 
     LedController &ledManager;
-    DoneGameCallback *doneGameCallback;
-    ButtonReceiver *buttonReceiver;
+    ReturnToReadyModeCallback *returnToReadyModeCallback;
+    ButtonPressReceiver *buttonPressReceiver;
 
-    void buttonPressed(unsigned char buttonPressed) override;
+    void onButtonPressed(unsigned char buttonPressed) override;
 
-    char *readReceived();
+    char *readBluetoothSerial();
 
-    bool containsBeginPacket(const char *content);
+    bool doesContainBeginConnectionPacket(const char *receivedData);
 
-    void sendPacket(const char *packetContent);
+    void sendPacket(const char *packetData);
 
-    void runThread() override;
+    void onRun() override;
 
-    void exitBluetoothMode();
+    void returnToReadyMode();
 
-    void analyzeContent(const char *content);
+    //Most complicated piece of code in class
+    //Iterates over the bytes in the receivedData one-by-one and run the required methods
+    //Prints to serial error message if received data does not match format
+    void parseReceivedData(const char *receivedData);
+
 public:
-    Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback);
+    BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
+                     ReturnToReadyModeCallback *returnToReadyModeCallback);
 
-    void goOnline();
+    void startBluetoothMode();
 
-    bool shouldGoOnline();
+    bool shouldStartBluetoothMode();
 };
 
 #endif

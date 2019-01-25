@@ -8,14 +8,14 @@
 
 class ButtonPressListener {
 public:
-    virtual void buttonPressed(unsigned char buttonPressed) = 0;
+    virtual void onButtonPressed(unsigned char buttonPressed) = 0;
 };
 
-class ButtonReceiver {
+class ButtonPressReceiver {
 protected:
-    ButtonPressListener *listener = nullptr;
+    ButtonPressListener *buttonPressListener = nullptr;
 public:
-    void addListener(ButtonPressListener *buttonPressListener);
+    void addListener(ButtonPressListener *buttonPressListener1);
 
     void removeListener();
 };

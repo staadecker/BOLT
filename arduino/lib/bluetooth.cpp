@@ -1,149 +1,155 @@
 #include <USBAPI.h>
 #include "bluetooth.h"
 
-constexpr char Bluetooth::BEGIN_PACKET[3]; //Do not remove or else doesn't compile.
+//Do not remove or else doesn't compile. See https://stackoverflow.com/questions/8016780/undefined-reference-to-static-constexpr-char
+constexpr char BluetoothManager::BEGIN_CONNECTION_PACKET[3];
 
-Bluetooth::Bluetooth(LedController &ledArg, ButtonReceiver *buttonReceiver, DoneGameCallback *doneGameCallback)
-        : ledManager(ledArg), doneGameCallback(doneGameCallback), buttonReceiver(buttonReceiver) {
-    BT.begin(9600);
+
+BluetoothManager::BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
+                                   ReturnToReadyModeCallback *returnToReadyModeCallback)
+        : ledManager(ledArg), returnToReadyModeCallback(returnToReadyModeCallback),
+          buttonPressReceiver(buttonPressReceiver) {
+    BtSerial.begin(9600);
 }
 
-bool Bluetooth::shouldGoOnline() {
-    return containsBeginPacket(readReceived());
+bool BluetoothManager::shouldStartBluetoothMode() {
+    return doesContainBeginConnectionPacket(readBluetoothSerial());
 }
 
-void Bluetooth::goOnline() {
-    buttonReceiver->addListener(this);
-    threadManager::addThread(this);
+void BluetoothManager::startBluetoothMode() {
+    buttonPressReceiver->addListener(this);
+    runnablesManager::addRunnable(this);
 }
 
-void Bluetooth::runThread() {
-    analyzeContent(readReceived());
+void BluetoothManager::onRun() {
+    parseReceivedData(readBluetoothSerial());
 }
 
-bool Bluetooth::containsBeginPacket(const char *content) {
-    return strstr(content, BEGIN_PACKET);
+bool BluetoothManager::doesContainBeginConnectionPacket(const char *receivedData) {
+    return strstr(receivedData, BEGIN_CONNECTION_PACKET); //strstr checks if string contains substring
 }
 
-char *Bluetooth::readReceived() {
+char *BluetoothManager::readBluetoothSerial() {
     static char content[256];
 
     unsigned char index = 0;
-    while (BT.available() and index < 255) {
-        content[index] = char(BT.read());
-        delay(10);
+
+    //Keep looping while data is available
+    while (BtSerial.available() and index < 255) {
+        content[index] = char(BtSerial.read());
+        delay(10); //Delay is necessary to allow proper reading
         index++;
     }
 
-    content[index + 1] = '\0';
+    content[index] = '\0'; // Add null terminator where string ends
 
     return content;
 }
 
 
-void Bluetooth::sendPacket(const char *packetContent) {
-    Serial.print(F("Sent packet: "));
-    Serial.println(packetContent);
+void BluetoothManager::sendPacket(const char *packetData) {
+    //1.  Create packet
+    size_t lengthOfData = strlen(packetData);
 
-    char packet[sizeof(packetContent) + 2];
+    char packet[lengthOfData + 3]; // +3 for start and end bytes and null terminator
+
     packet[0] = START_OF_PACKET;
-    strcat(packet, packetContent);
-    packet[strlen(packet)] = END_OF_PACKET;
-    packet[strlen(packet) + 1] = '\0';
+    packet[1] = '\0';
 
-    BT.write(packet);
+    strcat(packet, packetData);
 
-    if (acknowledgeTimeout == -1u) {
-        acknowledgeTimeout = millis() + ACKNOWLEDGE_TIMEOUT;
-    }
+    packet[lengthOfData + 1] = END_OF_PACKET;
+    packet[lengthOfData + 2] = '\0';
+
+    //2.  Send packet
+    BtSerial.write(packet);
+
+    //3. Log operation for debugging
+    Serial.print(F("Sent packet: "));
+    Serial.println(packet);
 }
 
 
-void Bluetooth::analyzeContent(const char *content) {
-    unsigned char index = 0;
-
-    while (index < strlen(content)) {
-        if (content[index] == START_OF_PACKET) {
-            bool packetDone = false;
-
-            while (!packetDone) {
-                if (index >= strlen(content)) {
-                    Serial.println(F("Did not receive end of packet byte"));
-                    break;
-                }
-
-                switch (content[index]) {
-                    case C_BEGIN: {
-                        index++;
-                        break;
-                    }
-                    case C_END: {
-                        index++;
-                        exitBluetoothMode();
-                        break;
-                    }
-                    case C_TURN_ON_LED: {
-                        char ledNumber[3];
-                        ledNumber[0] = content[index + 1];
-                        ledNumber[1] = content[index + 2];
-                        ledNumber[2] = '\0';
-
-                        ledManager.turnOn(atoi(ledNumber));
-                        index += 3;
-                        break;
-                    }
-
-                    case C_TURN_OFF_LED: {
-                        char ledNumber[3];
-                        ledNumber[0] = content[index + 1];
-                        ledNumber[1] = content[index + 2];
-                        ledNumber[2] = '\0';
-
-
-                        ledManager.turnOff(static_cast<const unsigned char &>(atoi(ledNumber)));
-                        index += 3;
-                        break;
-                    }
-                    case C_SHIFT_OUT: {
-                        ledManager.shiftOut();
-                        index++;
-                        break;
-                    }
-                    case END_OF_PACKET: {
-                        index++;
-                        packetDone = true;
-                        BT.write(ACKNOWLEDGE);
-                        break;
-                    }
-                    default: {
-                        packetDone = true; //This will exit the inner loop and result in the error being printed in the loop bellow.
-                    }
-                }
-            }
-        } else if (content[index] == ACKNOWLEDGE) {
-            acknowledgeTimeout = -1uL;
-            index++;
-        } else {
-            Serial.print(F("Could not parse this content: "));
-            Serial.println(content);
-            break;
-        }
-    }
-}
-
-void Bluetooth::buttonPressed(const unsigned char buttonPressed) {
-    char packetContent[4];
-    packetContent[0] = Bluetooth::C_BUTTON_PRESS;
-
+void BluetoothManager::onButtonPressed(const unsigned char buttonPressed) {
+    //Create string for containing the data to be sent
     char buttonNumber[3];
     sprintf(buttonNumber, "%05d", buttonPressed);
+
+    char packetContent[4];
+    packetContent[0] = BluetoothManager::BUTTON_PRESSED;
+    packetContent[1] = '\0';
+
     strcat(packetContent, buttonNumber);
 
+    packetContent[3] = '\0';
+
+    //Send the data
     sendPacket(packetContent);
 }
 
-void Bluetooth::exitBluetoothMode() {
-    threadManager::removeThread(this);
-    buttonReceiver->removeListener();
-    doneGameCallback->goToStartMode();
+void BluetoothManager::returnToReadyMode() {
+    runnablesManager::removeRunnable(this);
+    buttonPressReceiver->removeListener();
+    returnToReadyModeCallback->returnToReadyMode();
+}
+
+void BluetoothManager::parseReceivedData(const char *receivedData) {
+    size_t lengthOfData = strlen(receivedData);
+
+    unsigned char index = 0;
+
+    while (index < lengthOfData) {
+        if (receivedData[index] == ACKNOWLEDGE_BYTE) {
+            index++;
+        } else if (receivedData[index] == START_OF_PACKET) {
+            bool readingPacketContent = true;
+
+            while (readingPacketContent) {
+                if (index >= lengthOfData) {
+                    Serial.println(
+                            F("Error: Did not receive end of packet byte. Part of packet might already been processed."));
+                    break;
+                }
+
+                if (receivedData[index] ==
+                    BEGIN_CONNECTION) {// Nothing to do. Acknowledge will be sent when end of packet byte received
+                } else if (receivedData[index] == END_CONNECTION) {
+                    returnToReadyMode();
+                } else if (receivedData[index] == TURN_ON_LED or receivedData[index] == TURN_OFF_LED) {
+                    if (index + 2 >= lengthOfData) {
+                        Serial.println("Error: No bytes received indicating led number.");
+                    }
+
+                    char ledNumber[3];
+                    ledNumber[0] = receivedData[index + 1];
+                    ledNumber[1] = receivedData[index + 2];
+                    ledNumber[2] = '\0';
+
+                    if (receivedData[index] == TURN_ON_LED) {
+                        ledManager.turnOnLed(static_cast<unsigned char>(atoi(ledNumber)));
+                    } else {
+                        ledManager.turnOffLed(static_cast<unsigned char>(atoi(ledNumber)));
+                    }
+
+                    index += 2; //Increment extra 2 because read 2 bytes for led numbers
+
+                } else if (receivedData[index] == SHIFT_OUT) {
+                    ledManager.shiftOutLEDs();
+                } else if (receivedData[index] == END_OF_PACKET) {
+                    BtSerial.write(ACKNOWLEDGE_BYTE);
+                    readingPacketContent = false; //No false because done reading
+                } else {
+                    Serial.print(F("Error: Could not parse content received over bluetooth: "));
+                    Serial.println(receivedData);
+                    readingPacketContent = false;
+                }
+
+                index++;
+            }
+        } else {
+            Serial.print(F("Error: Could not parse content received over bluetooth: "));
+            Serial.println(receivedData);
+            break;
+        }
+    }
 }

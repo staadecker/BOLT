@@ -1,46 +1,52 @@
 #include "flasher.h"
 
-void Flasher::switchState() {
-    stateIsOn = !stateIsOn;
+void Flasher::switchFlashingState() {
+    currentFlashState = !currentFlashState;
 
     for (unsigned char ledNumber = 0; ledNumber < NUMBER_OF_LEDS; ledNumber++) {
-        if (flashing[ledNumber]) {
-            if (stateIsOn) {
-                ledManager.turnOn(ledNumber);
+        if (flashingLEDs[ledNumber]) {
+            if (currentFlashState) {
+                ledManager.turnOnLed(ledNumber);
             } else {
-                ledManager.turnOff(ledNumber);
+                ledManager.turnOffLed(ledNumber);
             }
         }
     }
-    ledManager.shiftOut();
-    nextRun = millis() + FLASHER_INTERVAL;
+
+    ledManager.shiftOutLEDs();
+
+    timeToNextFlash = millis() + FLASHING_INTERVAL;
 }
 
 
-void Flasher::startFlashing(const unsigned char ledNumber) {
-    if (not flashing[ledNumber]) {
-        flashing[ledNumber] = true;
-        numberFlashing++;
+void Flasher::startFlashingLED(const unsigned char ledNumber) {
+    if (not flashingLEDs[ledNumber]) {
+        flashingLEDs[ledNumber] = true;
+        numberOfLEDsFlashing++;
 
-        if (numberFlashing == 1) {
-            threadManager::addThread(this);
+        if (numberOfLEDsFlashing == 1) {
+            timeToNextFlash = millis();
+            runnablesManager::addRunnable(this);
         }
     }
 }
 
-void Flasher::stopFlashing(const unsigned char ledNumber) {
-    if (flashing[ledNumber]) {
-        flashing[ledNumber] = false;
-        numberFlashing--;
-        threadManager::removeThread(this);
-        ledManager.turnOff(ledNumber);
-        ledManager.shiftOut();
+void Flasher::stopFlashingLED(const unsigned char ledNumber) {
+    if (flashingLEDs[ledNumber]) {
+        flashingLEDs[ledNumber] = false;
+        numberOfLEDsFlashing--;
+
+        if (numberOfLEDsFlashing == 0) {
+            runnablesManager::removeRunnable(this);
+            ledManager.turnOffLed(ledNumber);
+            ledManager.shiftOutLEDs();
+        }
     }
 }
 
-void Flasher::runThread() {
-    if (millis() > nextRun) {
-        switchState();
+void Flasher::onRun() {
+    if (millis() >= timeToNextFlash) {
+        switchFlashingState();
     }
 }
 

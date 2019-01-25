@@ -5,15 +5,15 @@
 #include "buttonReceiver.h"
 
 
-class ButtonShieldReceiver : public ButtonReceiver {
-    ButtonShieldReceiver(); //private constructor. Use static method create() to make instance.
+class ButtonShieldButtonPressReceiver : public ButtonPressReceiver {
+    ButtonShieldButtonPressReceiver(); //private constructor. Use static method create() to make instance.
 
-    static ButtonShieldReceiver buttonShield;
+    static ButtonShieldButtonPressReceiver instanceOfButtonShield;
 
-    static void isr();
+    static void readButtonPress();
 
 public:
-    static ButtonShieldReceiver &create();
+    static ButtonShieldButtonPressReceiver &create();
 };
 
 

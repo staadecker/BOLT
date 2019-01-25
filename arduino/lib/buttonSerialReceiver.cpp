@@ -7,29 +7,33 @@
 #include <USBAPI.h>
 #include "buttonSerialReceiver.h"
 
-ButtonSerialReceiver::ButtonSerialReceiver() {
-    threadManager::addThread(this);
+SerialButtonPressReceiver::SerialButtonPressReceiver() {
+    runnablesManager::addRunnable(this);
 }
 
-void ButtonSerialReceiver::runThread() {
-    if (listener != nullptr and Serial.available()) {
+void SerialButtonPressReceiver::onRun() {
+    if (buttonPressListener != nullptr) {
         while (Serial.available()) {
-            int value = Serial.read();
-            delay(10);
-            if (value == 80) {
-                char buttonNumber[3];
-                unsigned char index = 0;
-                while (index < 2 and Serial.available()) {
-                    buttonNumber[index] = (char) Serial.read();
-                    delay(10);
-                    index++;
-                }
-                buttonNumber[index] = '\0';
+            char valueRead = static_cast<char>(Serial.read());
+            delay(10); // Add delay to allow Serial to work
 
-                Serial.print(F("Received button press: "));
+            if (valueRead == 'P') {
+                char buttonNumber[3];
+
+                unsigned char counter = 0;
+
+                while (counter < 2 and Serial.available()) { // Allow up to two characters (if received 2 on Serial)
+                    buttonNumber[counter] = static_cast<char>(Serial.read());
+                    delay(10);
+                    counter++;
+                }
+
+                buttonNumber[counter] = '\0';
+
+                Serial.print(F("Serial: Button pressed: "));
                 Serial.println(buttonNumber);
 
-                listener->buttonPressed(atoi(buttonNumber));
+                buttonPressListener->onButtonPressed(atoi(buttonNumber));
             }
         }
     }

@@ -5,19 +5,19 @@
 #include "constants.h"
 
 class LedController {
-    const unsigned char VCC_PWM = 95; //Value to adjust for optimal 2V output voltage
+    const unsigned char PWM_VALUE_FOR_VCC_PIN = 95; //Value to adjust for optimal 2V output voltage
 
-    // Array keeping track of states
-    bool states[NUMBER_OF_LEDS] = {}; //TODO switch to boolean
+
+    bool ledStates[NUMBER_OF_LEDS] = {};
 
 public:
     LedController();
 
-    void turnOn(unsigned char ledNumber);
+    void turnOnLed(unsigned char ledNumber);
 
-    void turnOff(unsigned char ledNumber);
+    void turnOffLed(unsigned char ledNumber);
 
-    void shiftOut();
+    void shiftOutLEDs();
 };
 
 #endif

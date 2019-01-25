@@ -2,47 +2,44 @@
 #include "ledController.h"
 
 LedController::LedController() {
-    pinMode(P_LED_VCC, OUTPUT);
-    pinMode(P_LED_DATA, OUTPUT);
-    pinMode(P_LED_CLOCK, OUTPUT);
-    pinMode(P_LED_LATCH, OUTPUT);
+    pinMode(PIN_LED_SHIFT_REG_VCC, OUTPUT);
+    pinMode(PIN_LED_SHIFT_REG_DATA, OUTPUT);
+    pinMode(PIN_LED_SHIFT_REG_CLOCK, OUTPUT);
+    pinMode(PIN_LED_SHIFT_REG_LATCH, OUTPUT);
 }
 
-void LedController::shiftOut() {
+void LedController::shiftOutLEDs() {
     //Latch Low. VCC high
-    digitalWrite(P_LED_VCC, HIGH);
-    digitalWrite(P_LED_LATCH, LOW);
+    digitalWrite(PIN_LED_SHIFT_REG_VCC, HIGH);
+    digitalWrite(PIN_LED_SHIFT_REG_LATCH, LOW);
 
 
     //Shift out
     for (unsigned char i = NUMBER_OF_LEDS; i <= NUMBER_OF_LEDS; i--) {
-        digitalWrite(P_LED_DATA, static_cast<unsigned char>(states[i]));
+        digitalWrite(PIN_LED_SHIFT_REG_DATA, static_cast<unsigned char>(ledStates[i]));
 
-        //Clock
-        digitalWrite(P_LED_CLOCK, HIGH);
-        digitalWrite(P_LED_CLOCK, LOW);
+        //Wait for clock cycle
+        digitalWrite(PIN_LED_SHIFT_REG_CLOCK, HIGH);
+        digitalWrite(PIN_LED_SHIFT_REG_CLOCK, LOW);
     }
 
     //If data is left on high drop to low, so that the final output voltage is not altered
-    digitalWrite(P_LED_DATA, LOW);
+    digitalWrite(PIN_LED_SHIFT_REG_DATA, LOW);
 
     //Latch high. VCC adjust to two volts
-    digitalWrite(P_LED_LATCH, HIGH);
-    analogWrite(P_LED_VCC, VCC_PWM);
-
+    digitalWrite(PIN_LED_SHIFT_REG_LATCH, HIGH);
+    analogWrite(PIN_LED_SHIFT_REG_VCC, PWM_VALUE_FOR_VCC_PIN);
 }
 
-void LedController::turnOn(unsigned char ledNumber) {
+void LedController::turnOnLed(unsigned char ledNumber) {
     Serial.print(F("Turn ON led "));
     Serial.println(ledNumber);
 
-    states[ledNumber] = HIGH;
+    ledStates[ledNumber] = HIGH;
 }
 
-void LedController::turnOff(unsigned char ledNumber) {
-    //log(TYPE_INFO, "led", "Set led number " + String(ledNumber) + " OFF");
-
-    states[ledNumber] = LOW;
+void LedController::turnOffLed(unsigned char ledNumber) {
+    ledStates[ledNumber] = LOW;
 }
 
 

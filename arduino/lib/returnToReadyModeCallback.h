@@ -5,9 +5,9 @@
 #ifndef BOLT_DONEGAMECALLBACK_H
 #define BOLT_DONEGAMECALLBACK_H
 
-class DoneGameCallback {
+class ReturnToReadyModeCallback {
 public:
-    virtual void goToStartMode() = 0;
+    virtual void returnToReadyMode() = 0;
 };
 
 #endif //BOLT_DONEGAMECALLBACK_H
