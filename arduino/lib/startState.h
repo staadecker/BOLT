@@ -11,7 +11,11 @@
 #include "offlineGame.h"
 
 
-class StartState : public ButtonPressListener, public ReturnToStartStateCallback, public Runnable {
+class StartState : public ButtonPressListener, public ReturnToStartStateCallback
+#if IS_BLUETOOTH_CHIP_CONNECTED
+        , public Runnable
+#endif
+{
     LedController ledController; //Create an led manager
     Flasher flasher = Flasher(ledController); //Create a flasher
     ButtonPressReceiver *buttonReceiver = nullptr;
@@ -29,7 +33,11 @@ public:
 
     void returnToStartState() override;
 
+#if IS_BLUETOOTH_CHIP_CONNECTED
+
     void onRun() override;
+
+#endif
 };
 
 #endif //BOLT_STARTSTATE_H

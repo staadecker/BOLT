@@ -3,24 +3,24 @@
 #ifndef CONST_H
 #define CONST_H
 
-const bool IS_BUTTONS_CONNECTED = false;
-const bool IS_SCREEN_CONNECTED = false;
-const bool IS_BLUETOOTH_CHIP_CONNECTED = true;
-const bool IS_LED_CONNECTED = false;
+//Toggle to enable different features
+#define IS_BUTTONS_CONNECTED false // When false button presses are received from Serial.
+#define IS_BLUETOOTH_CHIP_CONNECTED true // When true checks for start packets allowing online mode.
+#define IS_LED_CONNECTED false // When true will run boot sequence
 
-const unsigned char NUMBER_OF_LEDS = 64;
+#define NUMBER_OF_LEDS 64
 
-const int PIN_BUTTON_SHIELD_INTERRUPT = 2;
-const int PIN_BUTTON_SHIELD_DATA = 3;
-const int PIN_BUTTON_SHIELD_CLOCK = 4;
+#define PIN_BUTTON_SHIELD_INTERRUPT 2
+#define PIN_BUTTON_SHIELD_DATA 3
+#define PIN_BUTTON_SHIELD_CLOCK  4
 
-const int PIN_LED_SHIFT_REG_VCC = 5;
-const int PIN_LED_SHIFT_REG_DATA = 8;
-const int PIN_LED_SHIFT_REG_CLOCK = 12;
-const int PIN_LED_SHIFT_REG_LATCH = 7;
+#define PIN_LED_SHIFT_REG_VCC  5
+#define PIN_LED_SHIFT_REG_DATA 8
+#define PIN_LED_SHIFT_REG_CLOCK  12
+#define PIN_LED_SHIFT_REG_LATCH  7
 
-const int PIN_BLUETOOTH_SERIAL_RX = 9;
-const int PIN_BLUETOOTH_SERIAL_TX = 10;
+#define PIN_BLUETOOTH_SERIAL_RX 9
+#define PIN_BLUETOOTH_SERIAL_TX  10
 
 
 #endif
