@@ -19,8 +19,8 @@
 #define PIN_LED_SHIFT_REG_CLOCK  12
 #define PIN_LED_SHIFT_REG_LATCH  7
 
-#define PIN_BLUETOOTH_SERIAL_RX 9
-#define PIN_BLUETOOTH_SERIAL_TX  10
+#define PIN_BLUETOOTH_SERIAL_RX 9 // Connects to TXD on BT chip
+#define PIN_BLUETOOTH_SERIAL_TX  10 // Connects to RXD on BT chip
 
 
 #endif
