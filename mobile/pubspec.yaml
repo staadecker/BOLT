@@ -1,14 +1,13 @@
 name: bolt_flutter
 description: A new Flutter project.
+author: Martin Staadecker <machstg@gmail.com>
+repository: https://github.com/staadecker/BOLT
 
 dependencies:
   flutter:
     sdk: flutter
 
-  flutter_blue: ^0.4.0
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  flutter_blue: ^0.4.2
   cupertino_icons: ^0.1.2
 
 dev_dependencies:
