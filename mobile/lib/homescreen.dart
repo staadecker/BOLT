@@ -2,51 +2,38 @@ import 'package:flutter/material.dart';
 
 import 'gamescreen.dart';
 
-void main() => runApp(new MyApp());
+class BoltApp extends StatefulWidget {
+  @override
+  _BoltAppState createState() => _BoltAppState();
+}
 
-const String BUILD_NUMBER = "1";
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class _BoltAppState extends State<BoltApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Bolt',
       theme: ThemeData(
-        primarySwatch: Colors.red,
-        primaryColor: Colors.red,
-        accentColor: Colors.redAccent
-      ),
+          primarySwatch: Colors.red,
+          primaryColor: Colors.red,
+          accentColor: Colors.redAccent),
       home: Scaffold(
-          appBar: AppBar(
-            title: new Text("Bolt"),
+        appBar: AppBar(
+          title: new Text("Bolt"),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RaisedButton(
+                child: Text("Start game"),
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => GamePage()));
+                },
+              ),
+            ],
           ),
-          body: StatefulApp()),
-    );
-  }
-}
-
-class StatefulApp extends StatefulWidget {
-  @override
-  _StatefulAppState createState() => _StatefulAppState();
-}
-
-class _StatefulAppState extends State<StatefulApp> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          RaisedButton(
-            child: Text("Play"),
-            onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => GamePage()));
-            },
-          ),
-          Text("Build number: $BUILD_NUMBER")
-        ],
+        ),
       ),
     );
   }
