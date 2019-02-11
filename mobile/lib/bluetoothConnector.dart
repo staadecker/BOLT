@@ -5,46 +5,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
-enum ConnectorState { connecting, failed }
-
-class ConnectorMessage {
-  final String message;
-  final ConnectorState connectorState;
-
-  ConnectorMessage(this.message, this.connectorState);
-}
-
+/// A simple dialog that when created will connect to the device and display the progress in the connection
+/// Returns a [BluetoothConnection] or null if the user canceled the action
 class ConnectorDialog extends StatefulWidget {
   @override
   _ConnectorDialogState createState() => _ConnectorDialogState();
 }
 
 class _ConnectorDialogState extends State<ConnectorDialog> {
-  BluetoothConnector _bluetoothConnector = BluetoothConnector();
-  String _dialogMessage;
-  bool _connectingFailed = false;
+  /// The backend connector
+  final BluetoothConnector _bluetoothConnector = BluetoothConnector();
+
+  /// The message to display if there is one
+  String _latestMessage;
+
+  /// Indicates whether the bluetoothConnector failed to connect
+  bool _hasConnectorFailed = false;
 
   @override
   void initState() {
     super.initState();
 
-    //Listen for messages from the connector
-    _bluetoothConnector.messageStream.listen((message) {
-      if (message.connectorState == ConnectorState.connecting) {
-        setState(() {
-          _dialogMessage = message.message;
-        });
-      } else {
-        setState(() {
-          _dialogMessage = message.message;
-          _connectingFailed = true;
-        });
-      }
+    // Listen for updates from the connector
+    _bluetoothConnector.updateStream.listen((update) {
+      setState(() {
+        _latestMessage = update;
+      });
     });
 
-    _bluetoothConnector.getConnection().then((result) {
-      if (result != null) Navigator.pop(context, result);
-    });
+    // Start connecting to device and pass result to _onConnectionReceived
+    _bluetoothConnector.connect().then(_onConnectionReceived);
   }
 
   @override
@@ -53,121 +43,159 @@ class _ConnectorDialogState extends State<ConnectorDialog> {
     super.dispose();
   }
 
+  /// Called when bluetooth connector is done connecting
+  ///
+  /// Will be null if connector failed connecting.
+  /// If connection not null, dialog is done so pop and return the connection (as an argument)
+  void _onConnectionReceived(BluetoothConnection connection) {
+    if (connection == null) {
+      setState(() {
+        _hasConnectorFailed = true;
+      });
+    }
+    else Navigator.pop(context, connection);
+  }
+
+  void _onTryAgainPressed() {
+    setState(() {
+      _hasConnectorFailed = false;
+      _latestMessage = null;
+    });
+    _bluetoothConnector.connect();
+  }
+
+  void _onCancelPressed() {
+    Navigator.pop(context, null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Connecting to board"),
+      title: Text(_hasConnectorFailed ? "Failed to connect" : "Connecting to board..."),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          _connectingFailed
-              ? null
-              : Padding(
-                  child: CircularProgressIndicator(),
-                  padding: EdgeInsets.all(10.0),
-                ),
-          _dialogMessage == null ? null : Flexible(child: Text(_dialogMessage)),
-        ].where((element) => element != null).toList(),
+          !_hasConnectorFailed ? _buildCircularProgressIndicator() : null,
+          _latestMessage != null ? _buildMessageWidget() : null,
+        ].where(_isElementNotNull).toList(),
       ),
       actions: <Widget>[
-        _connectingFailed
-            ? FlatButton(
-                onPressed: () {
-                  setState(() {
-                    _connectingFailed = false;
-                    _dialogMessage = null;
-                  });
-                  _bluetoothConnector.getConnection();
-                },
-                child: Text("Try Again"),
-              )
-            : null,
-        FlatButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text("Cancel"),
+        _hasConnectorFailed ? _buildTryAgainButton() : null,
+        FlatButton(onPressed: _onCancelPressed, child: Text("Cancel"),
         ),
       ],
     );
   }
+
+  Widget _buildMessageWidget(){
+    return Flexible(child: Text(_latestMessage));
+  }
+
+  FlatButton _buildTryAgainButton() {
+    return FlatButton(
+      onPressed: _onTryAgainPressed,
+      child: Text("Try Again"),
+    );
+  }
+
+  static Widget _buildCircularProgressIndicator() {
+    return Padding(
+      child: CircularProgressIndicator(),
+      padding: EdgeInsets.all(10.0),
+    );
+  }
+
+  static bool _isElementNotNull(element) => element != null;
 }
 
+/// Class that is a service that creates a connection to the device.
+///
+/// Fully backend no UI.
+/// The service posts update message to [updateStream] to notify listeners of progress.
 class BluetoothConnector {
   static const _MAC_ADDRESS = "D4:36:39:BF:82:AB";
   static const _SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
   static const _CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
 
-  final StreamController<ConnectorMessage> messageStreamController = StreamController();
+  final StreamController<String> _updateStreamController = StreamController();
 
-  //Stream of messages giving updates of the events
-  Stream<ConnectorMessage> get messageStream => messageStreamController.stream;
+  /// Stream of messages giving updates of the connection process
+  Stream<String> get updateStream => _updateStreamController.stream;
 
-  Future<BluetoothConnection> getConnection() async {
+  /// Connects to the device and returns a [BluetoothConnection] or null if connecting failed
+  Future<BluetoothConnection> connect() async {
     //GET BLUETOOTH SERVICE
-    messageStreamController.add(ConnectorMessage("Checking for Bluetooth availability...", ConnectorState.connecting));
-    FlutterBlue bluetoothService = await getService(messageStreamController);
-    if (bluetoothService == null) return null;
+    _postUpdate("Checking for Bluetooth availability...");
+    FlutterBlue bluetoothService = await _getService();
+    if (bluetoothService == null)
+      return null; //_getService will call _postUpdate with failure message
 
     //GET CORRECT DEVICE
-    messageStreamController.add(ConnectorMessage("Scanning for board...", ConnectorState.connecting));
-    BluetoothDevice device = await findDevice(bluetoothService);
+    _postUpdate("Scanning for board...");
+    BluetoothDevice device = await _findDevice(bluetoothService);
     if (device == null) {
-      messageStreamController.add(ConnectorMessage("Board not found.", ConnectorState.failed));
+      _postUpdate("Board not found.");
       return null;
     }
 
     //GET CONNECTION TO DEVICE
-    messageStreamController.add(ConnectorMessage("Board found. Connecting...", ConnectorState.connecting));
-    StreamSubscription connection = await createConnection(bluetoothService, device);
+    _postUpdate("Board found. Connecting...");
+    StreamSubscription connection = await _createConnection(bluetoothService, device);
     if (connection == null) {
-      messageStreamController.add(ConnectorMessage("Could not connect to board.", ConnectorState.failed));
+      _postUpdate("Could not connect to board.");
       return null;
     }
 
     //GET DEVICE CHARACTERISTIC
-    messageStreamController.add(ConnectorMessage("Connected. Discovering characteristic...", ConnectorState.connecting));
-    BluetoothCharacteristic characteristic = await findCharacteristic(device);
+    _postUpdate("Connected. Discovering characteristic...");
+    BluetoothCharacteristic characteristic = await _findCharacteristic(device);
     if (characteristic == null){
-      messageStreamController.add(ConnectorMessage("Could not find characteristic.", ConnectorState.failed));
+      _postUpdate("Could not find characteristic.");
       connection.cancel();
       return null;
     }
 
-
     return BluetoothConnection(device, connection, characteristic);
   }
 
+  /// Should be called before disposing the object to close the streams.
   void dispose() {
-    messageStreamController.close();
+    _updateStreamController.close();
   }
 
-  static Future<FlutterBlue> getService(StreamController<ConnectorMessage> messageStreamController) async {
+  /// Helper method to post to the updateStream
+  void _postUpdate(String message){
+    _updateStreamController.add(message);
+  }
+
+  /// Returns the [FlutterBlue] service if available. The [FlutterBlue] service is used to access bluetooth.
+  Future<FlutterBlue> _getService() async {
     FlutterBlue service = FlutterBlue.instance;
 
     if (!await service.isAvailable){
-      messageStreamController.add(ConnectorMessage("Bluetooth Low Energy is not supported on this device.", ConnectorState.failed));
+      _postUpdate("Bluetooth Low Energy is not supported on this device.");
       return null;
     }
 
     if (!await service.isOn){
-      messageStreamController.add(ConnectorMessage("Please turn on Bluetooth.", ConnectorState.failed));
+      _postUpdate("Please turn on Bluetooth.");
       return null;
     }
 
     return service;
   }
 
-  static Future<BluetoothDevice> findDevice(
-      FlutterBlue bluetoothService) async {
+  /// Returns the device matching the [_MAC_ADDRESS] if it is found.
+  static Future<BluetoothDevice> _findDevice(FlutterBlue bluetoothService) async {
     ScanResult scanResult = await bluetoothService
         .scan(timeout: Duration(seconds: 10))
-        .firstWhere((result) => result.device.id.id == _MAC_ADDRESS,
-            orElse: () => null);
+        .firstWhere((result) => result.device.id.id == _MAC_ADDRESS, orElse: () => null);
 
     return scanResult?.device;
   }
 
-  static Future<StreamSubscription> createConnection(FlutterBlue bluetoothService, BluetoothDevice device) {
+  /// Connects to [device] and returns the connection.
+  static Future<StreamSubscription> _createConnection(FlutterBlue bluetoothService, BluetoothDevice device) {
     final Completer<StreamSubscription> completer = new Completer();
     StreamSubscription<BluetoothDeviceState> connection;
 
@@ -179,17 +207,20 @@ class BluetoothConnector {
       }
     });
 
-    connection.onDone(() => completer.complete(null));
+    connection.onDone(() {
+      if (!completer.isCompleted) completer.complete(null);
+    });
 
     return completer.future;
   }
 
-  static Future<BluetoothCharacteristic> findCharacteristic(BluetoothDevice device) async {
+  /// Finds the correct characteristic of the [device].
+  static Future<BluetoothCharacteristic> _findCharacteristic(BluetoothDevice device) async {
     BluetoothCharacteristic characteristic = (await device.discoverServices())
-        .singleWhere((service) => service.uuid == Guid(_SERVICE_UUID),
+        .singleWhere((service) => service.uuid.toString() == _SERVICE_UUID,
             orElse: () => null)
         ?.characteristics
-        ?.singleWhere((chara) => chara.uuid == Guid(_CHARACTERISTIC_UUID),
+        ?.singleWhere((chara) => chara.uuid.toString() == _CHARACTERISTIC_UUID,
             orElse: () => null);
 
     if (characteristic != null) {
