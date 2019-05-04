@@ -8,13 +8,15 @@ ButtonShieldButtonPressReceiver ButtonShieldButtonPressReceiver::instanceOfButto
 ButtonShieldButtonPressReceiver::ButtonShieldButtonPressReceiver() = default;
 
 ButtonShieldButtonPressReceiver &ButtonShieldButtonPressReceiver::create() {
-    attachInterrupt(digitalPinToInterrupt(PIN_BUTTON_SHIELD_INTERRUPT), readButtonPress,
+    interuptCalled = false;
+    runnablesManager::addRunnable(&instanceOfButtonShield);
+    attachInterrupt(digitalPinToInterrupt(PIN_BUTTON_SHIELD_INTERRUPT), isrReadButtonPress,
                     FALLING); //Attach interrupt for 64 button shield
 
     return ButtonShieldButtonPressReceiver::instanceOfButtonShield;
 }
 
-void ButtonShieldButtonPressReceiver::readButtonPress() {
+void ButtonShieldButtonPressReceiver::isrReadButtonPress() {
     unsigned char buttonNumber = 0;
 
     for (unsigned char i = 0; i < 8; i++) {
@@ -31,8 +33,19 @@ void ButtonShieldButtonPressReceiver::readButtonPress() {
     }
 
     if (buttonNumber > 64) {  // Button number starts at 129 when it is a press (rather than a un-press
-        if (instanceOfButtonShield.buttonPressListener) {
-            instanceOfButtonShield.buttonPressListener->onButtonPressed(buttonNumber - static_cast<unsigned char>(129));
+        latestButton = buttonNumber - static_cast<unsigned char>(129);
+
+        if (interuptCalled) {
+            Serial.println("Warning: Button already pressed and onRun hasn't been called yet.");
         }
+
+        interuptCalled = true;
+    }
+}
+
+void ButtonShieldButtonPressReceiver::onRun() {
+    if (interuptCalled && buttonPressListener) {
+        interuptCalled = false;
+        buttonPressListener->onButtonPressed(latestButton);
     }
 }
