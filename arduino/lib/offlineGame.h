@@ -9,7 +9,7 @@
 class OfflineGame : public ButtonPressListener {
     static const unsigned long GAME_DURATION = 30000;
     unsigned long gameStartTime;
-    unsigned char buttonsPressedInGame = 0;
+    unsigned char buttonsPressedInGame;
     unsigned char currentLedTurnedOn = 0;
 
     ButtonPressReceiver *buttonPressReceiver;

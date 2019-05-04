@@ -18,6 +18,7 @@ void OfflineGame::startGame() {
     buttonPressReceiver->addListener(this);
 
     gameStartTime = millis();
+    buttonsPressedInGame = 0;
 
     currentLedTurnedOn = static_cast<unsigned char>(random(0, NUMBER_OF_LEDS));  //Generate random button
 
@@ -46,7 +47,7 @@ void OfflineGame::onButtonPressed(const unsigned char buttonPressed) {
             strcat(screenMessage, " average speed in millis");
 
             screen::displayOnScreen(screenMessage);
-            delay(2000);
+            delay(3000);
 
             returnToStartingStateCallback->returnToStartState();
         }
