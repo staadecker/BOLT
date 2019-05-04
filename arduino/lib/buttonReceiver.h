@@ -6,15 +6,16 @@
 #define BOLT_BUTTONINTERFACE_H
 
 
+#include "runnablesManager.h"
+
 class ButtonPressListener {
 public:
     virtual void onButtonPressed(unsigned char buttonPressed) = 0;
 };
 
-class ButtonPressReceiver {
-protected:
-    ButtonPressListener *buttonPressListener = nullptr;
+class ButtonPressReceiver : public Runnable {
 public:
+    ButtonPressListener *buttonPressListener = nullptr;
     void addListener(ButtonPressListener *buttonPressListener1);
 
     void removeListener();

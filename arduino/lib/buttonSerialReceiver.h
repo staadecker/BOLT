@@ -9,10 +9,8 @@
 #include "buttonReceiver.h"
 #include "runnablesManager.h"
 
-class SerialButtonPressReceiver : public ButtonPressReceiver, public Runnable {
+class SerialButtonPressReceiver : public ButtonPressReceiver {
 public:
-    SerialButtonPressReceiver();
-
     void onRun() override;
 };
 

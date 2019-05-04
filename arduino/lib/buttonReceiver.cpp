@@ -10,8 +10,10 @@ void ButtonPressReceiver::addListener(ButtonPressListener *pButtonPressListener)
         Serial.println(F("Warning: A button press listener already existed. Overwriting it."));
     }
     buttonPressListener = pButtonPressListener;
+    runnablesManager::addRunnable(this);
 }
 
 void ButtonPressReceiver::removeListener() {
     buttonPressListener = nullptr;
+    runnablesManager::removeRunnable(this);
 }

@@ -5,21 +5,13 @@
 #include "buttonReceiver.h"
 #include "runnablesManager.h"
 
-class ButtonShieldButtonPressReceiver : public ButtonPressReceiver, public Runnable {
-    ButtonShieldButtonPressReceiver(); //private constructor. Use static method create() to make instance.
+namespace ButtonShield {
+    class ButtonShieldButtonPressReceiver : public ButtonPressReceiver {
+        void onRun() override;
+    };
 
-    static ButtonShieldButtonPressReceiver instanceOfButtonShield;
-
-    static void isrReadButtonPress();
-
-    static unsigned char latestButton;
-    static bool interuptCalled;
-
-public:
-    void onRun() override;
-
-    static ButtonShieldButtonPressReceiver &create();
-};
+    ButtonShieldButtonPressReceiver &create();
+}
 
 
 #endif

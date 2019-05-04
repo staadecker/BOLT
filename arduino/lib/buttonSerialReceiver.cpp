@@ -7,10 +7,6 @@
 #include <USBAPI.h>
 #include "buttonSerialReceiver.h"
 
-SerialButtonPressReceiver::SerialButtonPressReceiver() {
-    runnablesManager::addRunnable(this);
-}
-
 void SerialButtonPressReceiver::onRun() {
     if (buttonPressListener != nullptr) {
         while (Serial.available()) {
