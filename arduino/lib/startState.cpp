@@ -20,7 +20,7 @@ void StartState::setup() {
     //If button shield is connected then use ButtonShieldReceiver.
     //Else receive button presses from Serial using ButtonSerialReceiver
 #if IS_BUTTONS_CONNECTED
-    buttonReceiver = &ButtonShieldButtonPressReceiver::create(); //Assign to buttonInterface
+    buttonReceiver = &ButtonShield::create(); //Assign to buttonInterface
 #else
     static SerialButtonPressReceiver buttonSerialReceiver = SerialButtonPressReceiver(); //Create object
     buttonReceiver = &buttonSerialReceiver; //Assign to buttonInterface

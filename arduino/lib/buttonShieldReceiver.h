@@ -3,18 +3,15 @@
 #define BUTTON_H
 
 #include "buttonReceiver.h"
+#include "runnablesManager.h"
 
+namespace ButtonShield {
+    class ButtonShieldButtonPressReceiver : public ButtonPressReceiver {
+        void onRun() override;
+    };
 
-class ButtonShieldButtonPressReceiver : public ButtonPressReceiver {
-    ButtonShieldButtonPressReceiver(); //private constructor. Use static method create() to make instance.
-
-    static ButtonShieldButtonPressReceiver instanceOfButtonShield;
-
-    static void readButtonPress();
-
-public:
-    static ButtonShieldButtonPressReceiver &create();
-};
+    ButtonShieldButtonPressReceiver &create();
+}
 
 
 #endif

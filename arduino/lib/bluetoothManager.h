@@ -7,12 +7,17 @@
 #include "runnablesManager.h"
 #include "returnToStartingStateCallback.h"
 
-//This class is responsible for managing the bluetooth interactions with a phone
-//When created the class opens a Software serial connection with the Bluetooth chip
-//The class has two modes. The first is when it's just listening to see if a phone has connected
-//The second is once the phone has connected and the game is running
-//The start and end packet indicate when the modes should change
-//The bluetooth packet format can be found in bluetooth-protocol.md in the main folder of the repo
+/*
+ * This class is responsible for managing the bluetooth interactions with a phone
+ * When created the class opens a Software serial connection with the Bluetooth chip
+ * The class has two modes. The first is when it's just listening to see if a phone has connected
+ * The second is once the phone has connected and the game is running
+ * The start and end packet indicate when the modes should change
+ * The bluetooth packet format can be found in bluetooth-protocol.md in the main folder of the repo
+ *
+ * Note : When in listening mode: the class just scans for a begin packet but doesn't respond. If it finds one
+ * it will enter bluetooth mode and then send an acknowledge when it receives the begin packet again
+ */
 class BluetoothManager : public ButtonPressListener, public Runnable {
     //Constants used to create and parse packets
     static const char START_OF_PACKET = 0x01;  //Start of packet
@@ -36,7 +41,7 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
 
     char *readBluetoothSerial();
 
-    bool doesContainBeginConnectionPacket(const char *receivedData);
+    static bool doesContainBeginConnectionPacket(const char *receivedData);
 
     void sendPacket(const char *packetData);
 
