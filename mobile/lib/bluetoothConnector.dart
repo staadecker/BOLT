@@ -52,8 +52,8 @@ class _ConnectorDialogState extends State<ConnectorDialog> {
       setState(() {
         _hasConnectorFailed = true;
       });
-    }
-    else Navigator.pop(context, connection);
+    } else
+      Navigator.pop(context, connection);
   }
 
   void _onTryAgainPressed() {
@@ -61,7 +61,7 @@ class _ConnectorDialogState extends State<ConnectorDialog> {
       _hasConnectorFailed = false;
       _latestMessage = null;
     });
-    _bluetoothConnector.connect();
+    _bluetoothConnector.connect().then(_onConnectionReceived);
   }
 
   void _onCancelPressed() {
@@ -71,7 +71,8 @@ class _ConnectorDialogState extends State<ConnectorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(_hasConnectorFailed ? "Failed to connect" : "Connecting to board..."),
+      title: Text(
+          _hasConnectorFailed ? "Failed to connect" : "Connecting to board..."),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -81,13 +82,15 @@ class _ConnectorDialogState extends State<ConnectorDialog> {
       ),
       actions: <Widget>[
         _hasConnectorFailed ? _buildTryAgainButton() : null,
-        FlatButton(onPressed: _onCancelPressed, child: Text("Cancel"),
+        FlatButton(
+          onPressed: _onCancelPressed,
+          child: Text("Cancel"),
         ),
       ],
     );
   }
 
-  Widget _buildMessageWidget(){
+  Widget _buildMessageWidget() {
     return Flexible(child: Text(_latestMessage));
   }
 
@@ -140,7 +143,8 @@ class BluetoothConnector {
 
     //GET CONNECTION TO DEVICE
     _postUpdate("Board found. Connecting...");
-    StreamSubscription connection = await _createConnection(bluetoothService, device);
+    StreamSubscription connection =
+        await _createConnection(bluetoothService, device);
     if (connection == null) {
       _postUpdate("Could not connect to board.");
       return null;
@@ -149,7 +153,7 @@ class BluetoothConnector {
     //GET DEVICE CHARACTERISTIC
     _postUpdate("Connected. Discovering characteristic...");
     BluetoothCharacteristic characteristic = await _findCharacteristic(device);
-    if (characteristic == null){
+    if (characteristic == null) {
       _postUpdate("Could not find characteristic.");
       connection.cancel();
       return null;
@@ -164,7 +168,7 @@ class BluetoothConnector {
   }
 
   /// Helper method to post to the updateStream
-  void _postUpdate(String message){
+  void _postUpdate(String message) {
     _updateStreamController.add(message);
   }
 
@@ -172,12 +176,12 @@ class BluetoothConnector {
   Future<FlutterBlue> _getService() async {
     FlutterBlue service = FlutterBlue.instance;
 
-    if (!await service.isAvailable){
+    if (!await service.isAvailable) {
       _postUpdate("Bluetooth Low Energy is not supported on this device.");
       return null;
     }
 
-    if (!await service.isOn){
+    if (!await service.isOn) {
       _postUpdate("Please turn on Bluetooth.");
       return null;
     }
@@ -186,16 +190,19 @@ class BluetoothConnector {
   }
 
   /// Returns the device matching the [_MAC_ADDRESS] if it is found.
-  static Future<BluetoothDevice> _findDevice(FlutterBlue bluetoothService) async {
+  static Future<BluetoothDevice> _findDevice(
+      FlutterBlue bluetoothService) async {
     ScanResult scanResult = await bluetoothService
         .scan(timeout: Duration(seconds: 10))
-        .firstWhere((result) => result.device.id.id == _MAC_ADDRESS, orElse: () => null);
+        .firstWhere((result) => result.device.id.id == _MAC_ADDRESS,
+            orElse: () => null);
 
     return scanResult?.device;
   }
 
   /// Connects to [device] and returns the connection.
-  static Future<StreamSubscription> _createConnection(FlutterBlue bluetoothService, BluetoothDevice device) {
+  static Future<StreamSubscription> _createConnection(
+      FlutterBlue bluetoothService, BluetoothDevice device) {
     final Completer<StreamSubscription> completer = new Completer();
     StreamSubscription<BluetoothDeviceState> connection;
 
@@ -215,7 +222,8 @@ class BluetoothConnector {
   }
 
   /// Finds the correct characteristic of the [device].
-  static Future<BluetoothCharacteristic> _findCharacteristic(BluetoothDevice device) async {
+  static Future<BluetoothCharacteristic> _findCharacteristic(
+      BluetoothDevice device) async {
     BluetoothCharacteristic characteristic = (await device.discoverServices())
         .singleWhere((service) => service.uuid.toString() == _SERVICE_UUID,
             orElse: () => null)
