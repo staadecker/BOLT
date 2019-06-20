@@ -17,6 +17,7 @@ bool BluetoothManager::shouldGoInBluetoothState() {
 }
 
 void BluetoothManager::goInBluetoothState() {
+    Serial.println("Going Online");
     buttonPressReceiver->addListener(this);
     runnablesManager::addRunnable(this);
 }
@@ -26,7 +27,7 @@ void BluetoothManager::onRun() {
 }
 
 bool BluetoothManager::doesContainBeginConnectionPacket(const char *receivedData) {
-    return strstr(receivedData, BEGIN_CONNECTION_PACKET); //strstr checks if string contains substring
+    return strstr(receivedData, BEGIN_CONNECTION_PACKET) != nullptr; //strstr checks if string contains substring
 }
 
 char *BluetoothManager::readBluetoothSerial() {
@@ -43,10 +44,16 @@ char *BluetoothManager::readBluetoothSerial() {
 
     content[index] = '\0'; // Add null terminator where string ends
 
+#if DEBUG
     if (index != 0) {
         Serial.print("Received bluetooth data: ");
-        Serial.println(content);
+        for (int i = 0; i < index; i++){
+            Serial.print((int) content[i]);
+            Serial.print(",");
+        }
+        Serial.println();
     }
+#endif
 
     return content;
 }
@@ -78,7 +85,7 @@ void BluetoothManager::sendPacket(const char *packetData) {
 void BluetoothManager::onButtonPressed(const unsigned char buttonPressed) {
     //Create string for containing the data to be sent
     char buttonNumber[3];
-    sprintf(buttonNumber, "%05d", buttonPressed);
+    sprintf(buttonNumber, "%02d", buttonPressed);
 
     char packetContent[4];
     packetContent[0] = BluetoothManager::BUTTON_PRESSED;
@@ -107,6 +114,9 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
         if (receivedData[index] == ACKNOWLEDGE_BYTE) {
             index++;
         } else if (receivedData[index] == START_OF_PACKET) {
+#if DEBUG
+            Serial.println("Received packet");
+#endif
             index++;
 
             bool readingPacketContent = true;
@@ -119,8 +129,14 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                 }
 
                 if (receivedData[index] == BEGIN_CONNECTION) {
+#if DEBUG
+                    Serial.println("Received begin connection packet");
+#endif
                     // Nothing to do. Acknowledge will be sent when end of packet byte received
                 } else if (receivedData[index] == END_CONNECTION) {
+#if DEBUG
+                    Serial.println("Received end of connection packet");
+#endif
                     returnToStartingState();
                 } else if (receivedData[index] == TURN_ON_LED or receivedData[index] == TURN_OFF_LED) {
                     if (index + 2U >= lengthOfData) {
@@ -144,6 +160,9 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                     ledManager.shiftOutLEDs();
                 } else if (receivedData[index] == END_OF_PACKET) {
                     BtSerial.write(ACKNOWLEDGE_BYTE);
+#if DEBUG
+                    Serial.println("Sent acknowledge");
+#endif
                     readingPacketContent = false;
                 } else {
                     Serial.print(F("Error: Could not parse content received over bluetooth (in packet): "));

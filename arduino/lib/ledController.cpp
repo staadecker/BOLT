@@ -9,6 +9,10 @@ LedController::LedController() {
 }
 
 void LedController::shiftOutLEDs() {
+#if DEBUG
+    Serial.println("Shift OUT leds");
+#endif
+
     //Latch Low. VCC high
     digitalWrite(PIN_LED_SHIFT_REG_VCC, HIGH);
     digitalWrite(PIN_LED_SHIFT_REG_LATCH, LOW);
@@ -32,10 +36,16 @@ void LedController::shiftOutLEDs() {
 }
 
 void LedController::turnOnLed(unsigned char ledNumber) {
+#if DEBUG
+    Serial.println("Turn ON led :" + String(ledNumber));
+#endif
     ledStates[ledNumber] = HIGH;
 }
 
 void LedController::turnOffLed(unsigned char ledNumber) {
+#if DEBUG
+    Serial.println("Turn OFF led :" + String(ledNumber));
+#endif
     ledStates[ledNumber] = LOW;
 }
 
