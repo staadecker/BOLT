@@ -144,7 +144,7 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                     ledNumber[1] = receivedData[index];
                     ledNumber[2] = '\0';
 
-                    if (receivedData[index] == TURN_ON_LED) {
+                    if (receivedData[index - 2] == TURN_ON_LED) {
                         ledManager.turnOnLed(static_cast<unsigned char>(atoi(ledNumber)));
                     } else {
                         ledManager.turnOffLed(static_cast<unsigned char>(atoi(ledNumber)));
