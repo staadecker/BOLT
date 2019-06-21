@@ -47,11 +47,13 @@ char *BluetoothManager::readBluetoothSerial() {
 #if DEBUG
     if (index != 0) {
         Serial.print("Received bluetooth data: ");
+        Serial.print(content);
+        Serial.print(" (");
         for (int i = 0; i < index; i++){
             Serial.print((int) content[i]);
             Serial.print(",");
         }
-        Serial.println();
+        Serial.println(")");
     }
 #endif
 
@@ -114,9 +116,6 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
         if (receivedData[index] == ACKNOWLEDGE_BYTE) {
             index++;
         } else if (receivedData[index] == START_OF_PACKET) {
-#if DEBUG
-            Serial.println("Received packet");
-#endif
             index++;
 
             bool readingPacketContent = true;
@@ -129,14 +128,8 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                 }
 
                 if (receivedData[index] == BEGIN_CONNECTION) {
-#if DEBUG
-                    Serial.println("Received begin connection packet");
-#endif
                     // Nothing to do. Acknowledge will be sent when end of packet byte received
                 } else if (receivedData[index] == END_CONNECTION) {
-#if DEBUG
-                    Serial.println("Received end of connection packet");
-#endif
                     returnToStartingState();
                 } else if (receivedData[index] == TURN_ON_LED or receivedData[index] == TURN_OFF_LED) {
                     if (index + 2U >= lengthOfData) {
