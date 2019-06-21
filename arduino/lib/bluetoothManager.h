@@ -54,6 +54,8 @@ class BluetoothManager : public ButtonPressListener, public Runnable {
     //Prints to serial error message if received data does not match format
     void parseReceivedData(const char *receivedData);
 
+    void sendAcknowledge();
+
 public:
     BluetoothManager(LedController &ledArg, ButtonPressReceiver *buttonPressReceiver,
                      ReturnToStartStateCallback *returnToStartingStateCallback);
@@ -61,6 +63,8 @@ public:
     void goInBluetoothState();
 
     bool shouldGoInBluetoothState();
+
+    void sendAcknowledge() const;
 };
 
 #endif

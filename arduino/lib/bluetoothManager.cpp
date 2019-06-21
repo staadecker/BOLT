@@ -20,6 +20,7 @@ void BluetoothManager::goInBluetoothState() {
     Serial.println("Going Online");
     buttonPressReceiver->addListener(this);
     runnablesManager::addRunnable(this);
+    sendAcknowledge();
 }
 
 void BluetoothManager::onRun() {
@@ -49,7 +50,7 @@ char *BluetoothManager::readBluetoothSerial() {
         Serial.print("Received bluetooth data: ");
         Serial.print(content);
         Serial.print(" (");
-        for (int i = 0; i < index; i++){
+        for (int i = 0; i < index; i++) {
             Serial.print((int) content[i]);
             Serial.print(",");
         }
@@ -152,10 +153,7 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
                 } else if (receivedData[index] == SHIFT_OUT) {
                     ledManager.shiftOutLEDs();
                 } else if (receivedData[index] == END_OF_PACKET) {
-                    BtSerial.write(ACKNOWLEDGE_BYTE);
-#if DEBUG
-                    Serial.println("Sent acknowledge");
-#endif
+                    sendAcknowledge();
                     readingPacketContent = false;
                 } else {
                     Serial.print(F("Error: Could not parse content received over bluetooth (in packet): "));
@@ -171,4 +169,13 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
             break;
         }
     }
+
+
+}
+
+void BluetoothManager::sendAcknowledge() {
+    BtSerial.write(ACKNOWLEDGE_BYTE);
+#if DEBUG
+    Serial.println("Sent acknowledge");
+#endif
 }

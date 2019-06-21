@@ -37,14 +37,14 @@ void LedController::shiftOutLEDs() {
 
 void LedController::turnOnLed(unsigned char ledNumber) {
 #if DEBUG
-    Serial.println("Turn ON led :" + String(ledNumber));
+    Serial.println("Turn ON led : " + String(ledNumber));
 #endif
     ledStates[ledNumber] = HIGH;
 }
 
 void LedController::turnOffLed(unsigned char ledNumber) {
 #if DEBUG
-    Serial.println("Turn OFF led :" + String(ledNumber));
+    Serial.println("Turn OFF led : " + String(ledNumber));
 #endif
     ledStates[ledNumber] = LOW;
 }
