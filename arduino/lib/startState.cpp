@@ -43,7 +43,6 @@ void StartState::setup() {
 }
 
 void StartState::returnToStartState() {
-    screen::displayOnScreen("READY");
     buttonReceiver->addListener(this); // Register for callback to see if button 0 is pressed (indicating start of game)
     flasher.startFlashingLED(0); // Flash button zero to make user start game
 #if IS_BLUETOOTH_CHIP_CONNECTED
@@ -79,7 +78,6 @@ void StartState::onButtonPressed(const unsigned char buttonPressed) {
 void StartState::onRun() {
     if (bluetoothManager and bluetoothManager->shouldGoInBluetoothState()) {
         exitReadyMode();
-        screen::displayOnScreen("ONLINE");
 
         bluetoothManager->goInBluetoothState();
     }

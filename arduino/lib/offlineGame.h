@@ -3,7 +3,6 @@
 
 #include "buttonShieldReceiver.h"
 #include "ledController.h"
-#include "screen.h"
 #include "returnToStartingStateCallback.h"
 
 class OfflineGame : public ButtonPressListener {
