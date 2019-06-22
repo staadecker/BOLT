@@ -47,10 +47,14 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
 
     game = SimpleGame(_btTransmitter);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => _postBuildSetup());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _btTransmitter.buttonPresses.first.then((_) => _startGame()),
+    );
+
+    print("Test 2");
   }
 
-  _postBuildSetup() async {
+  _startGame() async {
     Future<double> gameResult = game.start();
 
     setState(() {
@@ -74,17 +78,27 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
 
   @override
   Widget build(BuildContext context) {
+    print("Building");
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(time, style: TextStyle(fontSize: 96.0)),
-          !isGameRunning ? Text(
-            "Press any button to start!",
-            style: TextStyle(fontSize: 16.0),
-          ): null
+          !isGameRunning
+              ? Text(
+                  "Press any button to start!",
+                  style: TextStyle(fontSize: 16.0),
+                )
+              : null
         ].where((element) => element != null).toList(),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    tickTimer?.cancel();
+
+    super.dispose();
   }
 }

@@ -20,17 +20,15 @@ class BtTransmitter {
 
   BtTransmitter(this._device, this._connection, this._btCharacteristic) {
     //Register device for connection changes
-    _device.onStateChanged().listen(deviceStateChanged);
-    _device
-        .onValueChanged(_btCharacteristic)
-        .listen(valueChanged);
+    _device.onStateChanged().listen(_deviceStateChanged);
+    _device.onValueChanged(_btCharacteristic).listen(_valueChanged);
   }
 
-  void deviceStateChanged(BluetoothDeviceState state) {
+  void _deviceStateChanged(BluetoothDeviceState state) {
     print("State changed to: " + state.toString());
   }
 
-  void valueChanged(List<int> values) {
+  void _valueChanged(List<int> values) {
     if (ListEquality().equals(values, BtMessage.acknowledge.value))
       _acknowledgeStreamController.add(null);
     else if (values[0] == BtMessage.startCode &&
@@ -51,8 +49,7 @@ class BtTransmitter {
 
   void writePacket(BtMessage packet) async {
     print("Sending content: $packet");
-    await _device.writeCharacteristic(
-        _btCharacteristic, packet.value);
+    await _device.writeCharacteristic(_btCharacteristic, packet.value);
   }
 
   void close() {

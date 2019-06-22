@@ -130,6 +130,7 @@ class BtConnector {
 
   /// Connects to the device and returns a [BluetoothConnection] or null if connecting failed
   Future<BtTransmitter> connect() async {
+    print("CONNECTING");
     //GET BLUETOOTH SERVICE
     _postUpdate("Checking for Bluetooth availability...");
     FlutterBlue btService = await _getService();
@@ -207,9 +208,8 @@ class BtConnector {
   }
 
   /// Returns the device matching the [_MAC_ADDRESS] if it is found.
-  static Future<BluetoothDevice> _findDevice(
-      FlutterBlue bluetoothService) async {
-    ScanResult scanResult = await bluetoothService
+  static Future<BluetoothDevice> _findDevice(FlutterBlue btService) async {
+    ScanResult scanResult = await btService
         .scan(timeout: Duration(seconds: 10))
         .firstWhere((result) => result.device.id.id == _MAC_ADDRESS,
             orElse: () => null);
@@ -226,6 +226,7 @@ class BtConnector {
     connection = btService
         .connect(device, timeout: Duration(seconds: 10))
         .listen((BluetoothDeviceState result) {
+      print("Bluetooth Device state changed to:" + result.toString());
       if (result == BluetoothDeviceState.connected) {
         completer.complete(connection);
       }
@@ -258,18 +259,17 @@ class BtConnector {
 
   /// Sends begin packet to board and waits for acknowledge.
   /// If acknowledge received returns true
-  static Future<bool> _waitForBoardToGoOnline(
-      BtTransmitter bluetoothTransmitter) {
+  static Future<bool> _waitForBoardToGoOnline(BtTransmitter btTransmitter) {
     Completer<bool> completer = new Completer();
 
     StreamSubscription firstAcknowledge;
 
-    firstAcknowledge = bluetoothTransmitter.acknowledgeStream.listen((_) {
+    firstAcknowledge = btTransmitter.acknowledgeStream.listen((_) {
       firstAcknowledge.cancel();
       completer.complete(true);
     });
 
-    bluetoothTransmitter.writePacket(BtMessage.begin);
+    btTransmitter.writePacket(BtMessage.begin);
 
     new Timer(Duration(seconds: 8), () {
       if (!completer.isCompleted) {
