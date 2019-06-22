@@ -50,8 +50,6 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _btTransmitter.buttonPresses.first.then((_) => _startGame()),
     );
-
-    print("Test 2");
   }
 
   _startGame() async {
@@ -78,7 +76,6 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
 
   @override
   Widget build(BuildContext context) {
-    print("Building");
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

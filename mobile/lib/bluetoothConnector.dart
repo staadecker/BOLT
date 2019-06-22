@@ -123,14 +123,12 @@ class BtConnector {
   static const _CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
 
   final StreamController<String> _updatesStreamController = StreamController();
-  StreamSubscription connection;
 
   /// Stream of messages giving updates of the connection process
   Stream<String> get updates => _updatesStreamController.stream;
 
   /// Connects to the device and returns a [BluetoothConnection] or null if connecting failed
   Future<BtTransmitter> connect() async {
-    print("CONNECTING");
     //GET BLUETOOTH SERVICE
     _postUpdate("Checking for Bluetooth availability...");
     FlutterBlue btService = await _getService();
@@ -147,7 +145,7 @@ class BtConnector {
 
     //GET CONNECTION TO DEVICE
     _postUpdate("Board found. Connecting...");
-    connection = await _createConnection(btService, device);
+    StreamSubscription connection = await _createConnection(btService, device);
     if (connection == null) {
       _postUpdate("Could not connect to board.");
       return null;
@@ -179,7 +177,6 @@ class BtConnector {
 
   /// Should be called before disposing the object to close the streams.
   void dispose() {
-    connection.cancel();
     _updatesStreamController.close();
   }
 
@@ -226,7 +223,7 @@ class BtConnector {
     connection = btService
         .connect(device, timeout: Duration(seconds: 10))
         .listen((BluetoothDeviceState result) {
-      print("Bluetooth Device state changed to:" + result.toString());
+      print("Bluetooth device state changed to:" + result.toString());
       if (result == BluetoothDeviceState.connected) {
         completer.complete(connection);
       }

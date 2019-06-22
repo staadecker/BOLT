@@ -49,7 +49,6 @@ class _HomePageAppBodyState extends State<HomePageAppBody> {
   }
 
   void onPlay() async {
-    print("PLAY called");
     //Create dialog that will generate a [BluetoothTransmitter] Object.
     if (btTransmitter == null) {
       btTransmitter = await showDialog<BtTransmitter>(
