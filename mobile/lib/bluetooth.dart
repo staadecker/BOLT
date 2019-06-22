@@ -1,21 +1,28 @@
 import 'dart:async';
 
-import 'package:bolt_flutter/bluetoothConnection.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 
-class BluetoothTransmitter {
-  BluetoothConnection _bluetoothConnection;
+class BtTransmitter {
+  final BluetoothDevice _device;
+  final StreamSubscription<BluetoothDeviceState> _connection;
+  final BluetoothCharacteristic _btCharacteristic;
 
-  final StreamController<int> _buttonPressStreamController = new StreamController();
+  final StreamController<int> _buttonPressStreamController =
+      new StreamController.broadcast();
 
   Stream<int> get buttonPresses => _buttonPressStreamController.stream;
 
-  BluetoothTransmitter(this._bluetoothConnection) {
+  final StreamController<Null> _acknowledgeStreamController =
+      new StreamController.broadcast();
+
+  Stream<Null> get acknowledgeStream => _acknowledgeStreamController.stream;
+
+  BtTransmitter(this._device, this._connection, this._btCharacteristic) {
     //Register device for connection changes
-    _bluetoothConnection.device.onStateChanged().listen(deviceStateChanged);
-    _bluetoothConnection.device
-        .onValueChanged(_bluetoothConnection.btCharacteristic)
+    _device.onStateChanged().listen(deviceStateChanged);
+    _device
+        .onValueChanged(_btCharacteristic)
         .listen(valueChanged);
   }
 
@@ -24,10 +31,10 @@ class BluetoothTransmitter {
   }
 
   void valueChanged(List<int> values) {
-    if (ListEquality().equals(values, _BluetoothMessage.acknowledge.value))
-      print("Received acknowledge");
-    else if (values[0] == _BluetoothMessage.startCode &&
-        values[values.length - 1] == _BluetoothMessage.endCode) {
+    if (ListEquality().equals(values, BtMessage.acknowledge.value))
+      _acknowledgeStreamController.add(null);
+    else if (values[0] == BtMessage.startCode &&
+        values[values.length - 1] == BtMessage.endCode) {
       switch (values[1]) {
         case 80:
           int buttonNumber = int.parse(String.fromCharCodes(values, 2, 3));
@@ -35,54 +42,53 @@ class BluetoothTransmitter {
           _buttonPressStreamController.add(buttonNumber);
           break;
         default:
-          print("Unknown packet content received");
+          print("Unknown packet content received : " + values.toString());
       }
-      writePacket(_BluetoothMessage.acknowledge);
+      writePacket(BtMessage.acknowledge);
     } else
       print("Value changed : " + values.toString());
   }
 
-  void writePacket(_BluetoothMessage packet) async {
+  void writePacket(BtMessage packet) async {
     print("Sending content: $packet");
-    await _bluetoothConnection.device.writeCharacteristic(
-        _bluetoothConnection.btCharacteristic, packet.value);
+    await _device.writeCharacteristic(
+        _btCharacteristic, packet.value);
   }
 
-  void disconnect() {
-    writePacket(_BluetoothMessage.end);
-    _bluetoothConnection.close();
+  void close() {
+    _connection.cancel();
+    writePacket(BtMessage.end);
     _buttonPressStreamController.close();
-  }
-
-  void doAction() {
-    writePacket(_BluetoothMessage.begin);
-    writePacket(_BluetoothMessage.turnLedOff(31));
+    _acknowledgeStreamController.close();
   }
 }
 
-class _BluetoothMessage {
+class BtMessage {
   final List<int> _value;
 
   List<int> get value => _value;
 
-  const _BluetoothMessage(this._value);
+  const BtMessage(this._value);
 
-  static const _BluetoothMessage acknowledge = _BluetoothMessage([6]);
-  static const startCode = 2;
-  static const endCode = 3;
+  static const BtMessage acknowledge = BtMessage([6]);
+  static const startCode = 0x01;
+  static const endCode = 0x04;
 
-  static final _BluetoothMessage begin = createPacket("B");
-  static final _BluetoothMessage end = createPacket("E");
-  static final _BluetoothMessage shiftOut = createPacket("S");
+  static final BtMessage begin = _createPacket("B");
+  static final BtMessage end = _createPacket("E");
+  static final BtMessage shiftOut = _createPacket("S");
 
-  static _BluetoothMessage createPacket(String packetContent) =>
-      _BluetoothMessage([startCode] + packetContent.codeUnits + [endCode]);
+  static BtMessage _createPacket(String packetContent) =>
+      BtMessage([startCode] + packetContent.codeUnits + [endCode]);
 
-  static _BluetoothMessage turnLedOn(int ledNumber) =>
-      createPacket("O" + ledNumber.toString());
+  static BtMessage turnLedOn(int ledNumber) =>
+      _createPacket("O" + ledNumber.toString());
 
-  static _BluetoothMessage turnLedOff(ledNumber) =>
-      createPacket("I" + ledNumber.toString());
+  static BtMessage turnLedOff(ledNumber) =>
+      _createPacket("I" + ledNumber.toString());
+
+  static BtMessage mergePackets(List<BtMessage> packets) =>
+      BtMessage(packets.expand((x) => x.value).toList());
 
   @override
   String toString() {

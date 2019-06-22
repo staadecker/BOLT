@@ -2,4 +2,4 @@ import 'package:flutter/widgets.dart';
 
 import 'homescreen.dart';
 
-void main() => runApp(BoltApp());
+void main() => runApp(HomePageApp());

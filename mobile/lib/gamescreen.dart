@@ -1,81 +1,75 @@
 import 'dart:async';
 
-import 'package:bolt_flutter/bluetoothConnection.dart';
-import 'package:bolt_flutter/bluetoothConnector.dart';
 import 'package:flutter/material.dart';
+
 import 'bluetooth.dart';
+import 'gameLogic.dart';
 
 class GamePage extends StatelessWidget {
+  final BtTransmitter _btTransmitter;
+
+  GamePage(this._btTransmitter);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Game"),
       ),
-      body: StatefulGamePage(),
+      body: StatefulGamePage(_btTransmitter),
     );
   }
 }
 
 class StatefulGamePage extends StatefulWidget {
+  final BtTransmitter _btTransmitter;
+
+  StatefulGamePage(this._btTransmitter);
+
   @override
-  _StatefulGamePageState createState() => _StatefulGamePageState();
+  _StatefulGamePageState createState() =>
+      _StatefulGamePageState(_btTransmitter);
 }
 
 class _StatefulGamePageState extends State<StatefulGamePage> {
-  BluetoothTransmitter bluetoothTransmitter;
-  StreamSubscription buttonPressSubscription;
-  String time = "30.00";
+  final BtTransmitter _btTransmitter;
+
+  String time = "0.00";
   Timer tickTimer;
-  Stopwatch stopwatch = Stopwatch();
-  final Duration gameDuration = Duration(seconds: 30);
+  SimpleGame game;
+  bool isGameRunning = false;
+
+  _StatefulGamePageState(this._btTransmitter);
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _showConnectingDialog());
+    game = SimpleGame(_btTransmitter);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _postBuildSetup());
   }
 
-  _showConnectingDialog() async {
-    BluetoothConnection bluetoothConnection =
-        await showDialog<BluetoothConnection>(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return ConnectorDialog();
-            });
+  _postBuildSetup() async {
+    Future<double> gameResult = game.start();
 
-    //Canceled trying to connect. Go back to home screen
-    if (bluetoothConnection == null) Navigator.pop(context);
-    else {
-      bluetoothTransmitter = BluetoothTransmitter(bluetoothConnection);
-      buttonPressSubscription =
-          bluetoothTransmitter.buttonPresses.listen(firstButtonPressed);
-    }
-  }
+    setState(() {
+      isGameRunning = true;
+    });
 
-  void firstButtonPressed(int buttonNumber) {
-    buttonPressSubscription.cancel();
-    stopwatch.start();
     tickTimer = new Timer.periodic(Duration(milliseconds: 30), tick);
-  }
 
-  @override
-  void dispose() {
-    bluetoothTransmitter?.disconnect();
-    super.dispose();
+    double result = await gameResult;
+
+    tickTimer.cancel();
+
+    print("Result is: " + result.toString());
   }
 
   void tick(Timer timer) {
-    if (stopwatch.elapsed > gameDuration)
-      tickTimer.cancel();
-    else {
-      setState(() {
-        time = (gameDuration - stopwatch.elapsed).inMilliseconds.toString();
-      });
-    }
+    setState(() {
+      time = game.stopwatch.elapsedMilliseconds.toString();
+    });
   }
 
   @override
@@ -85,11 +79,11 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(time, style: TextStyle(fontSize: 96.0)),
-          Text(
+          !isGameRunning ? Text(
             "Press any button to start!",
             style: TextStyle(fontSize: 16.0),
-          )
-        ],
+          ): null
+        ].where((element) => element != null).toList(),
       ),
     );
   }

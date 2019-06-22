@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'bluetooth.dart';
+import 'bluetoothConnector.dart';
 import 'gamescreen.dart';
 
 /// The home screen of the app.
 ///
 /// A page with a "Play" button.
-class BoltApp extends StatelessWidget {
+class HomePageApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,16 +21,18 @@ class BoltApp extends StatelessWidget {
             appBar: AppBar(
               title: new Text("Bolt"),
             ),
-            body: BoltAppBody()));
+            body: HomePageAppBody()));
   }
 }
 
-class BoltAppBody extends StatefulWidget {
+class HomePageAppBody extends StatefulWidget {
   @override
-  _BoltAppBodyState createState() => _BoltAppBodyState();
+  _HomePageAppBodyState createState() => _HomePageAppBodyState();
 }
 
-class _BoltAppBodyState extends State<BoltAppBody> {
+class _HomePageAppBodyState extends State<HomePageAppBody> {
+  BtTransmitter btTransmitter;
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -37,13 +41,37 @@ class _BoltAppBodyState extends State<BoltAppBody> {
         children: <Widget>[
           RaisedButton(
             child: Text("Play"),
-            onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => GamePage()));
-            },
+            onPressed: onPlay,
           ),
         ],
       ),
     );
+  }
+
+  void onPlay() async {
+    //Create dialog that will generate a [BluetoothTransmitter] Object.
+    if (btTransmitter == null) {
+      btTransmitter = await showDialog<BtTransmitter>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return BtConnectorDialog();
+        },
+      );
+    }
+
+    if (btTransmitter != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => GamePage(btTransmitter)),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    btTransmitter?.close();
+
+    super.dispose();
   }
 }
