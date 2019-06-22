@@ -35,7 +35,7 @@ class BtTransmitter {
         values[values.length - 1] == BtMessage.endCode) {
       switch (values[1]) {
         case 80:
-          int buttonNumber = int.parse(String.fromCharCodes(values, 2, 3));
+          int buttonNumber = int.parse(String.fromCharCodes(values, 2, 4));
           print("Received button pressed : $buttonNumber");
           _buttonPressStreamController.add(buttonNumber);
           break;
