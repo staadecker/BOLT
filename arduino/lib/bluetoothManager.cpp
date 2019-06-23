@@ -169,13 +169,11 @@ void BluetoothManager::parseReceivedData(const char *receivedData) {
             break;
         }
     }
-
-
 }
 
 void BluetoothManager::sendAcknowledge() {
     BtSerial.write(ACKNOWLEDGE_BYTE);
-#if DEBUG
-    Serial.println("Sent acknowledge");
-#endif
+//#if DEBUG
+//    Serial.println("Sent acknowledge");
+//#endif
 }
