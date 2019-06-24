@@ -49,7 +49,7 @@ class BtTransmitter {
 
   Future<void> writePacket(BtMessage message) async {
     print("Sending content: $message");
-    return await _btCharacteristic.write(message.value);
+    return await _btCharacteristic.write(message.value, withoutResponse: true);
   }
 
   void close() {

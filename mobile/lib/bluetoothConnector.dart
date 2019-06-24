@@ -52,9 +52,7 @@ class _BtConnectorDialogState extends State<BtConnectorDialog> {
   ///
   /// Will be null if connector failed connecting.
   /// If connection not null, dialog is done so pop and return the connection (as an argument)
-    BtTransmitter _onConnectionResult(BtTransmitter connection) {
-    if (connectionOperation.isCanceled) return null;
-
+  BtTransmitter _onConnectionResult(BtTransmitter connection) {
     if (connection == null)
       setState(() {
         _hasConnectorFailed = true;
@@ -88,39 +86,35 @@ class _BtConnectorDialogState extends State<BtConnectorDialog> {
           _hasConnectorFailed ? "Failed to connect" : "Connecting to board..."),
       content: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          !_hasConnectorFailed ? _buildCircularProgressIndicator() : null,
-          _latestMessage != null ? _buildMessageWidget() : null,
-        ].where((element) => element != null).toList(),
+        children: _buildDialogContent(),
       ),
-      actions: <Widget>[
-        _hasConnectorFailed ? _buildTryAgainButton() : null,
-        FlatButton(
-          onPressed: _onCancelPressed,
-          child: Text("Cancel"),
-        ),
-      ],
+      actions: _buildActionButtons(),
     );
   }
 
-  Widget _buildMessageWidget() {
-    return Flexible(child: Text(_latestMessage));
+  List<Widget> _buildActionButtons() {
+    return <Widget>[
+      _hasConnectorFailed
+          ? FlatButton(onPressed: _onTryAgainPressed, child: Text("Try Again"))
+          : null,
+      FlatButton(onPressed: _onCancelPressed, child: Text("Cancel")),
+    ].where((element) => element != null).toList();
   }
 
-  FlatButton _buildTryAgainButton() {
-    return FlatButton(
-      onPressed: _onTryAgainPressed,
-      child: Text("Try Again"),
-    );
+  List<Widget> _buildDialogContent() {
+    return <Widget>[
+      !_hasConnectorFailed
+          ? Padding(
+              child: CircularProgressIndicator(),
+              padding: EdgeInsets.all(10.0),
+            )
+          : null,
+      _latestMessage != null ? Flexible(child: Text(_latestMessage)) : null,
+    ].where((element) => element != null).toList();
   }
 
-  static Widget _buildCircularProgressIndicator() {
-    return Padding(
-      child: CircularProgressIndicator(),
-      padding: EdgeInsets.all(10.0),
-    );
-  }
-
+  //Called after Navigator.pop()
+  //Navigator.pop() called after result or cancel
   @override
   void dispose() {
     updatesSubscription.cancel();
@@ -144,40 +138,35 @@ class BtConnector {
   /// Stream of messages giving updates of the connection process
   Stream<String> get updates => _updatesStreamController.stream;
 
-  CancelableCompleter<BtTransmitter> mainOperation;
   CancelableOperation<dynamic> currentOperation;
 
   /// Connects to the device and returns a [BluetoothConnection] or null if connecting failed
   CancelableOperation<BtTransmitter> connect() {
-    mainOperation =
+    CancelableCompleter<BtTransmitter> mainOperation =
         CancelableCompleter(onCancel: () => currentOperation.cancel());
 
-    _runOperations();
+    _runOperations().then((result) => mainOperation.complete(result));
 
     return mainOperation.operation;
   }
 
-  void _runOperations() async {
+  Future<BtTransmitter> _runOperations() async {
     //GET BLUETOOTH SERVICE
     currentOperation = CancelableOperation.fromFuture(_getService());
     FlutterBlue btService = await currentOperation.value;
-    if (btService == null) return;
+    if (btService == null) return null;
 
     //GET CORRECT DEVICE
-    currentOperation = CancelableOperation.fromFuture(_findDevice(btService));
-    BluetoothDevice device = await currentOperation.value;
-    if (device == null) return;
-
-    //GET CONNECTION TO DEVICE
     currentOperation =
-        CancelableOperation.fromFuture(_createConnection(device));
-    await currentOperation.value;
+        CancelableOperation.fromFuture(_findAndConnectDevice(btService));
+    BluetoothDevice device = await currentOperation.value;
+    if (device == null) return null;
 
     //GET DEVICE CHARACTERISTIC
     currentOperation =
         CancelableOperation.fromFuture(_findCharacteristic(device));
     BluetoothCharacteristic characteristic = await currentOperation.value;
-    if (characteristic == null) return;
+    if (characteristic == null) return null;
 
     //WAIT FOR BOARD TO GO ONLINE
     BtTransmitter btTransmitter = BtTransmitter(device, characteristic);
@@ -185,7 +174,10 @@ class BtConnector {
     currentOperation =
         CancelableOperation.fromFuture(_waitForBoardToGoOnline(btTransmitter));
     bool success = await currentOperation.value;
-    if (success) mainOperation.complete(btTransmitter);
+    if (success)
+      return btTransmitter;
+    else
+      return null;
   }
 
   void cancel() {
@@ -203,21 +195,20 @@ class BtConnector {
 
     FlutterBlue service = FlutterBlue.instance;
 
-    if (!await service.isAvailable)
+    if (!await service.isAvailable) {
       _postUpdate("Bluetooth Low Energy is not supported on this device.");
-    else if (!await service.isOn)
+      return null;
+    } else if (!await service.isOn) {
       _postUpdate("Please turn on Bluetooth.");
-    else
-      return service;
+      return null;
+    }
 
-    mainOperation.complete(null);
-    return null;
+    return service;
   }
 
   /// Returns the device matching the [_TARGET_DEVICE_ID] if it is found.
-  Future<BluetoothDevice> _findDevice(FlutterBlue btService) async {
+  Future<BluetoothDevice> _findAndConnectDevice(FlutterBlue btService) async {
     _postUpdate("Scanning for board...");
-
     List<BluetoothDevice> connectedDevices = await btService.connectedDevices;
 
     for (BluetoothDevice device in connectedDevices) {
@@ -226,28 +217,27 @@ class BtConnector {
       }
     }
 
-    ScanResult scanResult =
-        await btService.scan(timeout: Duration(seconds: 10)).firstWhere(
+    BluetoothDevice device =
+        (await btService.scan(timeout: Duration(seconds: 10)).firstWhere(
       (result) => result.device.id == _TARGET_DEVICE_ID,
       orElse: () {
         _postUpdate("Board not found.");
-        mainOperation.complete(null);
         return null;
       },
-    );
+    ))
+            ?.device;
 
-    return scanResult?.device;
-  }
+    if (device == null) return null;
 
-  /// Connects to [device] and returns the connection.
-  Future<void> _createConnection(BluetoothDevice device) async {
     _postUpdate("Connecting to board...");
-    return await device.connect(timeout: Duration(seconds: 10));
+    await device.connect(timeout: Duration(seconds: 10));
+    return device;
   }
 
   /// Finds the correct characteristic of the [device].
-  Future<BluetoothCharacteristic> _findCharacteristic(BluetoothDevice device) async {
-    _postUpdate("Discovering characteristic...");
+  Future<BluetoothCharacteristic> _findCharacteristic(
+      BluetoothDevice device) async {
+    _postUpdate("Discovering characteristics...");
     BluetoothCharacteristic characteristic = (await device.discoverServices())
         .singleWhere((service) => service.uuid.toString() == _SERVICE_UUID,
             orElse: () => null)
@@ -257,13 +247,11 @@ class BtConnector {
 
     if (characteristic == null) {
       _postUpdate("Could not find characteristic.");
-      mainOperation.complete(null);
+      return null;
     }
 
-    if (characteristic != null) {
-      //Setup on notify for change
-      await characteristic.setNotifyValue(true);
-    }
+    //Setup on notify for change
+    await characteristic.setNotifyValue(true);
 
     return characteristic;
   }
@@ -275,10 +263,11 @@ class BtConnector {
 
     btTransmitter.writePacket(BtMessage.begin);
 
-    return btTransmitter.acknowledgeStream.map((element) => true).timeout(Duration(seconds: 8), onTimeout: (sink) {
+    return btTransmitter.acknowledgeStream
+        .map((element) => true)
+        .timeout(Duration(seconds: 8), onTimeout: (sink) {
       _postUpdate("Board did not respond.");
-      mainOperation.complete(null);
-      return false;
+      sink.add(false);
     }).first;
   }
 }

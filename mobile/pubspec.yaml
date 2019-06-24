@@ -10,6 +10,7 @@ dependencies:
   flutter_blue: ^0.6.0
   cupertino_icons: ^0.1.2
   async: ^2.2.0
+  intl: ^0.15.8
 
 dev_dependencies:
   flutter_test:

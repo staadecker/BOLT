@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'bluetooth.dart';
 import 'gameLogic.dart';
@@ -32,13 +33,14 @@ class StatefulGamePage extends StatefulWidget {
 }
 
 class _StatefulGamePageState extends State<StatefulGamePage> {
+  static final NumberFormat formatter = NumberFormat("##0.00");
+
   final BtTransmitter _btTransmitter;
 
-  String time = "0.00";
+  String time = _formatTime(Duration.zero);
   Timer tickTimer;
   SimpleGame game;
   bool isGameRunning = false;
-  StreamSubscription firstButtonPressSubscription;
 
   _StatefulGamePageState(this._btTransmitter);
 
@@ -49,63 +51,51 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
     game = SimpleGame(_btTransmitter);
 
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => firstButtonPressSubscription = _btTransmitter.buttonPresses.listen((_) => _startGame()),
+      (_) => _btTransmitter.buttonPresses.first.then((_) => _startGame()),
     );
-  }
-
-  _startGame() async {
-    firstButtonPressSubscription.cancel();
-
-    Future<Duration> gameResult = game.start();
-
-    setState(() {
-      isGameRunning = true;
-    });
-
-    tickTimer = new Timer.periodic(Duration(milliseconds: 30), tick);
-
-    Duration result = await gameResult;
-
-    tickTimer.cancel();
-
-    if (result != null) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext content) {
-          return AlertDialog(
-            title: Text("Result"),
-            content: Text(
-              "Your average reaction speed was " +
-                  result.inMilliseconds.toString() +
-                  "ms per button.",
-            ),
-            actions: <Widget>[
-               FlatButton(
-                child: Text("Ok"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    game = SimpleGame(_btTransmitter);
-    firstButtonPressSubscription = _btTransmitter.buttonPresses.listen((_) => _startGame());
-
-    setState(() {
-      isGameRunning = false;
-      time = "0.00";
-    });
   }
 
   void tick(Timer timer) {
     setState(() {
-      time = game.stopwatch.elapsedMilliseconds.toString();
+      time = _formatTime(game.stopwatch.elapsed);
     });
+  }
+
+  _startGame() async {
+    if (mounted) {
+      Future<Duration> gameResult = game.start();
+
+      setState(() {
+        isGameRunning = true;
+      });
+
+      tickTimer = new Timer.periodic(Duration(milliseconds: 30), tick);
+
+      Duration result = await gameResult;
+
+      tickTimer.cancel();
+
+      if (result != null) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => ResultDialog(result),
+        );
+      }
+
+      game = SimpleGame(_btTransmitter);
+
+      _btTransmitter.buttonPresses.first.then((_) => _startGame());
+
+      setState(() {
+        isGameRunning = false;
+        time = "0.00";
+      });
+    }
+  }
+
+  static String _formatTime(Duration elapsedTime) {
+    return formatter.format((elapsedTime.inMilliseconds) / 1000);
   }
 
   @override
@@ -130,8 +120,33 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
   void dispose() {
     tickTimer?.cancel();
     game?.cancelGame();
-    firstButtonPressSubscription?.cancel();
 
     super.dispose();
+  }
+}
+
+class ResultDialog extends StatelessWidget {
+  final Duration result;
+
+  ResultDialog(this.result);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Result"),
+      content: Text(
+        "Your average reaction speed was " +
+            result.inMilliseconds.toString() +
+            "ms per button.",
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("Ok"),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    );
   }
 }
