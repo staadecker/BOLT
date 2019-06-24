@@ -5,7 +5,6 @@ import 'package:flutter_blue/flutter_blue.dart';
 
 class BtTransmitter {
   final BluetoothDevice _device;
-  final StreamSubscription<BluetoothDeviceState> _connection;
   final BluetoothCharacteristic _btCharacteristic;
 
   final StreamController<int> _buttonPressStreamController =
@@ -18,10 +17,10 @@ class BtTransmitter {
 
   Stream<Null> get acknowledgeStream => _acknowledgeStreamController.stream;
 
-  BtTransmitter(this._device, this._connection, this._btCharacteristic) {
+  BtTransmitter(this._device, this._btCharacteristic) {
     //Register device for connection changes
-    _device.onStateChanged().listen(_deviceStateChanged);
-    _device.onValueChanged(_btCharacteristic).listen(_valueChanged);
+    _device.state.listen(_deviceStateChanged);
+    _btCharacteristic.value.listen(_valueChanged);
   }
 
   void _deviceStateChanged(BluetoothDeviceState state) {
@@ -29,6 +28,7 @@ class BtTransmitter {
   }
 
   void _valueChanged(List<int> values) {
+    if (values.length == 0) return;
     if (ListEquality().equals(values, BtMessage.acknowledge.value))
       _acknowledgeStreamController.add(null);
     else if (values[0] == BtMessage.startCode &&
@@ -47,13 +47,13 @@ class BtTransmitter {
       print("Value changed : " + values.toString());
   }
 
-  void writePacket(BtMessage packet) async {
-    print("Sending content: $packet");
-    await _device.writeCharacteristic(_btCharacteristic, packet.value);
+  Future<void> writePacket(BtMessage message) async {
+    print("Sending content: $message");
+    return await _btCharacteristic.write(message.value);
   }
 
   void close() {
-    _connection.cancel();
+    _device.disconnect();
     writePacket(BtMessage.end);
     _buttonPressStreamController.close();
     _acknowledgeStreamController.close();
@@ -79,10 +79,10 @@ class BtMessage {
       BtMessage([startCode] + packetContent.codeUnits + [endCode]);
 
   static BtMessage turnLedOn(int ledNumber) =>
-      _createPacket("O" + ledNumber.toString());
+      _createPacket("O" + ledNumber.toString().padLeft(2, "0"));
 
   static BtMessage turnLedOff(ledNumber) =>
-      _createPacket("I" + ledNumber.toString());
+      _createPacket("I" + ledNumber.toString().padLeft(2, "0"));
 
   static BtMessage mergePackets(List<BtMessage> packets) =>
       BtMessage(packets.expand((x) => x.value).toList());

@@ -38,6 +38,7 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
   Timer tickTimer;
   SimpleGame game;
   bool isGameRunning = false;
+  StreamSubscription firstButtonPressSubscription;
 
   _StatefulGamePageState(this._btTransmitter);
 
@@ -48,12 +49,14 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
     game = SimpleGame(_btTransmitter);
 
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _btTransmitter.buttonPresses.first.then((_) => _startGame()),
+      (_) => firstButtonPressSubscription = _btTransmitter.buttonPresses.listen((_) => _startGame()),
     );
   }
 
   _startGame() async {
-    Future<double> gameResult = game.start();
+    firstButtonPressSubscription.cancel();
+
+    Future<Duration> gameResult = game.start();
 
     setState(() {
       isGameRunning = true;
@@ -61,11 +64,42 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
 
     tickTimer = new Timer.periodic(Duration(milliseconds: 30), tick);
 
-    double result = await gameResult;
+    Duration result = await gameResult;
 
     tickTimer.cancel();
 
-    print("Result is: " + result.toString());
+    if (result != null) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext content) {
+          return AlertDialog(
+            title: Text("Result"),
+            content: Text(
+              "Your average reaction speed was " +
+                  result.inMilliseconds.toString() +
+                  "ms per button.",
+            ),
+            actions: <Widget>[
+               FlatButton(
+                child: Text("Ok"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    game = SimpleGame(_btTransmitter);
+    firstButtonPressSubscription = _btTransmitter.buttonPresses.listen((_) => _startGame());
+
+    setState(() {
+      isGameRunning = false;
+      time = "0.00";
+    });
   }
 
   void tick(Timer timer) {
@@ -95,6 +129,8 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
   @override
   void dispose() {
     tickTimer?.cancel();
+    game?.cancelGame();
+    firstButtonPressSubscription?.cancel();
 
     super.dispose();
   }

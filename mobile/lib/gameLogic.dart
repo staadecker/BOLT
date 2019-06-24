@@ -10,7 +10,7 @@ class SimpleGame {
 
   final BtTransmitter _btTransmitter;
   final Stopwatch stopwatch = Stopwatch();
-  final Completer<double> _gameComplete = new Completer();
+  final Completer<Duration> _gameComplete = new Completer();
   int _buttonsPressed = 0;
   int ledOn;
   StreamSubscription buttonPressSubscription;
@@ -18,10 +18,12 @@ class SimpleGame {
 
   SimpleGame(this._btTransmitter);
 
-  Future<double> start() async {
+  Future<Duration> start() async {
     ledOn = random.nextInt(_NUMBER_OF_LEDS);
 
+    Timer(GAME_DURATION, _endGame);
     stopwatch.start();
+
     _btTransmitter.writePacket(BtMessage.mergePackets(
         [BtMessage.turnLedOn(ledOn), BtMessage.shiftOut]));
 
@@ -37,31 +39,40 @@ class SimpleGame {
 
       BtMessage turnOffMessage = BtMessage.turnLedOff(ledOn);
 
-      if (stopwatch.elapsed > GAME_DURATION) {
-        _btTransmitter.writePacket(turnOffMessage);
-        _endGame();
-      } else {
-        ledOn = random.nextInt(_NUMBER_OF_LEDS);
+      ledOn = random.nextInt(_NUMBER_OF_LEDS);
 
-        _btTransmitter.writePacket(BtMessage.mergePackets(
-            [turnOffMessage, BtMessage.turnLedOn(ledOn), BtMessage.shiftOut]));
-      }
-    }
-
-    if (stopwatch.elapsed > GAME_DURATION) {
-      _endGame();
+      _btTransmitter.writePacket(
+        BtMessage.mergePackets(
+            [turnOffMessage, BtMessage.turnLedOn(ledOn), BtMessage.shiftOut]),
+      );
     }
   }
 
   void _endGame() {
+    if (!_gameComplete.isCompleted) {
+      stopwatch.stop();
+      _btTransmitter.writePacket(BtMessage.mergePackets(
+          [BtMessage.turnLedOff(ledOn), BtMessage.shiftOut]));
+
+      buttonPressSubscription.cancel();
+
+      if (_buttonsPressed == 0)
+        _gameComplete.complete(null);
+      else
+        _gameComplete.complete(GAME_DURATION ~/ _buttonsPressed);
+    }
+  }
+
+  void cancelGame() {
     stopwatch.stop();
 
-    if (_buttonsPressed == 0) {
-      buttonPressSubscription.cancel();
-      _gameComplete.complete(null);
-    } else {
-      buttonPressSubscription.cancel();
-      _gameComplete.complete(stopwatch.elapsedMilliseconds / _buttonsPressed);
+    if (ledOn != null) {
+      _btTransmitter.writePacket(BtMessage.mergePackets(
+          [BtMessage.turnLedOff(ledOn), BtMessage.shiftOut]));
     }
+
+    buttonPressSubscription?.cancel();
+
+    _gameComplete.complete(null);
   }
 }
