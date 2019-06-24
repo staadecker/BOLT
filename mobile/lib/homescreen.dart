@@ -54,9 +54,7 @@ class _HomePageAppBodyState extends State<HomePageAppBody> {
       btTransmitter = await showDialog<BtTransmitter>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) {
-          return BtConnectorDialog();
-        },
+        builder: (_) => BtConnectorDialog(),
       );
     }
 
