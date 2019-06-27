@@ -227,6 +227,8 @@ class BtConnector {
     ))
             ?.device;
 
+    await btService.stopScan();
+
     if (device == null) return null;
 
     _postUpdate("Connecting to board...");

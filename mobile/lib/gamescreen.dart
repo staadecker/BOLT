@@ -85,12 +85,14 @@ class _StatefulGamePageState extends State<StatefulGamePage> {
 
       game = SimpleGame(_btTransmitter);
 
-      _btTransmitter.buttonPresses.first.then((_) => _startGame());
+      if (mounted) {
+        _btTransmitter.buttonPresses.first.then((_) => _startGame());
 
-      setState(() {
-        isGameRunning = false;
-        time = "0.00";
-      });
+        setState(() {
+          isGameRunning = false;
+          time = "0.00";
+        });
+      }
     }
   }
 

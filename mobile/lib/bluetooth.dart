@@ -47,14 +47,15 @@ class BtTransmitter {
       print("Value changed : " + values.toString());
   }
 
-  Future<void> writePacket(BtMessage message) async {
+  Future<void> writePacket(BtMessage message, {waitForResponse: false}) async {
     print("Sending content: $message");
-    return await _btCharacteristic.write(message.value, withoutResponse: true);
+    return await _btCharacteristic.write(message.value,
+        withoutResponse: !waitForResponse);
   }
 
-  void close() {
+  void close() async {
+    await writePacket(BtMessage.end, waitForResponse: true);
     _device.disconnect();
-    writePacket(BtMessage.end);
     _buttonPressStreamController.close();
     _acknowledgeStreamController.close();
   }

@@ -68,6 +68,7 @@ class _HomePageAppBodyState extends State<HomePageAppBody> {
 
   @override
   void dispose() {
+    print("Closing bt transmitter:" + (btTransmitter == null).toString());
     btTransmitter?.close();
 
     super.dispose();
