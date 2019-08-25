@@ -138,138 +138,147 @@ class BtConnector {
   /// Stream of messages giving updates of the connection process
   Stream<String> get updates => _updatesStreamController.stream;
 
-  CancelableOperation<dynamic> currentOperation;
+  CancelableOperation currentOperation;
+  CancelableCompleter<BtTransmitter> mainOperation;
 
   /// Connects to the device and returns a [BluetoothConnection] or null if connecting failed
   CancelableOperation<BtTransmitter> connect() {
-    CancelableCompleter<BtTransmitter> mainOperation =
+    mainOperation =
         CancelableCompleter(onCancel: () => currentOperation.cancel());
 
-    _runOperations().then((result) => mainOperation.complete(result));
+    _checkBtAvailability(FlutterBlue.instance); // Start the chain of operations
 
     return mainOperation.operation;
   }
 
-  Future<BtTransmitter> _runOperations() async {
-    //GET BLUETOOTH SERVICE
-    currentOperation = CancelableOperation.fromFuture(_getService());
-    FlutterBlue btService = await currentOperation.value;
-    if (btService == null) return null;
+  void _checkBtAvailability(FlutterBlue btService) => _createOperation(
+        btService.isAvailable,
+        onComplete: (isAvailable) {
+          if (isAvailable)
+            _checkBtIsOn(btService);
+          else {
+            _postUpdate(
+                "Bluetooth Low Energy is not supported on this device.");
+            mainOperation.complete(null);
+          }
+        },
+        message: "Checking for Bluetooth availability...",
+      );
 
-    //GET CORRECT DEVICE
-    currentOperation =
-        CancelableOperation.fromFuture(_findAndConnectDevice(btService));
-    BluetoothDevice device = await currentOperation.value;
-    if (device == null) return null;
+  void _checkBtIsOn(FlutterBlue btService) => _createOperation(
+        btService.isOn,
+        message: "Checking if Bluetooth is on...",
+        onComplete: (isOn) {
+          if (isOn)
+            _checkAlreadyConnectedDevices(btService);
+          else {
+            _postUpdate("Please turn on Bluetooth.");
+            mainOperation.complete(null);
+          }
+        },
+      );
 
-    //GET DEVICE CHARACTERISTIC
-    currentOperation =
-        CancelableOperation.fromFuture(_findCharacteristic(device));
-    BluetoothCharacteristic characteristic = await currentOperation.value;
-    if (characteristic == null) return null;
+  void _checkAlreadyConnectedDevices(FlutterBlue btService) => _createOperation(
+        btService.connectedDevices,
+        message: "Checking connected device...",
+        onComplete: (connectedDevices) {
+          for (BluetoothDevice device in connectedDevices) {
+            if (device.id == _TARGET_DEVICE_ID) {
+              _getDeviceCharacteristic(btService, device);
+              return;
+            }
+          }
+          _scanForDevice(btService);
+        },
+      );
 
-    //WAIT FOR BOARD TO GO ONLINE
+  void _scanForDevice(FlutterBlue btService) => _createOperation(
+        btService.scan(timeout: Duration(seconds: 10)).firstWhere(
+            (result) => result.device.id == _TARGET_DEVICE_ID,
+            orElse: () => null),
+        message: "Scanning for board...",
+        onComplete: (result) {
+          if (result == null) {
+            _postUpdate("Board not found.");
+            mainOperation.complete(null);
+          } else {
+            btService.stopScan();
+            _connectToBoard(btService, result.device);
+          }
+        },
+        onCancel: () => btService.stopScan(),
+      );
+
+  void _connectToBoard(FlutterBlue btService, BluetoothDevice device) =>
+      _createOperation(
+        device.connect(timeout: Duration(seconds: 10)),
+        message: "Connecting to board...",
+        onComplete: (_) => _getDeviceCharacteristic(btService, device),
+      );
+
+  void _getDeviceCharacteristic(
+          FlutterBlue btService, BluetoothDevice device) =>
+      _createOperation(
+        device.discoverServices(),
+        message: "Discovering characteristics...",
+        onComplete: (result) {
+          BluetoothCharacteristic characteristic = result
+              .singleWhere(
+                  (service) => service.uuid.toString() == _SERVICE_UUID,
+                  orElse: () => null)
+              ?.characteristics
+              ?.singleWhere(
+                  (chara) => chara.uuid.toString() == _CHARACTERISTIC_UUID,
+                  orElse: () => null);
+
+          if (characteristic == null) {
+            _postUpdate("Could not find characteristic.");
+            mainOperation.complete(null);
+          } else {
+            _setOnNotify(btService, device, characteristic);
+          }
+        },
+      );
+
+  void _setOnNotify(FlutterBlue btService, BluetoothDevice device,
+          BluetoothCharacteristic characteristic) =>
+      _createOperation(
+        characteristic.setNotifyValue(true),
+        message: "Registering for notification",
+        onComplete: (_) =>
+            _waitForBoardToGoOnline(btService, device, characteristic),
+      );
+
+  void _waitForBoardToGoOnline(FlutterBlue btService, BluetoothDevice device,
+      BluetoothCharacteristic characteristic) {
     BtTransmitter btTransmitter = BtTransmitter(device, characteristic);
 
-    currentOperation =
-        CancelableOperation.fromFuture(_waitForBoardToGoOnline(btTransmitter));
-    bool success = await currentOperation.value;
-    if (success)
-      return btTransmitter;
-    else
-      return null;
-  }
-
-  void cancel() {
-    currentOperation.cancel();
-  }
-
-  /// Helper method to post to the updateStream
-  void _postUpdate(String message) {
-    _updatesStreamController.add(message);
-  }
-
-  /// Returns the [FlutterBlue] service if available. The [FlutterBlue] service is used to access bluetooth.
-  Future<FlutterBlue> _getService() async {
-    _postUpdate("Checking for Bluetooth availability...");
-
-    FlutterBlue service = FlutterBlue.instance;
-
-    if (!await service.isAvailable) {
-      _postUpdate("Bluetooth Low Energy is not supported on this device.");
-      return null;
-    } else if (!await service.isOn) {
-      _postUpdate("Please turn on Bluetooth.");
-      return null;
-    }
-
-    return service;
-  }
-
-  /// Returns the device matching the [_TARGET_DEVICE_ID] if it is found.
-  Future<BluetoothDevice> _findAndConnectDevice(FlutterBlue btService) async {
-    _postUpdate("Scanning for board...");
-    List<BluetoothDevice> connectedDevices = await btService.connectedDevices;
-
-    for (BluetoothDevice device in connectedDevices) {
-      if (device.id == _TARGET_DEVICE_ID) {
-        return device;
-      }
-    }
-
-    BluetoothDevice device =
-        (await btService.scan(timeout: Duration(seconds: 10)).firstWhere(
-      (result) => result.device.id == _TARGET_DEVICE_ID,
-      orElse: () {
-        _postUpdate("Board not found.");
-        return null;
+    _createOperation(
+      btTransmitter.acknowledgeStream
+          .map((element) => true)
+          .timeout(Duration(seconds: 8), onTimeout: (sink) {
+        _postUpdate("Board did not respond.");
+        sink.add(false);
+      }).first,
+      message: "Waiting for board to respond...",
+      onComplete: (receivedAcknowledge) {
+        if (receivedAcknowledge) {
+          mainOperation.complete(btTransmitter);
+        } else {
+          mainOperation.complete(null);
+        }
       },
-    ))
-            ?.device;
-
-    await btService.stopScan();
-
-    if (device == null) return null;
-
-    _postUpdate("Connecting to board...");
-    await device.connect(timeout: Duration(seconds: 10));
-    return device;
-  }
-
-  /// Finds the correct characteristic of the [device].
-  Future<BluetoothCharacteristic> _findCharacteristic(
-      BluetoothDevice device) async {
-    _postUpdate("Discovering characteristics...");
-    BluetoothCharacteristic characteristic = (await device.discoverServices())
-        .singleWhere((service) => service.uuid.toString() == _SERVICE_UUID,
-            orElse: () => null)
-        ?.characteristics
-        ?.singleWhere((chara) => chara.uuid.toString() == _CHARACTERISTIC_UUID,
-            orElse: () => null);
-
-    if (characteristic == null) {
-      _postUpdate("Could not find characteristic.");
-      return null;
-    }
-
-    //Setup on notify for change
-    await characteristic.setNotifyValue(true);
-
-    return characteristic;
-  }
-
-  /// Sends begin packet to board and waits for acknowledge.
-  /// If acknowledge received returns true
-  Future<bool> _waitForBoardToGoOnline(BtTransmitter btTransmitter) async {
-    _postUpdate("Wainting for board to respond...");
+    );
 
     btTransmitter.writePacket(BtMessage.begin);
+  }
 
-    return btTransmitter.acknowledgeStream
-        .map((element) => true)
-        .timeout(Duration(seconds: 8), onTimeout: (sink) {
-      _postUpdate("Board did not respond.");
-      sink.add(false);
-    }).first;
+  void _postUpdate(String message) => _updatesStreamController.add(message);
+
+  void _createOperation<T, R>(Future<T> operation,
+      {FutureOr<R> Function(T) onComplete, FutureOr<R> Function() onCancel, String message}) {
+    currentOperation = CancelableOperation.fromFuture(operation);
+    currentOperation.then(onComplete, onCancel: onCancel);
+    _postUpdate(message);
   }
 }
