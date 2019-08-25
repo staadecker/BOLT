@@ -1,6 +1,6 @@
 #include "lib/startState.h"
 
-StartState startingState; //Must be define globally to still be accessible in loop function
+StartState startingState = StartState(); //Must be define globally to still be accessible in loop function
 
 void setup() {
     startingState.setup();
@@ -9,5 +9,3 @@ void setup() {
 void loop() {
     runnablesManager::execute(); //Parts of the code will add themselves to the runnablesManager who will run them.
 }
-
-

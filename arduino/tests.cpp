@@ -56,7 +56,7 @@ class PrintButtonTest : public ButtonPressListener { ;
     void start() {
         Serial.begin(9600);
 
-        ButtonShieldButtonPressReceiver buttonManager = ButtonShieldButtonPressReceiver::create();
+        ButtonShield::ButtonShieldButtonPressReceiver buttonManager = ButtonShield::create();
         buttonManager.addListener(this);
     }
 
@@ -70,18 +70,19 @@ class ButtonWithLEDTest : public ButtonPressListener {
     unsigned char buttonNumber = 0;
 
     LedController ledController;
+    ButtonShield::ButtonShieldButtonPressReceiver *buttonPressReceiver = &ButtonShield::create();
 
 public:
     void start() {
-
-        ButtonShieldButtonPressReceiver buttonPressReceiver = ButtonShieldButtonPressReceiver::create();
-        buttonPressReceiver.addListener(this);
+        buttonPressReceiver->addListener(this);
 
         ledController.turnOnLed(buttonNumber);
         ledController.shiftOutLEDs();
     }
 
     void onButtonPressed(unsigned char buttonPressed) override {
+        Serial.print("Button pressed: ");
+        Serial.println(buttonPressed);
         if (buttonPressed == buttonNumber) {
             ledController.turnOffLed(buttonPressed);
 
@@ -97,11 +98,17 @@ public:
     }
 };
 
+ButtonWithLEDTest buttonWithLedTest = ButtonWithLEDTest();
 
 void setup() {
+    Serial.begin(9600);
+    Serial.println("Starting...");
+    buttonWithLedTest.start();
 }
 
-void loop() {}
+void loop() {
+    runnablesManager::execute();
+}
 
 
 #pragma clang diagnostic pop

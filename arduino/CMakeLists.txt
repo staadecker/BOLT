@@ -12,7 +12,7 @@ project(bolt)
 #### 2. Update Board Settings ####
 ##################################
 #set(PORT "/dev/ttyACM0") # Linux
-set(PORT "COM5") # Windows
+set(PORT "COM4") # Windows
 set(MCU "atmega328p")
 set(CPU_SPEED "16000000")
 set(PIN_VARIANT "standard")
